@@ -1,31 +1,30 @@
 <template>
-  <div class="app-container">
-    <h1>Welcome to {{ title }}!</h1>
-    <p>Your Vue.js Module Federation app is running.</p>
-  </div>
+	<div id="taskbolt">
+		<AppLayout />
+	</div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import type { Plugin } from "vue";
+import { getCurrentInstance } from "vue";
+import AppLayout from "@/components/layout/AppLayout.vue";
+import "@/styles/globals.css";
+import { shellServicesPlugin } from "@/plugins/shell-services";
+import { createAppRouter } from "@/router";
 
-const title = ref('Taskbolt');
+const props = withDefaults(
+	defineProps<{ basePath?: string; embedded?: boolean }>(),
+	{
+		basePath: "/dashboard/taskbolt",
+		embedded: true,
+	},
+);
+
+const app = getCurrentInstance()!.appContext.app;
+
+if (!app.config.globalProperties.$router) {
+	app.use(shellServicesPlugin);
+	const router = createAppRouter(props.basePath, props.embedded);
+	app.use(router as unknown as Plugin);
+}
 </script>
-
-<style scoped>
-.app-container {
-  text-align: center;
-  padding: 2rem;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-}
-
-h1 {
-  color: #42b983;
-  font-size: 2.5rem;
-  margin-bottom: 1rem;
-}
-
-p {
-  color: #333;
-  font-size: 1.2rem;
-}
-</style>
