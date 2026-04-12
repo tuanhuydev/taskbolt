@@ -1,4 +1,4 @@
-import { inject, ref, watch, onUnmounted, type InjectionKey } from 'vue';
+import { inject, ref, onUnmounted, type InjectionKey } from 'vue';
 import type { I18nService, ShellServiceRegistry, ToastService, ApiClient } from '@/types/shell-services';
 import { taskboltTranslations } from '@/i18n/translations';
 
