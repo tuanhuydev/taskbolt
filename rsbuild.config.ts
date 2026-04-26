@@ -28,7 +28,7 @@ export default defineConfig({
 			index: "./src/main.ts",
 		},
 		define: {
-			"process.env.AUTH_URL": JSON.stringify(process.env.APP_AUTH_URL || ""),
+			"process.env.APP_AUTH_URL": JSON.stringify(process.env.APP_AUTH_URL || "http://localhost:8888"),
 		},
 	},
 

@@ -8,6 +8,18 @@ importers:
 
   .:
     dependencies:
+      '@lexical/link':
+        specifier: ^0.17.1
+        version: 0.17.1
+      '@lexical/list':
+        specifier: ^0.17.1
+        version: 0.17.1
+      '@lexical/markdown':
+        specifier: ^0.17.1
+        version: 0.17.1
+      '@lexical/rich-text':
+        specifier: ^0.17.1
+        version: 0.17.1
       '@vueuse/core':
         specifier: ^14.2.1
         version: 14.2.1(vue@3.5.25(typescript@5.4.5))
@@ -17,6 +29,9 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
+      lexical:
+        specifier: ^0.17.1
+        version: 0.17.1
       lucide-vue-next:
         specifier: ^1.0.0
         version: 1.0.0(vue@3.5.25(typescript@5.4.5))
@@ -32,6 +47,9 @@ importers:
       tw-animate-css:
         specifier: ^1.4.0
         version: 1.4.0
+      vaul-vue:
+        specifier: ^0.4.1
+        version: 0.4.1(reka-ui@2.9.3(vue@3.5.25(typescript@5.4.5)))(vue@3.5.25(typescript@5.4.5))
       vue:
         specifier: ^3.4.0
         version: 3.5.25(typescript@5.4.5)
@@ -145,6 +163,39 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
+
+  '@lexical/clipboard@0.17.1':
+    resolution: {integrity: sha512-OVqnEfWX8XN5xxuMPo6BfgGKHREbz++D5V5ISOiml0Z8fV/TQkdgwqbBJcUdJHGRHWSUwdK7CWGs/VALvVvZyw==}
+
+  '@lexical/code@0.17.1':
+    resolution: {integrity: sha512-ZspfTm6g6dN3nAb4G5bPp3SqxzdkB/bjGfa0uRKMU6/eBKtrMUgZsGxt0a8JRZ1eq2TZrQhx+l1ceRoLXii/bQ==}
+
+  '@lexical/html@0.17.1':
+    resolution: {integrity: sha512-yGG+K2DXl7Wn2DpNuZ0Y3uCHJgfHkJN3/MmnFb4jLnH1FoJJiuy7WJb/BRRh9H+6xBJ9v70iv+kttDJ0u1xp5w==}
+
+  '@lexical/link@0.17.1':
+    resolution: {integrity: sha512-qFJEKBesZAtR8kfJfIVXRFXVw6dwcpmGCW7duJbtBRjdLjralOxrlVKyFhW9PEXGhi4Mdq2Ux16YnnDncpORdQ==}
+
+  '@lexical/list@0.17.1':
+    resolution: {integrity: sha512-k9ZnmQuBvW+xVUtWJZwoGtiVG2cy+hxzkLGU4jTq1sqxRIoSeGcjvhFAK8JSEj4i21SgkB1FmkWXoYK5kbwtRA==}
+
+  '@lexical/markdown@0.17.1':
+    resolution: {integrity: sha512-uexR9snyT54jfQTrbr/GZAtzX+8Oyykr4p1HS0vCVL1KU5MDuP2PoyFfOv3rcfB2TASc+aYiINhU2gSXzwCHNg==}
+
+  '@lexical/rich-text@0.17.1':
+    resolution: {integrity: sha512-T3kvj4P1OpedX9jvxN3WN8NP1Khol6mCW2ScFIRNRz2dsXgyN00thH1Q1J/uyu7aKyGS7rzcY0rb1Pz1qFufqQ==}
+
+  '@lexical/selection@0.17.1':
+    resolution: {integrity: sha512-qBKVn+lMV2YIoyRELNr1/QssXx/4c0id9NCB/BOuYlG8du5IjviVJquEF56NEv2t0GedDv4BpUwkhXT2QbNAxA==}
+
+  '@lexical/table@0.17.1':
+    resolution: {integrity: sha512-2fUYPmxhyuMQX3MRvSsNaxbgvwGNJpHaKx1Ldc+PT2MvDZ6ALZkfsxbi0do54Q3i7dOon8/avRp4TuVaCnqvoA==}
+
+  '@lexical/text@0.17.1':
+    resolution: {integrity: sha512-zD2pAGXaMfPpT8PeNrx3+n0+jGnQORHyn0NEBO+hnyacKfUq5z5sI6Gebsq5NwH789bRadmJM5LvX5w8fsuv6w==}
+
+  '@lexical/utils@0.17.1':
+    resolution: {integrity: sha512-jCQER5EsvhLNxKH3qgcpdWj/necUb82Xjp8qWQ3c0tyL07hIRm2tDRA/s9mQmvcP855HEZSmGVmR5SKtkcEAVg==}
 
   '@module-federation/bridge-react-webpack-plugin@2.3.1':
     resolution: {integrity: sha512-rixIHit2xeusr052t/IOfgQa9OyKc21GiJC8uE/5szmgJlJOHmiXa7QrudKb4KVDCcbd5Ad2b4+XrSYxxRUzJA==}
@@ -305,36 +356,42 @@ packages:
     engines: {node: '>= 10.0.0'}
     cpu: [arm]
     os: [linux]
+    libc: [glibc]
 
   '@parcel/watcher-linux-arm-musl@2.5.1':
     resolution: {integrity: sha512-6E+m/Mm1t1yhB8X412stiKFG3XykmgdIOqhjWj+VL8oHkKABfu/gjFj8DvLrYVHSBNC+/u5PeNrujiSQ1zwd1Q==}
     engines: {node: '>= 10.0.0'}
     cpu: [arm]
     os: [linux]
+    libc: [musl]
 
   '@parcel/watcher-linux-arm64-glibc@2.5.1':
     resolution: {integrity: sha512-LrGp+f02yU3BN9A+DGuY3v3bmnFUggAITBGriZHUREfNEzZh/GO06FF5u2kx8x+GBEUYfyTGamol4j3m9ANe8w==}
     engines: {node: '>= 10.0.0'}
     cpu: [arm64]
     os: [linux]
+    libc: [glibc]
 
   '@parcel/watcher-linux-arm64-musl@2.5.1':
     resolution: {integrity: sha512-cFOjABi92pMYRXS7AcQv9/M1YuKRw8SZniCDw0ssQb/noPkRzA+HBDkwmyOJYp5wXcsTrhxO0zq1U11cK9jsFg==}
     engines: {node: '>= 10.0.0'}
     cpu: [arm64]
     os: [linux]
+    libc: [musl]
 
   '@parcel/watcher-linux-x64-glibc@2.5.1':
     resolution: {integrity: sha512-GcESn8NZySmfwlTsIur+49yDqSny2IhPeZfXunQi48DMugKeZ7uy1FX83pO0X22sHntJ4Ub+9k34XQCX+oHt2A==}
     engines: {node: '>= 10.0.0'}
     cpu: [x64]
     os: [linux]
+    libc: [glibc]
 
   '@parcel/watcher-linux-x64-musl@2.5.1':
     resolution: {integrity: sha512-n0E2EQbatQ3bXhcH2D1XIAANAcTZkQICBPVaxMeaCVBtOpBZpWJuf7LwyWPSBDITb7In8mqQgJ7gH8CILCURXg==}
     engines: {node: '>= 10.0.0'}
     cpu: [x64]
     os: [linux]
+    libc: [musl]
 
   '@parcel/watcher-win32-arm64@2.5.1':
     resolution: {integrity: sha512-RFzklRvmc3PkjKjry3hLF9wD7ppR4AKcWNzH7kXR7GUe0Igb3Nz8fyPwtZCSquGrhU5HhUNDr/mKBqj7tqA2Vw==}
@@ -385,21 +442,25 @@ packages:
     resolution: {integrity: sha512-P0QrGRPbTWu6RKWfN0bDtbnEps3rXH0MWIMreZABoUrVmNQKtXR6e73J3ub6a+di5s2+K0M2LJ9Bh2/H4UsDUA==}
     cpu: [arm64]
     os: [linux]
+    libc: [glibc]
 
   '@rspack/binding-linux-arm64-musl@1.7.11':
     resolution: {integrity: sha512-6ky7R43VMjWwmx3Yx7Jl7faLBBMAgMDt+/bN35RgwjiPgsIByz65EwytUVuW9rikB43BGHvA/eqlnjLrUzNBqw==}
     cpu: [arm64]
     os: [linux]
+    libc: [musl]
 
   '@rspack/binding-linux-x64-gnu@1.7.11':
     resolution: {integrity: sha512-cuOJMfCOvb2Wgsry5enXJ3iT1FGUjdPqtGUBVupQlEG4ntSYsQ2PtF4wIDVasR3wdxC5nQbipOrDiN/u6fYsdQ==}
     cpu: [x64]
     os: [linux]
+    libc: [glibc]
 
   '@rspack/binding-linux-x64-musl@1.7.11':
     resolution: {integrity: sha512-CoK37hva4AmHGh3VCsQXmGr40L36m1/AdnN5LEjUX6kx5rEH7/1nEBN6Ii72pejqDVvk9anEROmPDiPw10tpFg==}
     cpu: [x64]
     os: [linux]
+    libc: [musl]
 
   '@rspack/binding-wasm32-wasi@1.7.11':
     resolution: {integrity: sha512-OtrmnPUVJMxjNa3eDMfHyPdtlLRmmp/aIm0fQHlAOATbZvlGm12q7rhPW5BXTu1yh+1rQ1/uqvz+SzKEZXuJaQ==}
@@ -476,24 +537,28 @@ packages:
     engines: {node: '>= 20'}
     cpu: [arm64]
     os: [linux]
+    libc: [glibc]
 
   '@tailwindcss/oxide-linux-arm64-musl@4.2.2':
     resolution: {integrity: sha512-oCfG/mS+/+XRlwNjnsNLVwnMWYH7tn/kYPsNPh+JSOMlnt93mYNCKHYzylRhI51X+TbR+ufNhhKKzm6QkqX8ag==}
     engines: {node: '>= 20'}
     cpu: [arm64]
     os: [linux]
+    libc: [musl]
 
   '@tailwindcss/oxide-linux-x64-gnu@4.2.2':
     resolution: {integrity: sha512-rTAGAkDgqbXHNp/xW0iugLVmX62wOp2PoE39BTCGKjv3Iocf6AFbRP/wZT/kuCxC9QBh9Pu8XPkv/zCZB2mcMg==}
     engines: {node: '>= 20'}
     cpu: [x64]
     os: [linux]
+    libc: [glibc]
 
   '@tailwindcss/oxide-linux-x64-musl@4.2.2':
     resolution: {integrity: sha512-XW3t3qwbIwiSyRCggeO2zxe3KWaEbM0/kW9e8+0XpBgyKU4ATYzcVSMKteZJ1iukJ3HgHBjbg9P5YPRCVUxlnQ==}
     engines: {node: '>= 20'}
     cpu: [x64]
     os: [linux]
+    libc: [musl]
 
   '@tailwindcss/oxide-wasm32-wasi@4.2.2':
     resolution: {integrity: sha512-eKSztKsmEsn1O5lJ4ZAfyn41NfG7vzCg496YiGtMDV86jz1q/irhms5O0VrY6ZwTUkFy/EKG3RfWgxSI3VbZ8Q==}
@@ -1043,6 +1108,9 @@ packages:
   jsonfile@6.2.0:
     resolution: {integrity: sha512-FGuPw30AdOIUTRMC2OMRtQV+jkVj2cfPqSeWXv1NEAJ1qZ5zb1X6z1mFhbfOB/iy3ssJCD+3KuZ8r8C3uVFlAg==}
 
+  lexical@0.17.1:
+    resolution: {integrity: sha512-72/MhR7jqmyqD10bmJw8gztlCm4KDDT+TPtU4elqXrEvHoO5XENi34YAEUD9gIkPfqSwyLa9mwAX1nKzIr5xEA==}
+
   lightningcss-android-arm64@1.32.0:
     resolution: {integrity: sha512-YK7/ClTt4kAK0vo6w3X+Pnm0D2cf2vPHbhOXdoNti1Ga0al1P4TBZhwjATvjNwLEBCnKvjJc2jQgHXH0NEwlAg==}
     engines: {node: '>= 12.0.0'}
@@ -1078,24 +1146,28 @@ packages:
     engines: {node: '>= 12.0.0'}
     cpu: [arm64]
     os: [linux]
+    libc: [glibc]
 
   lightningcss-linux-arm64-musl@1.32.0:
     resolution: {integrity: sha512-UpQkoenr4UJEzgVIYpI80lDFvRmPVg6oqboNHfoH4CQIfNA+HOrZ7Mo7KZP02dC6LjghPQJeBsvXhJod/wnIBg==}
     engines: {node: '>= 12.0.0'}
     cpu: [arm64]
     os: [linux]
+    libc: [musl]
 
   lightningcss-linux-x64-gnu@1.32.0:
     resolution: {integrity: sha512-V7Qr52IhZmdKPVr+Vtw8o+WLsQJYCTd8loIfpDaMRWGUZfBOYEJeyJIkqGIDMZPwPx24pUMfwSxxI8phr/MbOA==}
     engines: {node: '>= 12.0.0'}
     cpu: [x64]
     os: [linux]
+    libc: [glibc]
 
   lightningcss-linux-x64-musl@1.32.0:
     resolution: {integrity: sha512-bYcLp+Vb0awsiXg/80uCRezCYHNg1/l3mt0gzHnWV9XP1W5sKa5/TCdGWaR/zBM2PeF/HbsQv/j2URNOiVuxWg==}
     engines: {node: '>= 12.0.0'}
     cpu: [x64]
     os: [linux]
+    libc: [musl]
 
   lightningcss-win32-arm64-msvc@1.32.0:
     resolution: {integrity: sha512-8SbC8BR40pS6baCM8sbtYDSwEVQd4JlFTOlaD3gWGHfThTcABnNDBda6eTZeqbofalIJhFx0qKzgHJmcPTnGdw==}
@@ -1206,6 +1278,10 @@ packages:
   postcss@8.5.8:
     resolution: {integrity: sha512-OW/rX8O/jXnm82Ey1k44pObPtdblfiuWnrd8X7GJ7emImCOstunGbXUpp7HdBrFQX6rJzn3sPT397Wp5aCwCHg==}
     engines: {node: ^10 || ^12 || >=14}
+
+  prismjs@1.30.0:
+    resolution: {integrity: sha512-DEvV2ZF2r2/63V+tK8hQvrR2ZGn10srHbXviTlcv7Kpzw8jWiNTqbVgjO3IY8RxrrOUF8VPMQQFysYYYv0YZxw==}
+    engines: {node: '>=6'}
 
   proxy-from-env@1.1.0:
     resolution: {integrity: sha512-D+zkORCbA9f1tdWRK0RaCR3GPv50cMxcrz4X8k5LTSUD1Dkw47mKJEZQNunItRTkWwgtaUSo1RVFRIG9ZXiFYg==}
@@ -1368,6 +1444,12 @@ packages:
     peerDependencies:
       browserslist: '>= 4.21.0'
 
+  vaul-vue@0.4.1:
+    resolution: {integrity: sha512-A6jOWOZX5yvyo1qMn7IveoWN91mJI5L3BUKsIwkg6qrTGgHs1Sb1JF/vyLJgnbN1rH4OOOxFbtqL9A46bOyGUQ==}
+    peerDependencies:
+      reka-ui: ^2.0.0
+      vue: ^3.3.0
+
   vue-demi@0.14.10:
     resolution: {integrity: sha512-nMZBOwuzabUO0nLgIcc6rycZEebF6eeUfaiQx9+WSk8e29IbLvPU9feI6tqW4kTo3hvoYAJkMh8n8D0fuISphg==}
     engines: {node: '>=12'}
@@ -1519,6 +1601,73 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
+
+  '@lexical/clipboard@0.17.1':
+    dependencies:
+      '@lexical/html': 0.17.1
+      '@lexical/list': 0.17.1
+      '@lexical/selection': 0.17.1
+      '@lexical/utils': 0.17.1
+      lexical: 0.17.1
+
+  '@lexical/code@0.17.1':
+    dependencies:
+      '@lexical/utils': 0.17.1
+      lexical: 0.17.1
+      prismjs: 1.30.0
+
+  '@lexical/html@0.17.1':
+    dependencies:
+      '@lexical/selection': 0.17.1
+      '@lexical/utils': 0.17.1
+      lexical: 0.17.1
+
+  '@lexical/link@0.17.1':
+    dependencies:
+      '@lexical/utils': 0.17.1
+      lexical: 0.17.1
+
+  '@lexical/list@0.17.1':
+    dependencies:
+      '@lexical/utils': 0.17.1
+      lexical: 0.17.1
+
+  '@lexical/markdown@0.17.1':
+    dependencies:
+      '@lexical/code': 0.17.1
+      '@lexical/link': 0.17.1
+      '@lexical/list': 0.17.1
+      '@lexical/rich-text': 0.17.1
+      '@lexical/text': 0.17.1
+      '@lexical/utils': 0.17.1
+      lexical: 0.17.1
+
+  '@lexical/rich-text@0.17.1':
+    dependencies:
+      '@lexical/clipboard': 0.17.1
+      '@lexical/selection': 0.17.1
+      '@lexical/utils': 0.17.1
+      lexical: 0.17.1
+
+  '@lexical/selection@0.17.1':
+    dependencies:
+      lexical: 0.17.1
+
+  '@lexical/table@0.17.1':
+    dependencies:
+      '@lexical/utils': 0.17.1
+      lexical: 0.17.1
+
+  '@lexical/text@0.17.1':
+    dependencies:
+      lexical: 0.17.1
+
+  '@lexical/utils@0.17.1':
+    dependencies:
+      '@lexical/list': 0.17.1
+      '@lexical/selection': 0.17.1
+      '@lexical/table': 0.17.1
+      lexical: 0.17.1
 
   '@module-federation/bridge-react-webpack-plugin@2.3.1(node-fetch@2.7.0(encoding@0.1.13))':
     dependencies:
@@ -2550,6 +2699,8 @@ snapshots:
     optionalDependencies:
       graceful-fs: 4.2.11
 
+  lexical@0.17.1: {}
+
   lightningcss-android-arm64@1.32.0:
     optional: true
 
@@ -2673,6 +2824,8 @@ snapshots:
       nanoid: 3.3.11
       picocolors: 1.1.1
       source-map-js: 1.2.1
+
+  prismjs@1.30.0: {}
 
   proxy-from-env@1.1.0: {}
 
@@ -2836,6 +2989,14 @@ snapshots:
       browserslist: 4.28.2
       escalade: 3.2.0
       picocolors: 1.1.1
+
+  vaul-vue@0.4.1(reka-ui@2.9.3(vue@3.5.25(typescript@5.4.5)))(vue@3.5.25(typescript@5.4.5)):
+    dependencies:
+      '@vueuse/core': 10.11.1(vue@3.5.25(typescript@5.4.5))
+      reka-ui: 2.9.3(vue@3.5.25(typescript@5.4.5))
+      vue: 3.5.25(typescript@5.4.5)
+    transitivePeerDependencies:
+      - '@vue/composition-api'
 
   vue-demi@0.14.10(vue@3.5.25(typescript@5.4.5)):
     dependencies:
