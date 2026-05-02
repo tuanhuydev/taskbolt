@@ -121,7 +121,7 @@
     </Button>
     <Button
       @click="handleSubmit"
-      type="submit"
+      type="button"
     >
       {{ isEditMode ? t('taskForm.updateButton') : t('taskForm.submitButton') }}
     </Button>
