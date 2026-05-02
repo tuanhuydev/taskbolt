@@ -1,18 +1,13 @@
-import {
-	createRouter,
-	createWebHistory,
-	createMemoryHistory,
-} from "vue-router";
-import ActiveSprintPage from "@/views/ActiveSprintPage.vue";
-import BacklogsPage from "@/views/BacklogsPage.vue";
-import ReportsPage from "@/views/ReportsPage.vue";
-import ConfigurePage from "@/views/ConfigurePage.vue";
+import { createRouter, createWebHistory } from "vue-router";
+import ActiveSprintPage from "@/features/active-sprint/ActiveSprintPage.vue";
+import BacklogsPage from "@/features/backlogs/BacklogsPage.vue";
+import ReportsPage from "@/features/reports/ReportsPage.vue";
+import ConfigurePage from "@/features/configure/ConfigurePage.vue";
 
 const routes = [
 	{
 		path: "/",
-		name: "home",
-		component: ActiveSprintPage,
+		redirect: "/active-sprint",
 	},
 	{
 		path: "/active-sprint",
@@ -37,11 +32,8 @@ const routes = [
 ];
 
 /**
- * @param base - base path for web history mode
- * @param embedded - true when running inside a shell app (uses memory history to avoid conflicting with the shell's router)
+ * Uses web history for full URL-based navigation. Pass base path if needed.
  */
-export function createAppRouter(base = "/", embedded = false) {
-	const history = embedded ? createMemoryHistory() : createWebHistory(base);
-
-	return createRouter({ history, routes });
+export function createAppRouter(base = "/") {
+	return createRouter({ history: createWebHistory(base), routes });
 }

@@ -1,5 +1,5 @@
 declare namespace NodeJS {
 	interface ProcessEnv {
-		AUTH_URL: string;
+		APP_AUTH_URL: string;
 	}
 }
