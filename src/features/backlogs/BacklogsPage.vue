@@ -19,7 +19,12 @@
   <p v-else-if="error" class="text-destructive">{{ error }}</p>
 
   <ul v-else class="p-0 list-none overflow-auto max-h-4/5">
-    <TaskItem v-for="task in taskList" :task="task" @click="selectTask" />
+    <TaskItem
+      v-for="task in taskList"
+      :key="task.id"
+      :task="task"
+      @click="selectTask"
+    />
     <li v-if="parentTasks.length === 0" class="text-muted-foreground">
       No tasks found.
     </li>
