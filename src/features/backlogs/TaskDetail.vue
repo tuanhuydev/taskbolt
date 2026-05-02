@@ -9,14 +9,16 @@
       }
     "
   >
-    <DrawerContent class="w-150">
-      <!-- Show TaskForm when editing -->
+    <DrawerContent class="w-[600px]">
+      <!-- Show form fields when editing -->
       <template v-if="isEditing && task">
-        <TaskForm
-          :open="true"
+        <DrawerHeader class="border-b pb-4">
+          <DrawerTitle>{{ t('taskForm.editTitle') }}</DrawerTitle>
+        </DrawerHeader>
+        <TaskFormFields
           :initial-data="task"
           @submit="handleFormSubmit"
-          @close="cancelEditing"
+          @cancel="cancelEditing"
         />
       </template>
 
@@ -158,7 +160,7 @@ import {
 import { Button } from "@/shared/components/ui/button";
 import { Task, TaskStatus, TaskPriority } from "@/shared/types/task";
 import { useTaskboltTranslation } from "@/shared/composables/useShellServices";
-import { TaskForm } from "./index";
+import TaskFormFields from "./TaskFormFields.vue";
 import TaskTypeIcon from "@/shared/components/ui/task-item/TaskTypeIcon.vue";
 import TaskItemPriority from "@/shared/components/ui/task-item/TaskItemPriority.vue";
 import { Pencil } from "lucide-vue-next";
