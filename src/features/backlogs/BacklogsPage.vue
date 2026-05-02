@@ -20,9 +20,9 @@
 
   <ul v-else class="p-0 list-none overflow-auto max-h-4/5">
     <TaskItem v-for="task in taskList" :task="task" @click="selectTask" />
-    <div v-if="parentTasks.length === 0" class="text-muted-foreground">
+    <li v-if="parentTasks.length === 0" class="text-muted-foreground">
       No tasks found.
-    </div>
+    </li>
   </ul>
   <TaskDetail
     :task="selectedTask"
