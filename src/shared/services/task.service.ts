@@ -7,10 +7,10 @@ interface TaskResponse {
   total: number;
 }
 
-export const getTasks = async (apiClient: ApiClient, filter: Record<string, unknown>) => {
-    const queryParams = new URLSearchParams(filter as Record<string, string>).toString();
-    try {
-    const response = await apiClient.request(`${APP_AUTH_URL}/tasks?${queryParams}`, {
+export const getTasks = async (apiClient: ApiClient, filter: Record<string, unknown> = {}) => {
+  const queryParams = new URLSearchParams(filter as Record<string, string>).toString();
+  try {
+    const response = await apiClient.request(`${APP_AUTH_URL}/tasks${queryParams ? `?${queryParams}` : ""}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -27,4 +27,4 @@ export const getTasks = async (apiClient: ApiClient, filter: Record<string, unkn
     console.error("Error fetching tasks:", error);
     throw error;
   }
-}
+};
