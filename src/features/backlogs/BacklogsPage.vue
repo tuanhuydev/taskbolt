@@ -104,15 +104,11 @@ async function fetchTasks() {
   error.value = null;
 
   try {
-   const filter: Record<string, string> = {
+   const filter: Record<string, string | null> = {
     sortOrder: "desc",
     sortBy: "createdAt",
+    projectId: selectedProjectId.value,
    };
-   
-   // Add projectId filter if a project is selected
-   if (selectedProjectId.value) {
-     filter.projectId = selectedProjectId.value;
-   }
    
    const tasks = await getTasks(apiClient, filter);
     taskList.value = tasks;
@@ -166,10 +162,10 @@ async function handleTaskSubmit(data: any, isEdit: boolean) {
         body: JSON.stringify(data),
       });
     } else {
-      // Create new task - add projectId if selected
+      // Create new task - always include projectId (null for personal workspace)
       const taskData = {
         ...data,
-        ...(selectedProjectId.value && { projectId: selectedProjectId.value }),
+        projectId: selectedProjectId.value,
       };
       
       response = await apiClient.request(`${APP_AUTH_URL}/tasks`, {

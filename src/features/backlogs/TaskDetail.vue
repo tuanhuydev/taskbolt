@@ -2,7 +2,6 @@
   <Drawer
     direction="right"
     :fixed="true"
-    :dismissible="false"
     :open="(props.open as boolean) ?? false"
     @update:open="
       (isOpen) => {

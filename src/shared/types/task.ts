@@ -33,7 +33,7 @@ export interface Task {
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
-  projectId: string;
+  projectId: string | null;
   subTasks: Task[];
   sprintId: string | null;
 }
