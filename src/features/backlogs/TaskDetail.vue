@@ -273,7 +273,9 @@ const copyTaskId = async (taskId?: string) => {
       copiedOpen.value = false;
     }, 1200);
   } catch (e) {
-    throw new Error("Failed to copy", { cause: e });
+    copiedOpen.value = false;
+    console.error("Failed to copy task ID to clipboard", e);
+    return;
   }
 };
 
