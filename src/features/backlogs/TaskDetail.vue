@@ -23,7 +23,7 @@
                     <TaskTypeIcon :type="task.type" />
                   </TooltipTrigger>
                   <TooltipContent
-                    class="z-1150"
+                    class="z-[1150]"
                     side="left"
                     :avoid-collisions="true"
                   >
