@@ -54,7 +54,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from "vue";
+import { ref, computed, onMounted } from "vue";
 import {
   ChevronDown,
   Zap,
@@ -106,7 +106,7 @@ async function fetchProjects() {
     console.error("ApiClient is not available");
     return;
   }
-  
+
   isLoadingProjects.value = true;
   try {
     const projectList = await getProjects(apiClient);

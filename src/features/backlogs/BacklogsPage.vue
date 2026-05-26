@@ -50,7 +50,11 @@ import {
 } from "@/shared/composables/useShellServices";
 import { useProjectContext } from "@/shared/composables/useProject";
 import { APP_AUTH_URL } from "@/shared/lib/constants";
-import { Task } from "@/shared/types/task";
+import {
+  Task,
+  type CreateTaskPayload,
+  type UpdateTaskPayload,
+} from "@/shared/types/task";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import TaskItem from "@/shared/components/ui/task-item/TaskItem.vue";
@@ -104,13 +108,13 @@ async function fetchTasks() {
   error.value = null;
 
   try {
-   const filter: Record<string, string | null> = {
-    sortOrder: "desc",
-    sortBy: "createdAt",
-    projectId: selectedProjectId.value,
-   };
-   
-   const tasks = await getTasks(apiClient, filter);
+    const filter: Record<string, string | null> = {
+      sortOrder: "desc",
+      sortBy: "createdAt",
+      projectId: selectedProjectId.value,
+    };
+
+    const tasks = await getTasks(apiClient, filter);
     taskList.value = tasks;
   } catch (err: any) {
     error.value = err.message || "Failed to load tasks.";
@@ -136,30 +140,32 @@ const closeTaskForm = () => {
   showTaskForm.value = false;
 };
 
-async function handleTaskSubmit(data: any, isEdit: boolean) {
+async function handleTaskSubmit(
+  data: CreateTaskPayload | UpdateTaskPayload,
+  isEdit: boolean,
+) {
   const apiClient = getApiClient();
   const toastService = getToastService();
 
   if (!apiClient) {
     console.error("API client not available");
-    toastService?.error("API client not available");
+    toastService?.error(t("toast.apiClientUnavailable"));
     return;
   }
 
   try {
     let response;
-    
+
     if (isEdit) {
       // Update existing task
-      const taskId = data.id;
-      delete data.id; // Remove id from body
-      
+      const { id: taskId, ...body } = data as UpdateTaskPayload;
+
       response = await apiClient.request(`${APP_AUTH_URL}/tasks/${taskId}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(body),
       });
     } else {
       // Create new task - always include projectId (null for personal workspace)
@@ -167,7 +173,7 @@ async function handleTaskSubmit(data: any, isEdit: boolean) {
         ...data,
         projectId: selectedProjectId.value,
       };
-      
+
       response = await apiClient.request(`${APP_AUTH_URL}/tasks`, {
         method: "POST",
         headers: {
@@ -179,22 +185,29 @@ async function handleTaskSubmit(data: any, isEdit: boolean) {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `Failed to ${isEdit ? 'update' : 'create'} task`);
+      throw new Error(
+        errorData.message || `Failed to ${isEdit ? "update" : "create"} task`,
+      );
     }
 
     // Success
-    toastService?.success(isEdit ? "Task updated successfully" : "Task created successfully");
+    toastService?.success(
+      isEdit ? t("toast.taskUpdated") : t("toast.taskCreated"),
+    );
     closeTaskForm();
-    
+
     // Refresh task list
     await fetchTasks();
   } catch (err: any) {
     console.error("Error submitting task:", err);
-    toastService?.error(err.message || "Failed to submit task");
+    toastService?.error(
+      err.message ||
+        (isEdit ? t("toast.taskUpdateFailed") : t("toast.taskCreateFailed")),
+    );
   }
 }
 
-async function handleUpdateTask(data: any) {
+async function handleUpdateTask(data: UpdateTaskPayload) {
   await handleTaskSubmit(data, true);
 }
 </script>
