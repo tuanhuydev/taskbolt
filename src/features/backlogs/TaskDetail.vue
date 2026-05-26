@@ -86,7 +86,7 @@
           <div class="space-y-6 px-3">
             <div class="grid grid-cols-1 gap-2 text-muted-foreground">
               <div class="flex items-center">
-                <span class="font-medium text-xs w-25"
+                <span class="font-medium text-xs w-28"
                   >{{ t("taskForm.statusLabel") }}:</span
                 >
                 <span class="flex items-center gap-1 ml-1 text-sm">
@@ -95,7 +95,7 @@
                 </span>
               </div>
               <div class="flex items-center">
-                <span class="font-medium text-xs w-25"
+                <span class="font-medium text-xs w-28"
                   >{{ t("taskForm.priorityLabel") }}:</span
                 >
                 <span class="flex items-center gap-1 ml-1 text-sm">
@@ -104,7 +104,7 @@
                 </span>
               </div>
               <div v-if="task.type !== TaskType.EPIC" class="flex items-center">
-                <span class="font-medium text-xs w-25"
+                <span class="font-medium text-xs w-28"
                   >{{ t("taskForm.storyPointLabel") }}:</span
                 >
                 <span
@@ -113,7 +113,7 @@
                 >
               </div>
               <div class="flex items-center">
-                <span class="font-medium text-xs w-25"
+                <span class="font-medium text-xs w-28"
                   >{{ t("taskForm.createdLabel") }}:</span
                 >
                 <span class="ml-1 text-xs">{{
@@ -121,7 +121,7 @@
                 }}</span>
               </div>
               <div v-if="task.description">
-                <span class="font-medium text-xs w-25">
+                <span class="font-medium text-xs w-28">
                   {{ t("taskForm.descriptionLabel") }}:</span
                 >
                 <div
