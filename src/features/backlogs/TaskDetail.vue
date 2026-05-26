@@ -10,7 +10,7 @@
       }
     "
   >
-    <DrawerContent class="w-150">
+    <DrawerContent class="w-[600px]">
       <DrawerHeader class="p-0">
         <div class="flex items-start justify-between gap-4">
           <div class="flex-1 min-w-0">
