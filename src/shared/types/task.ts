@@ -24,11 +24,11 @@ export interface Task {
   title: string;
   description: string;
   type: TaskType;
+  priority: TaskPriority;
+  storyPoint: number;
   assigneeId: string | null;
   parentId: string | null;
   status: TaskStatus;
-  priority: TaskPriority;
-  storyPoint?: number;
   createdById: string;
   createdAt: string;
   updatedAt: string;
@@ -36,4 +36,21 @@ export interface Task {
   projectId: string | null;
   subTasks: Task[];
   sprintId: string | null;
+}
+
+export interface CreateTaskPayload {
+  title: string;
+  description?: string;
+  type: TaskType;
+  status?: TaskStatus;
+  priority?: TaskPriority;
+  storyPoint?: number;
+  assigneeId?: string | null;
+  parentId?: string | null;
+  projectId?: string | null;
+  sprintId?: string | null;
+}
+
+export interface UpdateTaskPayload extends Partial<CreateTaskPayload> {
+  id: string;
 }

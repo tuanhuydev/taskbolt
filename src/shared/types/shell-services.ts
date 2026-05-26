@@ -3,10 +3,10 @@
  * Matches the actual ShellServiceRegistry class from the shell
  */
 export interface ShellServiceRegistry {
-  get<T = any>(name: string): T | null;
+  get<T = unknown>(name: string): T | null;
   has(name: string): boolean;
   list(): string[];
-  getMetadata(name: string): any | null;
+  getMetadata(name: string): unknown | null;
   getRegistryInfo(): ShellServiceMetadata;
 }
 
@@ -18,7 +18,7 @@ export interface ShellServiceMetadata {
 /**
  * Toast Service Interface
  */
-export type ToastSeverity = 'success' | 'error' | 'warning' | 'info';
+export type ToastSeverity = "success" | "error" | "warning" | "info";
 
 export interface ToastService {
   notify: (message: string, severity?: ToastSeverity) => void;
@@ -46,7 +46,7 @@ export interface ApiClient {
 /**
  * i18n Service — the actual i18next instance exposed by the shell
  */
-export type { i18n as I18nService } from 'i18next';
+export type { i18n as I18nService } from "i18next";
 
 /**
  * Global window type extension

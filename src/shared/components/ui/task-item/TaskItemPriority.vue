@@ -1,6 +1,6 @@
 <template>
   <img
-    :src="getPriorityIcon(priority)"
+    :src="getPriorityIcon(props.priority)"
     :alt="priority + ' priority icon'"
     class="w-5 h-5"
   />

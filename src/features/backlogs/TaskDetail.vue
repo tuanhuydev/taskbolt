@@ -1,116 +1,133 @@
 <template>
-  <Drawer direction="right" :fixed="true" :dismissible="false" :open="(props.open as boolean) ?? false" @update:open="
-    (isOpen) => {
-      if (!isOpen) emits('close');
-    }
-  ">
+  <Drawer
+    direction="right"
+    :fixed="true"
+    :dismissible="false"
+    :open="(props.open as boolean) ?? false"
+    @update:open="
+      (isOpen) => {
+        if (!isOpen) emits('close');
+      }
+    "
+  >
     <DrawerContent class="w-150">
       <DrawerHeader class="p-0">
-        <div class="flex items-start justify-between gap-4 ">
-          <div class="flex-1 min-w-0 ">
-            <div class="flex items-center gap-2 px-3 py-2 justify-between border-b mb-2">
+        <div class="flex items-start justify-between gap-4">
+          <div class="flex-1 min-w-0">
+            <div
+              class="flex items-center gap-2 px-3 py-2 justify-between border-b mb-2"
+            >
               <div class="flex items-center gap-2 min-w-0">
-                <TaskTypeIcon v-if="task" :type="task.type" />
-                <span class="text-xs font-medium truncate text-primary">
-                  {{ task?.id }}
-                </span>
+                <Tooltip v-if="task" :side="'left'">
+                  <TooltipTrigger as-child>
+                    <TaskTypeIcon :type="task.type" />
+                  </TooltipTrigger>
+                  <TooltipContent
+                    class="z-1150"
+                    side="left"
+                    :avoid-collisions="true"
+                  >
+                    {{ t(`taskType.${task.type}`) }}
+                  </TooltipContent>
+                </Tooltip>
+
+                <Tooltip :open="copiedOpen" :disable-hoverable-content="true">
+                  <TooltipTrigger as-child>
+                    <span
+                      class="cursor-pointer text-xs font-medium truncate text-primary hover:underline"
+                      @click="copyTaskId(task?.id)"
+                    >
+                      {{ task?.id ? formatId(task.id) : "TaskID" }}
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent class="z-1150"> Copied </TooltipContent>
+                </Tooltip>
               </div>
               <div class="flex items-center gap-2">
-                <Button v-if="task && !isEditing" size="icon" @click="startEditing" class="shrink-0 h-5 w-5">
+                <Button
+                  v-if="task && !isEditing"
+                  size="icon"
+                  class="shrink-0 h-5 w-5"
+                  @click="startEditing"
+                >
                   <Pencil class="w-3.5! h-3.5!" />
                 </Button>
-                 <Button v-if="task && !isEditing" size="icon" @click="emits('close')" class="shrink-0 h-5 w-5">
+                <Button
+                  v-if="task && !isEditing"
+                  size="icon"
+                  class="shrink-0 h-5 w-5"
+                  @click="emits('close')"
+                >
                   <X class="w-2 h-2" />
                 </Button>
               </div>
             </div>
-            <DrawerTitle class="text-xl px-3 line-clamp-3 mb-2" v-if="!isEditing">
+            <DrawerTitle
+              v-if="!isEditing"
+              class="text-xl px-3 line-clamp-3 mb-2"
+            >
               {{ task?.title }}
             </DrawerTitle>
           </div>
-
         </div>
       </DrawerHeader>
       <!-- Show form fields when editing -->
       <template v-if="isEditing && task">
-        <TaskFormFields :initial-data="task" @submit="handleFormSubmit" @cancel="cancelEditing" />
+        <TaskFormFields
+          :initial-data="task"
+          @submit="handleFormSubmit"
+          @cancel="cancelEditing"
+        />
       </template>
 
       <!-- Show task details when not editing -->
       <template v-else>
         <div v-if="task" class="flex-1 overflow-auto">
-          <div class="px-6 py-6">
-            <div class="space-y-6">
-              <!-- Metadata Grid -->
-              <div class="grid grid-cols-2 gap-4">
-                <!-- Type -->
-                <div class="bg-muted/30 rounded-lg p-3">
-                  <label class="text-xs font-medium text-muted-foreground uppercase tracking-wide block mb-2">
-                    {{ t('taskForm.typeLabel') }}
-                  </label>
-                  <div class="flex items-center gap-2">
-                    <TaskTypeIcon :type="task.type" />
-                    <span class="text-sm font-medium">{{ t(`taskType.${task.type}`) }}</span>
-                  </div>
-                </div>
-
-                <!-- Status -->
-                <div class="bg-muted/30 rounded-lg p-3">
-                  <label class="text-xs font-medium text-muted-foreground uppercase tracking-wide block mb-2">
-                    {{ t('taskForm.statusLabel') }}
-                  </label>
-                  <div class="flex items-center">
-                    <span :class="getStatusBadgeClass(task.status)"
-                      class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium">
-                      <span :class="getStatusDotClass(task.status)" class="w-2 h-2 rounded-full mr-1.5"></span>
-                      {{ t(`taskStatus.${task.status}`) }}
-                    </span>
-                  </div>
-                </div>
-
-                <!-- Priority -->
-                <div class="bg-muted/30 rounded-lg p-3">
-                  <label class="text-xs font-medium text-muted-foreground uppercase tracking-wide block mb-2">
-                    {{ t('taskForm.priorityLabel') }}
-                  </label>
-                  <div class="flex items-center gap-2">
-                    <TaskItemPriority :priority="taskPriority" />
-                    <span class="text-sm font-medium">{{ t(`taskPriority.${taskPriority}`) }}</span>
-                  </div>
-                </div>
-
-                <!-- Story Points -->
-                <div class="bg-muted/30 rounded-lg p-3">
-                  <label class="text-xs font-medium text-muted-foreground uppercase tracking-wide block mb-2">
-                    {{ t('taskForm.storyPointLabel') }}
-                  </label>
-                  <div class="flex items-center">
-                    <span class="text-sm font-medium">
-                      {{ task.storyPoint ?? '—' }}
-                    </span>
-                  </div>
-                </div>
+          <div class="space-y-6 px-3">
+            <div class="grid grid-cols-1 gap-2 text-muted-foreground">
+              <div class="flex items-center">
+                <span class="font-medium text-xs w-25"
+                  >{{ t("taskForm.statusLabel") }}:</span
+                >
+                <span class="flex items-center gap-1 ml-1 text-sm">
+                  <TaskItemStatus :status="task.status" />
+                  {{ t(`taskStatus.${task.status}`) }}
+                </span>
               </div>
-
-              <!-- Timestamps -->
-              <div class="border-t pt-6 grid grid-cols-2 gap-4 text-xs text-muted-foreground">
-                <div>
-                  <span class="font-medium">Created:</span>
-                  <span class="ml-1">{{ formatDate(task.createdAt) }}</span>
-                </div>
-                <div>
-                  <span class="font-medium">Updated:</span>
-                  <span class="ml-1">{{ formatDate(task.updatedAt) }}</span>
-                </div>
+              <div class="flex items-center">
+                <span class="font-medium text-xs w-25"
+                  >{{ t("taskForm.priorityLabel") }}:</span
+                >
+                <span class="flex items-center gap-1 ml-1 text-sm">
+                  <TaskItemPriority :priority="taskPriority" />
+                  {{ t(`taskPriority.${taskPriority}`) }}
+                </span>
               </div>
-
-              <!-- Description -->
-              <div v-if="task.description" class="border-t pt-6">
-                <label class="text-xs font-medium text-muted-foreground uppercase tracking-wide block mb-3">
-                  {{ t('taskForm.descriptionLabel') }}
-                </label>
-                <div class="prose prose-sm max-w-none text-foreground bg-muted/20 rounded-lg p-4"
-                  v-html="renderMarkdown(task.description)"></div>
+              <div v-if="task.type !== TaskType.EPIC" class="flex items-center">
+                <span class="font-medium text-xs w-25"
+                  >{{ t("taskForm.storyPointLabel") }}:</span
+                >
+                <span
+                  class="ml-1 text-xs font-medium border bg-gray-100 border-gray-600 rounded-md p-1"
+                  >{{ task.storyPoint ?? "—" }}</span
+                >
+              </div>
+              <div class="flex items-center">
+                <span class="font-medium text-xs w-25"
+                  >{{ t("taskForm.createdLabel") }}:</span
+                >
+                <span class="ml-1 text-xs">{{
+                  formatDate(task.createdAt)
+                }}</span>
+              </div>
+              <div v-if="task.description">
+                <span class="font-medium text-xs w-25">
+                  {{ t("taskForm.descriptionLabel") }}:</span
+                >
+                <div
+                  class="prose prose-sm max-w-none text-foreground bg-muted/20 rounded-lg py-3 text-sm"
+                  v-html="renderMarkdown(task.description)"
+                ></div>
               </div>
             </div>
           </div>
@@ -121,7 +138,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, onBeforeUnmount } from "vue";
 import {
   Drawer,
   DrawerContent,
@@ -129,21 +146,36 @@ import {
   DrawerTitle,
 } from "@/shared/components/ui/drawer";
 import { Button } from "@/shared/components/ui/button";
-import { Task, TaskStatus, TaskPriority } from "@/shared/types/task";
+import {
+  Task,
+  TaskType,
+  TaskStatus,
+  TaskPriority,
+  type CreateTaskPayload,
+  type UpdateTaskPayload,
+} from "@/shared/types/task";
 import { useTaskboltTranslation } from "@/shared/composables/useShellServices";
 import TaskFormFields from "./TaskFormFields.vue";
 import TaskTypeIcon from "@/shared/components/ui/task-item/TaskTypeIcon.vue";
 import TaskItemPriority from "@/shared/components/ui/task-item/TaskItemPriority.vue";
+import TaskItemStatus from "@/shared/components/ui/task-item/TaskItemStatus.vue";
 import { Pencil, X } from "lucide-vue-next";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/shared/components/ui/tooltip";
 
 const props = defineProps<{ open: boolean; task: Task | null }>();
 const emits = defineEmits<{
   (e: "close"): void;
-  (e: "update", data: any): void;
+  (e: "update", data: UpdateTaskPayload): void;
 }>();
 
 const { t } = useTaskboltTranslation();
 const isEditing = ref<boolean>(false);
+const copiedOpen = ref(false);
+let copiedTimer: number | undefined;
 
 // Computed property to get priority with default value
 const taskPriority = computed(() => {
@@ -158,72 +190,46 @@ function cancelEditing() {
   isEditing.value = false;
 }
 
-function handleFormSubmit(data: any, isEdit: boolean) {
+function handleFormSubmit(
+  data: CreateTaskPayload | UpdateTaskPayload,
+  _isEdit: boolean,
+) {
   // Emit update event to parent (BacklogsPage)
-  emits('update', data);
+  emits("update", data as UpdateTaskPayload);
   isEditing.value = false;
-  emits('close');
-}
-
-// Status badge styling
-function getStatusBadgeClass(status: TaskStatus): string {
-  const baseClass = "bg-opacity-10";
-  switch (status) {
-    case TaskStatus.TODO:
-      return `${baseClass} bg-slate-500 text-slate-700 dark:text-slate-300`;
-    case TaskStatus.IN_PROGRESS:
-      return `${baseClass} bg-blue-500 text-blue-700 dark:text-blue-300`;
-    case TaskStatus.IN_REVIEW:
-      return `${baseClass} bg-amber-500 text-amber-700 dark:text-amber-300`;
-    case TaskStatus.DONE:
-      return `${baseClass} bg-green-500 text-green-700 dark:text-green-300`;
-    default:
-      return `${baseClass} bg-gray-500 text-gray-700 dark:text-gray-300`;
-  }
-}
-
-function getStatusDotClass(status: TaskStatus): string {
-  switch (status) {
-    case TaskStatus.TODO:
-      return "bg-slate-500";
-    case TaskStatus.IN_PROGRESS:
-      return "bg-blue-500";
-    case TaskStatus.IN_REVIEW:
-      return "bg-amber-500";
-    case TaskStatus.DONE:
-      return "bg-green-500";
-    default:
-      return "bg-gray-500";
-  }
+  emits("close");
 }
 
 // Simple markdown to HTML converter
 function renderMarkdown(markdown: string): string {
-  if (!markdown) return '';
+  if (!markdown) return "";
 
-  let html = markdown
+  const html = markdown
     // Headers
-    .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-    .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-    .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+    .replace(/^### (.*$)/gim, "<h3>$1</h3>")
+    .replace(/^## (.*$)/gim, "<h2>$1</h2>")
+    .replace(/^# (.*$)/gim, "<h1>$1</h1>")
     // Bold
-    .replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>')
+    .replace(/\*\*(.*?)\*\*/gim, "<strong>$1</strong>")
     // Italic
-    .replace(/\*(.*?)\*/gim, '<em>$1</em>')
+    .replace(/\*(.*?)\*/gim, "<em>$1</em>")
     // Code inline
-    .replace(/`([^`]+)`/gim, '<code>$1</code>')
+    .replace(/`([^`]+)`/gim, "<code>$1</code>")
     // Links
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/gim, '<a href="$2" target="_blank">$1</a>')
+    .replace(
+      /\[([^\]]+)\]\(([^)]+)\)/gim,
+      '<a href="$2" target="_blank">$1</a>',
+    )
     // Line breaks
-    .replace(/\n\n/gim, '</p><p>')
-    .replace(/\n/gim, '<br>');
+    .replace(/\n\n/gim, "</p><p>")
+    .replace(/\n/gim, "<br>");
 
   return `<p>${html}</p>`;
 }
 
 // Date formatter
 function formatDate(dateString: string): string {
-  if (!dateString) return '—';
+  if (!dateString) return "—";
 
   try {
     const date = new Date(dateString);
@@ -233,18 +239,47 @@ function formatDate(dateString: string): string {
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
 
-    if (diffMins < 1) return 'Just now';
+    if (diffMins < 1) return "Just now";
     if (diffMins < 60) return `${diffMins}m ago`;
     if (diffHours < 24) return `${diffHours}h ago`;
     if (diffDays < 7) return `${diffDays}d ago`;
 
     return date.toLocaleDateString(undefined, {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   } catch (e) {
     return dateString;
   }
 }
+
+const formatId = (taskId: string) => {
+  const expectedIdLength: number = 12;
+  if (taskId.length > expectedIdLength)
+    return taskId.slice(taskId.length - expectedIdLength);
+  return taskId;
+};
+
+const copyTaskId = async (taskId?: string) => {
+  if (!taskId) return;
+  try {
+    await navigator.clipboard.writeText(taskId);
+    copiedOpen.value = true;
+    if (copiedTimer) {
+      clearTimeout(copiedTimer);
+    }
+    copiedTimer = window.setTimeout(() => {
+      copiedOpen.value = false;
+    }, 1200);
+  } catch (e) {
+    throw new Error("Failed to copy", { cause: e });
+  }
+};
+
+onBeforeUnmount(() => {
+  if (copiedTimer) {
+    clearTimeout(copiedTimer);
+  }
+});
 </script>

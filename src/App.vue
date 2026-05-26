@@ -1,12 +1,15 @@
 <template>
-	<div id="taskbolt" class="relative h-full w-full overflow-hidden">
-		<AppLayout />
-	</div>
+  <div id="taskbolt" class="relative h-full w-full overflow-hidden">
+    <TooltipProvider>
+      <AppLayout />
+    </TooltipProvider>
+  </div>
 </template>
 
 <script setup lang="ts">
 import type { Plugin } from "vue";
 import { getCurrentInstance } from "vue";
+import { TooltipProvider } from "@/shared/components/ui/tooltip";
 import AppLayout from "@/shared/components/layout/AppLayout.vue";
 import "@/shared/styles/globals.css";
 import { shellServicesPlugin } from "@/shared/plugins/shell-services";
