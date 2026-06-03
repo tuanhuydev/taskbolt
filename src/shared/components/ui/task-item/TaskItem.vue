@@ -14,7 +14,6 @@
     </div>
     <div class="flex items-center gap-2">
       <TaskItemStatus :status="task.status" />
-      <EllipsisVertical :size="16" class="text-muted-foreground" />
     </div>
   </li>
 </template>
@@ -23,7 +22,6 @@ import { Task, TaskPriority, TaskStatus } from "@/shared/types/task";
 import TaskTypeIcon from "./TaskTypeIcon.vue";
 import TaskItemPriority from "./TaskItemPriority.vue";
 import TaskItemStatus from "./TaskItemStatus.vue";
-import { EllipsisVertical } from "lucide-vue-next";
 
 const { task } = defineProps<{ task: Task }>();
 const emit = defineEmits<{

@@ -19,10 +19,12 @@
   <p v-else-if="error" class="text-destructive">{{ error }}</p>
 
   <ul v-else class="p-0 list-none overflow-auto max-h-4/5">
-    <TaskItem
-      v-for="task in taskList"
+    <TaskGroup
+      v-for="task in parentTasks"
       :key="task.id"
       :task="task"
+      :sub-tasks="subTaskMap.get(task.id) ?? []"
+      :active-task-id="selectedTask?.id ?? null"
       @click="selectTask"
     />
     <li v-if="parentTasks.length === 0" class="text-muted-foreground">
@@ -31,9 +33,11 @@
   </ul>
   <TaskDetail
     :task="selectedTask"
+    :tasks="taskList"
     :open="shouldShowTaskDetail"
     @close="closeTaskDetail"
     @update="handleUpdateTask"
+    @create="handleCreateTask"
   />
   <TaskForm
     :open="showTaskForm"
@@ -57,7 +61,7 @@ import {
 } from "@/shared/types/task";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
-import TaskItem from "@/shared/components/ui/task-item/TaskItem.vue";
+import { TaskGroup } from "@/shared/components/ui/task-item";
 import TaskDetail from "./TaskDetail.vue";
 import { TaskForm } from "./index";
 import { getTasks } from "@/shared/services";
@@ -71,18 +75,32 @@ const showTaskForm = ref<boolean>(false);
 
 const taskList = ref<Task[]>([]);
 
-const subTaskMap = computed(() => {
-  const map: Record<string, Task[]> = {};
+const taskGroups = computed(() => {
+  const parentTaskIds = new Set<string>();
+  const childTaskMap = new Map<string, Task[]>();
+  const parentTaskList: Task[] = [];
+
   for (const task of taskList.value) {
-    if (task.parentId) {
-      if (!map[task.parentId]) map[task.parentId] = [];
-      map[task.parentId].push(task);
+    if (task.parentId == null) {
+      parentTaskIds.add(task.id);
+      parentTaskList.push(task);
+      continue;
     }
+
+    const existingChildren = childTaskMap.get(task.parentId) ?? [];
+    existingChildren.push(task);
+    childTaskMap.set(task.parentId, existingChildren);
   }
-  return map;
+
+  return {
+    parentTaskIds,
+    childTaskMap,
+    parentTaskList,
+  };
 });
 
-const parentTasks = computed(() => taskList.value.filter((t) => !t.parentId));
+const subTaskMap = computed(() => taskGroups.value.childTaskMap);
+const parentTasks = computed(() => taskGroups.value.parentTaskList);
 const loading = ref(true);
 const error = ref<string | null>(null);
 
@@ -116,8 +134,10 @@ async function fetchTasks() {
 
     const tasks = await getTasks(apiClient, filter);
     taskList.value = tasks;
-  } catch (err: any) {
-    error.value = err.message || "Failed to load tasks.";
+  } catch (err: unknown) {
+    const message =
+      err instanceof Error ? err.message : "Failed to load tasks.";
+    error.value = message;
   } finally {
     loading.value = false;
   }
@@ -198,16 +218,23 @@ async function handleTaskSubmit(
 
     // Refresh task list
     await fetchTasks();
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const message =
+      err instanceof Error
+        ? err.message
+        : isEdit
+          ? t("toast.taskUpdateFailed")
+          : t("toast.taskCreateFailed");
     console.error("Error submitting task:", err);
-    toastService?.error(
-      err.message ||
-        (isEdit ? t("toast.taskUpdateFailed") : t("toast.taskCreateFailed")),
-    );
+    toastService?.error(message);
   }
 }
 
 async function handleUpdateTask(data: UpdateTaskPayload) {
   await handleTaskSubmit(data, true);
+}
+
+async function handleCreateTask(data: CreateTaskPayload) {
+  await handleTaskSubmit(data, false);
 }
 </script>
