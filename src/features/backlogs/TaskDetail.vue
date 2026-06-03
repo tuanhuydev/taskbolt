@@ -201,9 +201,11 @@ function handleCreateSubTaskSubmit(
   data: CreateTaskPayload | UpdateTaskPayload,
   _isEdit: boolean,
 ) {
+  if (!props.task) return;
+
   const payload: CreateTaskPayload = {
     ...(data as CreateTaskPayload),
-    parentId: props.task!.id,
+    parentId: props.task.id,
   };
   emits("create", payload);
   showCreateSubTaskModal.value = false;

@@ -32,6 +32,13 @@ export const taskboltTranslations = {
     configure: {
       title: "Configure",
     },
+    taskDetailHeader: {
+      taskId: "Task ID",
+      copied: "Copied",
+      createSubTask: "Create sub-task",
+      convertToSubTask: "Convert to sub-task",
+      convertToTask: "Convert to task",
+    },
     common: {
       save: "Save",
       cancel: "Cancel",
@@ -116,6 +123,13 @@ export const taskboltTranslations = {
     },
     configure: {
       title: "Cấu hình",
+    },
+    taskDetailHeader: {
+      taskId: "Mã công việc",
+      copied: "Đã sao chép",
+      createSubTask: "Tạo sub-task",
+      convertToSubTask: "Chuyển thành sub-task",
+      convertToTask: "Chuyển thành công việc",
     },
     common: {
       save: "Lưu",

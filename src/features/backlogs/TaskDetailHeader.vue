@@ -3,9 +3,9 @@
     <div class="flex items-start justify-between gap-4">
       <div class="flex-1 min-w-0">
         <div
-          class="flex items-center gap-2 px-3 py-2 justify-between border-b mb-2"
+          class="mb-2 flex items-center justify-between gap-2 border-b px-3 py-2"
         >
-          <div class="flex items-center gap-2 min-w-0">
+          <div class="flex min-w-0 items-center gap-2">
             <Tooltip v-if="task" :side="'left'">
               <TooltipTrigger as-child>
                 <TaskTypeIcon :type="task.type" />
@@ -22,39 +22,53 @@
             <Tooltip :open="copiedOpen" :disable-hoverable-content="true">
               <TooltipTrigger as-child>
                 <span
-                  class="cursor-pointer text-xs font-medium truncate text-primary hover:underline"
+                  class="cursor-pointer truncate text-xs font-medium text-primary hover:underline"
                   @click="copyTaskId(task?.id)"
                 >
-                  {{ task?.id ? formatId(task.id) : "TaskID" }}
+                  {{
+                    task?.id ? formatId(task.id) : t("taskDetailHeader.taskId")
+                  }}
                 </span>
               </TooltipTrigger>
-              <TooltipContent class="z-1150"> Copied </TooltipContent>
+              <TooltipContent class="z-1150">
+                {{ t("taskDetailHeader.copied") }}
+              </TooltipContent>
             </Tooltip>
           </div>
 
           <div class="flex items-center gap-2">
-            <DropdownMenu class="w-5 h-5">
-              <DropdownMenuTrigger class="flex">
+            <DropdownMenu>
+              <DropdownMenuTrigger as-child>
                 <Button
                   v-if="task && !isEditing"
                   size="icon"
+                  variant="outline"
+                  class="shrink-0 h-5 w-5"
+                >
                   <EllipsisVertical class="h-3.5 w-3.5" />
+                </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent class="w-48">
-                <DropdownMenuItem v-if="!isSubTask" @click="emit('create-sub-task')">
-                  <CopyPlus /> Create sub-task
+                <DropdownMenuItem
+                  v-if="!isSubTask"
+                  @click="emit('create-sub-task')"
+                >
+                  <CopyPlus class="mr-2 h-4 w-4" />
+                  {{ t("taskDetailHeader.createSubTask") }}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   v-if="!isSubTask"
                   @click="emit('convert-to-sub-task')"
                 >
-                  <CopySlash /> Convert to sub-task
+                  <CopySlash class="mr-2 h-4 w-4" />
+                  {{ t("taskDetailHeader.convertToSubTask") }}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   v-if="isSubTask"
                   @click="emit('convert-to-task')"
                 >
-                  <Copy /> Convert to task
+                  <Copy class="mr-2 h-4 w-4" />
+                  {{ t("taskDetailHeader.convertToTask") }}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -63,7 +77,12 @@
               v-if="task && !isEditing"
               size="icon"
               variant="outline"
+              class="shrink-0 h-5 w-5"
+              @click="emit('start-editing')"
+            >
               <Pencil class="h-3.5 w-3.5" />
+            </Button>
+
             <Button
               v-if="task && !isEditing"
               size="icon"
@@ -71,12 +90,12 @@
               class="shrink-0 h-5 w-5"
               @click="emit('close')"
             >
-              <X class="w-2 h-2" />
+              <X class="h-2 w-2" />
             </Button>
           </div>
         </div>
 
-        <DrawerTitle v-if="!isEditing" class="text-xl px-3 line-clamp-3 mb-2">
+        <DrawerTitle v-if="!isEditing" class="mb-2 px-3 text-xl line-clamp-3">
           {{ task?.title }}
         </DrawerTitle>
       </div>
