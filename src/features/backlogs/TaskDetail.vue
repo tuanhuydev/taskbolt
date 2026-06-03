@@ -10,67 +10,17 @@
       }
     "
   >
-    <DrawerContent class="w-[600px]">
-      <DrawerHeader class="p-0">
-        <div class="flex items-start justify-between gap-4">
-          <div class="flex-1 min-w-0">
-            <div
-              class="flex items-center gap-2 px-3 py-2 justify-between border-b mb-2"
-            >
-              <div class="flex items-center gap-2 min-w-0">
-                <Tooltip v-if="task" :side="'left'">
-                  <TooltipTrigger as-child>
-                    <TaskTypeIcon :type="task.type" />
-                  </TooltipTrigger>
-                  <TooltipContent
-                    class="z-[1150]"
-                    side="left"
-                    :avoid-collisions="true"
-                  >
-                    {{ t(`taskType.${task.type}`) }}
-                  </TooltipContent>
-                </Tooltip>
-
-                <Tooltip :open="copiedOpen" :disable-hoverable-content="true">
-                  <TooltipTrigger as-child>
-                    <span
-                      class="cursor-pointer text-xs font-medium truncate text-primary hover:underline"
-                      @click="copyTaskId(task?.id)"
-                    >
-                      {{ task?.id ? formatId(task.id) : "TaskID" }}
-                    </span>
-                  </TooltipTrigger>
-                  <TooltipContent class="z-1150"> Copied </TooltipContent>
-                </Tooltip>
-              </div>
-              <div class="flex items-center gap-2">
-                <Button
-                  v-if="task && !isEditing"
-                  size="icon"
-                  class="shrink-0 h-5 w-5"
-                  @click="startEditing"
-                >
-                  <Pencil class="w-3.5! h-3.5!" />
-                </Button>
-                <Button
-                  v-if="task && !isEditing"
-                  size="icon"
-                  class="shrink-0 h-5 w-5"
-                  @click="emits('close')"
-                >
-                  <X class="w-2 h-2" />
-                </Button>
-              </div>
-            </div>
-            <DrawerTitle
-              v-if="!isEditing"
-              class="text-xl px-3 line-clamp-3 mb-2"
-            >
-              {{ task?.title }}
-            </DrawerTitle>
-          </div>
-        </div>
-      </DrawerHeader>
+    <DrawerContent class="w-150">
+      <TaskDetailHeader
+        :task="task"
+        :is-editing="isEditing"
+        :is-sub-task="isSubTask"
+        @start-editing="startEditing"
+        @close="emits('close')"
+        @create-sub-task="openCreateSubTaskModal"
+        @convert-to-sub-task="convertToSubTask"
+        @convert-to-task="convertToTask"
+      />
       <!-- Show form fields when editing -->
       <template v-if="isEditing && task">
         <TaskFormFields
@@ -135,51 +85,185 @@
       </template>
     </DrawerContent>
   </Drawer>
+
+  <!-- Create sub-task modal -->
+  <Dialog :open="showCreateSubTaskModal" @update:open="closeCreateSubTaskModal">
+    <DialogContent class="max-w-xl p-0 overflow-auto h-130">
+      <DialogHeader class="px-4 py-3 border-b">
+        <DialogTitle class="text-sm">Create sub-task</DialogTitle>
+      </DialogHeader>
+      <TaskFormFields
+        :initial-data="subTaskInitialData"
+        @submit="handleCreateSubTaskSubmit"
+        @cancel="closeCreateSubTaskModal"
+      />
+    </DialogContent>
+  </Dialog>
+
+  <!-- Convert to sub-task modal -->
+  <Dialog
+    class="w-150"
+    :open="showParentTaskPopup"
+    @update:open="closeParentTaskPopup"
+  >
+    <DialogContent class="max-w-xl p-0 shrink-1">
+      <DialogHeader class="px-4 py-3 border-b">
+        <DialogTitle class="text-sm">Convert to sub-task</DialogTitle>
+      </DialogHeader>
+
+      <div class="p-4 space-y-3">
+        <Input
+          v-model="parentTaskQuery"
+          type="text"
+          placeholder="Search parent task by title or id"
+        />
+
+        <div class="max-h-72 overflow-auto border rounded-md">
+          <button
+            v-for="parent in filteredParentTasks"
+            :key="parent.id"
+            type="button"
+            class="w-full text-left px-3 py-2 hover:bg-muted border-b last:border-b-0"
+            @click="selectParentTask(parent.id)"
+          >
+            <p class="text-sm font-medium truncate">{{ parent.title }}</p>
+            <p class="text-xs text-muted-foreground">
+              {{ formatId(parent.id) }}
+            </p>
+          </button>
+          <p
+            v-if="filteredParentTasks.length === 0"
+            class="px-3 py-4 text-sm text-muted-foreground"
+          >
+            No parent task found.
+          </p>
+        </div>
+      </div>
+    </DialogContent>
+  </Dialog>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onBeforeUnmount } from "vue";
+import { ref, computed } from "vue";
+import { Drawer, DrawerContent } from "@/shared/components/ui/drawer";
 import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-} from "@/shared/components/ui/drawer";
-import { Button } from "@/shared/components/ui/button";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/shared/components/ui/dialog";
 import {
   Task,
   TaskType,
-  TaskStatus,
   TaskPriority,
   type CreateTaskPayload,
   type UpdateTaskPayload,
 } from "@/shared/types/task";
 import { useTaskboltTranslation } from "@/shared/composables/useShellServices";
 import TaskFormFields from "./TaskFormFields.vue";
-import TaskTypeIcon from "@/shared/components/ui/task-item/TaskTypeIcon.vue";
+import TaskDetailHeader from "./TaskDetailHeader.vue";
 import TaskItemPriority from "@/shared/components/ui/task-item/TaskItemPriority.vue";
 import TaskItemStatus from "@/shared/components/ui/task-item/TaskItemStatus.vue";
-import { Pencil, X } from "lucide-vue-next";
-import {
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-} from "@/shared/components/ui/tooltip";
+import { Input } from "@/shared/components/ui/input";
 
-const props = defineProps<{ open: boolean; task: Task | null }>();
+const props = defineProps<{
+  open: boolean;
+  task: Task | null;
+  tasks: Task[];
+}>();
 const emits = defineEmits<{
   (e: "close"): void;
   (e: "update", data: UpdateTaskPayload): void;
+  (e: "create", data: CreateTaskPayload): void;
 }>();
+
+const isSubTask = computed(() => !!props.task?.parentId);
 
 const { t } = useTaskboltTranslation();
 const isEditing = ref<boolean>(false);
-const copiedOpen = ref(false);
-let copiedTimer: number | undefined;
+const showParentTaskPopup = ref(false);
+const parentTaskQuery = ref("");
+const showCreateSubTaskModal = ref(false);
+
+const subTaskInitialData = computed(() =>
+  props.task ? { parentId: props.task.id } : {},
+);
+
+function openCreateSubTaskModal() {
+  showCreateSubTaskModal.value = true;
+}
+
+function closeCreateSubTaskModal() {
+  showCreateSubTaskModal.value = false;
+}
+
+function handleCreateSubTaskSubmit(
+  data: CreateTaskPayload | UpdateTaskPayload,
+  _isEdit: boolean,
+) {
+  if (!props.task) return;
+
+  const payload: CreateTaskPayload = {
+    ...(data as CreateTaskPayload),
+    parentId: props.task.id,
+  };
+  emits("create", payload);
+  showCreateSubTaskModal.value = false;
+}
 
 // Computed property to get priority with default value
 const taskPriority = computed(() => {
   return props.task?.priority || TaskPriority.LOW;
+});
+
+const descendantTaskIds = computed(() => {
+  const currentTaskId = props.task?.id;
+  if (!currentTaskId) return new Set<string>();
+
+  const childrenByParent: Record<string, string[]> = {};
+  for (const task of props.tasks) {
+    if (!task.parentId) continue;
+    if (!childrenByParent[task.parentId]) {
+      childrenByParent[task.parentId] = [];
+    }
+    childrenByParent[task.parentId].push(task.id);
+  }
+
+  const visited = new Set<string>();
+  const stack = [...(childrenByParent[currentTaskId] ?? [])];
+
+  while (stack.length > 0) {
+    const nextId = stack.pop();
+    if (!nextId || visited.has(nextId)) continue;
+
+    visited.add(nextId);
+    const children = childrenByParent[nextId] ?? [];
+    for (const childId of children) {
+      if (!visited.has(childId)) {
+        stack.push(childId);
+      }
+    }
+  }
+
+  return visited;
+});
+
+const filteredParentTasks = computed(() => {
+  const currentTaskId = props.task?.id;
+  const query = parentTaskQuery.value.trim().toLowerCase();
+
+  return props.tasks.filter((candidate) => {
+    if (candidate.id === currentTaskId) return false;
+    if (descendantTaskIds.value.has(candidate.id)) return false;
+    if (candidate.parentId) return false;
+
+    if (!query) return true;
+
+    return (
+      candidate.title.toLowerCase().includes(query) ||
+      candidate.id.toLowerCase().includes(query)
+    );
+  });
 });
 
 function startEditing() {
@@ -249,7 +333,7 @@ function formatDate(dateString: string): string {
       month: "short",
       day: "numeric",
     });
-  } catch (e) {
+  } catch {
     return dateString;
   }
 }
@@ -261,27 +345,34 @@ const formatId = (taskId: string) => {
   return taskId;
 };
 
-const copyTaskId = async (taskId?: string) => {
-  if (!taskId) return;
-  try {
-    await navigator.clipboard.writeText(taskId);
-    copiedOpen.value = true;
-    if (copiedTimer) {
-      clearTimeout(copiedTimer);
-    }
-    copiedTimer = window.setTimeout(() => {
-      copiedOpen.value = false;
-    }, 1200);
-  } catch (e) {
-    copiedOpen.value = false;
-    console.error("Failed to copy task ID to clipboard", e);
-    return;
-  }
+const convertToTask = () => {
+  if (!props.task) return;
+
+  emits("update", {
+    id: props.task.id,
+    parentId: null,
+  });
 };
 
-onBeforeUnmount(() => {
-  if (copiedTimer) {
-    clearTimeout(copiedTimer);
-  }
-});
+const convertToSubTask = () => {
+  if (!props.task) return;
+  parentTaskQuery.value = "";
+  showParentTaskPopup.value = true;
+};
+
+const closeParentTaskPopup = () => {
+  showParentTaskPopup.value = false;
+};
+
+const selectParentTask = (parentTaskId: string) => {
+  if (!props.task) return;
+
+  emits("update", {
+    id: props.task.id,
+    parentId: parentTaskId,
+  });
+
+  showParentTaskPopup.value = false;
+  emits("close");
+};
 </script>
