@@ -63,11 +63,7 @@
               v-if="task && !isEditing"
               size="icon"
               variant="outline"
-              class="shrink-0 h-5 w-5"
-              @click="emit('start-editing')"
-            >
-              <Pencil class="w-3.5! h-3.5!" />
-            </Button>
+              <Pencil class="h-3.5 w-3.5" />
             <Button
               v-if="task && !isEditing"
               size="icon"
