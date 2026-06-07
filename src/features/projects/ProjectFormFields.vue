@@ -128,17 +128,19 @@ import {
   ProjectStatus,
   ProjectType,
   type Project,
+  type CreateProjectPayload,
   type UpdateProjectPayload,
 } from '@/shared/types/project';
 import { useTaskboltTranslation } from '@/shared/composables/useShellServices';
 import { isRequired } from '@/shared/lib/form-validation';
 
 const props = defineProps<{
-  initialData: Project;
+  initialData?: Project;
+  mode: 'create' | 'edit';
 }>();
 
 const emit = defineEmits<{
-  submit: [data: UpdateProjectPayload];
+  submit: [data: CreateProjectPayload | UpdateProjectPayload];
   cancel: [];
 }>();
 
@@ -193,14 +195,28 @@ function validateForm(): boolean {
 function handleSubmit() {
   if (!validateForm()) return;
 
-  emit('submit', {
-    name: formData.value.name,
-    clientName: formData.value.clientName || undefined,
-    description: formData.value.description || undefined,
-    status: formData.value.status,
-    type: formData.value.type,
-    startDate: formData.value.startDate || undefined,
-    endDate: formData.value.endDate || undefined,
-  });
+  if (props.mode === 'create') {
+    const payload: CreateProjectPayload = {
+      name: formData.value.name,
+      clientName: formData.value.clientName || undefined,
+      description: formData.value.description || undefined,
+      status: formData.value.status,
+      type: formData.value.type,
+      startDate: formData.value.startDate || undefined,
+      endDate: formData.value.endDate || undefined,
+    };
+    emit('submit', payload);
+  } else {
+    const payload: UpdateProjectPayload = {
+      name: formData.value.name,
+      clientName: formData.value.clientName || undefined,
+      description: formData.value.description || undefined,
+      status: formData.value.status,
+      type: formData.value.type,
+      startDate: formData.value.startDate || undefined,
+      endDate: formData.value.endDate || undefined,
+    };
+    emit('submit', payload);
+  }
 }
 </script>

@@ -68,6 +68,9 @@
       <!-- Sprint Management -->
       <SprintManagement :project-id="project.id" />
 
+      <!-- Member Management -->
+      <ProjectMemberManagement :project-id="project.id" class="mt-6" />
+
       <!-- Edit Project Form -->
       <ProjectForm
         :open="showEditForm"
@@ -89,9 +92,10 @@ import {
 } from '@/shared/composables/useShellServices';
 import { getProjectById, updateProject } from '@/shared/services';
 import { cn } from '@/shared/lib/utils';
-import { ProjectStatus, type Project, type UpdateProjectPayload } from '@/shared/types/project';
+import { ProjectStatus, type Project, type CreateProjectPayload, type UpdateProjectPayload } from '@/shared/types/project';
 import { Button } from '@/shared/components/ui/button';
 import SprintManagement from './SprintManagement.vue';
+import ProjectMemberManagement from './ProjectMemberManagement.vue';
 import ProjectForm from './ProjectForm.vue';
 
 const route = useRoute();
@@ -142,7 +146,9 @@ function closeEditForm() {
   showEditForm.value = false;
 }
 
-async function handleProjectUpdate(data: UpdateProjectPayload) {
+async function handleProjectUpdate(data: CreateProjectPayload | UpdateProjectPayload, isEdit: boolean) {
+  if (!isEdit) return;
+
   const apiClient = getApiClient();
   const toast = getToastService();
 
@@ -152,7 +158,7 @@ async function handleProjectUpdate(data: UpdateProjectPayload) {
   }
 
   try {
-    project.value = await updateProject(apiClient, project.value.id, data);
+    project.value = await updateProject(apiClient, project.value.id, data as UpdateProjectPayload);
     toast?.success(t('toast.projectUpdated'));
     closeEditForm();
   } catch (err) {

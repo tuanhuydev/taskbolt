@@ -28,6 +28,17 @@ export interface Project {
   deletedAt: string | null;
 }
 
+export interface CreateProjectPayload {
+  name: string;
+  clientName?: string;
+  description?: string;
+  users?: string[];
+  startDate?: string;
+  endDate?: string;
+  status: ProjectStatus;
+  type: ProjectType;
+}
+
 export interface UpdateProjectPayload {
   name?: string;
   clientName?: string;
