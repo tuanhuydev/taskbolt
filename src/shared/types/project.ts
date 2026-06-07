@@ -27,3 +27,14 @@ export interface Project {
   updatedAt: string;
   deletedAt: string | null;
 }
+
+export interface UpdateProjectPayload {
+  name?: string;
+  clientName?: string;
+  description?: string;
+  users?: string[];
+  startDate?: string;
+  endDate?: string;
+  status?: ProjectStatus;
+  type?: ProjectType;
+}

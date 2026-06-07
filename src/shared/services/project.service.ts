@@ -1,6 +1,6 @@
 import { APP_AUTH_URL } from "@/shared/lib/constants";
 import { ApiClient } from "@/shared/types/shell-services";
-import { Project } from "@/shared/types/project";
+import { Project, UpdateProjectPayload } from "@/shared/types/project";
 
 interface ProjectResponse {
   projects: Array<Project>;
@@ -46,6 +46,32 @@ export const getProjectById = async (apiClient: ApiClient, projectId: string) =>
     return project;
   } catch (error) {
     console.error("Error fetching project:", error);
+    throw error;
+  }
+};
+
+export const updateProject = async (
+  apiClient: ApiClient,
+  projectId: string,
+  data: UpdateProjectPayload,
+) => {
+  try {
+    const response = await apiClient.request(`${APP_AUTH_URL}/projects/${projectId}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to update project (${response.status})`);
+    }
+
+    const project: Project = await response.json();
+    return project;
+  } catch (error) {
+    console.error("Error updating project:", error);
     throw error;
   }
 };

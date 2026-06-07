@@ -7,7 +7,11 @@
     "build": "rsbuild build",
     "preview": "rsbuild preview",
     "lint": "eslint src",
-    "lint:fix": "eslint src --fix"
+    "lint:fix": "eslint src --fix",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@lexical/link": "^0.17.1",
@@ -35,16 +39,21 @@
     "@rsbuild/plugin-vue": "^1.1.1",
     "@tailwindcss/postcss": "^4.2.2",
     "@types/node": "^20.10.0",
+    "@vitejs/plugin-vue": "^6.0.7",
+    "@vitest/ui": "^4.1.8",
+    "@vue/test-utils": "^2.4.11",
     "autoprefixer": "^10.4.27",
     "eslint": "^10.4.0",
     "eslint-plugin-vue": "^10.9.1",
     "globals": "^17.6.0",
+    "happy-dom": "^20.10.2",
     "i18next": "^26.0.3",
     "postcss": "^8.5.8",
     "sass": "^1.69.5",
     "tailwindcss": "^4.2.2",
     "typescript": "~5.4.0",
-    "typescript-eslint": "^8.59.4"
+    "typescript-eslint": "^8.59.4",
+    "vitest": "^4.1.8"
   },
   "packageManager": "pnpm@10.33.2"
 }

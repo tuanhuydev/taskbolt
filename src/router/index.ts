@@ -29,6 +29,11 @@ const routes = [
 		name: "configure",
 		component: ConfigurePage,
 	},
+	{
+		path: "/configure/projects/:projectId",
+		name: "project-detail",
+		component: () => import("@/features/projects/ProjectDetailPage.vue"),
+	},
 ];
 
 /**
