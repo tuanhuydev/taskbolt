@@ -1,5 +1,5 @@
 <template>
-  <aside class="w-50 border-r border-border bg-background flex flex-col">
+  <aside class="w-50 bg-background flex flex-col">
     <!-- Navigation -->
     <nav class="flex-1 px-2 flex flex-col gap-1">
       <!-- Project Selector -->

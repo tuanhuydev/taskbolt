@@ -1,8 +1,8 @@
 <template>
   <section>
-    <div class="flex items-center justify-between mb-4">
+    <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <h3 class="text-lg font-medium">{{ t('sprint.title') }}</h3>
-      <Button size="sm" @click="openCreateForm">
+      <Button size="sm" class="w-full sm:w-auto" @click="openCreateForm">
         {{ t('sprint.addSprint') }}
       </Button>
     </div>
@@ -18,7 +18,7 @@
       <li
         v-for="sprint in sprints"
         :key="sprint.id"
-        class="flex items-center justify-between p-4 rounded-lg border bg-card"
+        class="flex flex-col items-start gap-3 rounded-lg border bg-card p-4 sm:flex-row sm:items-center sm:justify-between"
       >
         <div class="flex-1 min-w-0">
           <p class="font-medium truncate">{{ sprint.name }}</p>
@@ -31,7 +31,7 @@
             <span v-if="sprint.endDate">{{ formatDate(sprint.endDate) }}</span>
           </p>
         </div>
-        <div class="flex items-center gap-2 ml-4 shrink-0">
+        <div class="flex w-full items-center justify-between sm:ml-4 sm:w-auto sm:justify-end sm:gap-2 sm:shrink-0">
           <span
             :class="cn('text-xs px-2 py-1 rounded-full font-medium', statusClasses[sprint.status])"
           >

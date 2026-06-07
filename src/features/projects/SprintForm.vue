@@ -6,7 +6,7 @@
     :open="props.open"
     @update:open="handleDrawerUpdate"
   >
-    <DrawerContent class="w-120">
+    <DrawerContent class="w-full max-w-[95vw] sm:max-w-[560px]">
       <DrawerHeader>
         <DrawerTitle>
           {{ isEditMode ? t('sprint.editTitle') : t('sprint.createTitle') }}
@@ -54,7 +54,7 @@
             </div>
 
             <!-- Start + End Date -->
-            <div class="grid grid-cols-2 gap-3">
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
                 <label class="text-sm font-medium block mb-1.5">
                   {{ t('sprint.startDateLabel') }}
@@ -83,11 +83,11 @@
         </div>
       </div>
 
-      <div class="flex flex-row gap-2 p-4 border-t">
-        <Button variant="outline" type="button" @click="emit('close')">
+      <div class="flex flex-col-reverse gap-2 border-t p-4 sm:flex-row">
+        <Button variant="outline" type="button" class="w-full sm:w-auto" @click="emit('close')">
           {{ t('common.cancel') }}
         </Button>
-        <Button type="button" @click="handleSubmit">
+        <Button type="button" class="w-full sm:w-auto" @click="handleSubmit">
           {{ t('common.save') }}
         </Button>
       </div>

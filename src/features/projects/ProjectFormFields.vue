@@ -30,7 +30,7 @@
         </div>
 
         <!-- Status + Type Row -->
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
             <label class="text-sm font-medium block mb-1.5">
               {{ t('project.statusLabel') }}
@@ -73,7 +73,7 @@
         </div>
 
         <!-- Start Date + End Date Row -->
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
             <label class="text-sm font-medium block mb-1.5">
               {{ t('project.startDateLabel') }}
@@ -102,11 +102,11 @@
     </div>
   </div>
 
-  <div class="flex flex-row gap-2 p-4 border-t">
-    <Button variant="outline" type="button" @click="emit('cancel')">
+  <div class="flex flex-col-reverse gap-2 border-t p-4 sm:flex-row">
+    <Button variant="outline" type="button" class="w-full sm:w-auto" @click="emit('cancel')">
       {{ t('common.cancel') }}
     </Button>
-    <Button type="button" @click="handleSubmit">
+    <Button type="button" class="w-full sm:w-auto" @click="handleSubmit">
       {{ t('common.save') }}
     </Button>
   </div>
@@ -128,17 +128,19 @@ import {
   ProjectStatus,
   ProjectType,
   type Project,
+  type CreateProjectPayload,
   type UpdateProjectPayload,
 } from '@/shared/types/project';
 import { useTaskboltTranslation } from '@/shared/composables/useShellServices';
 import { isRequired } from '@/shared/lib/form-validation';
 
 const props = defineProps<{
-  initialData: Project;
+  initialData?: Project;
+  mode: 'create' | 'edit';
 }>();
 
 const emit = defineEmits<{
-  submit: [data: UpdateProjectPayload];
+  submit: [data: CreateProjectPayload | UpdateProjectPayload];
   cancel: [];
 }>();
 
@@ -193,14 +195,28 @@ function validateForm(): boolean {
 function handleSubmit() {
   if (!validateForm()) return;
 
-  emit('submit', {
-    name: formData.value.name,
-    clientName: formData.value.clientName || undefined,
-    description: formData.value.description || undefined,
-    status: formData.value.status,
-    type: formData.value.type,
-    startDate: formData.value.startDate || undefined,
-    endDate: formData.value.endDate || undefined,
-  });
+  if (props.mode === 'create') {
+    const payload: CreateProjectPayload = {
+      name: formData.value.name,
+      clientName: formData.value.clientName || undefined,
+      description: formData.value.description || undefined,
+      status: formData.value.status,
+      type: formData.value.type,
+      startDate: formData.value.startDate || undefined,
+      endDate: formData.value.endDate || undefined,
+    };
+    emit('submit', payload);
+  } else {
+    const payload: UpdateProjectPayload = {
+      name: formData.value.name,
+      clientName: formData.value.clientName || undefined,
+      description: formData.value.description || undefined,
+      status: formData.value.status,
+      type: formData.value.type,
+      startDate: formData.value.startDate || undefined,
+      endDate: formData.value.endDate || undefined,
+    };
+    emit('submit', payload);
+  }
 }
 </script>

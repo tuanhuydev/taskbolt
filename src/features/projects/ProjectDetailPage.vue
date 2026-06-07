@@ -13,7 +13,7 @@
 
     <template v-else-if="project">
       <!-- Project Title + Edit -->
-      <div class="flex items-start justify-between mb-6">
+      <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h2 class="text-2xl font-semibold">{{ project.name }}</h2>
           <p v-if="project.clientName" class="text-muted-foreground mt-1">
@@ -31,12 +31,12 @@
         <!-- Status + Type badges -->
         <div class="flex flex-wrap gap-2">
           <span
-            :class="cn('text-xs px-2.5 py-1 rounded-full font-medium', statusClasses[project.status])"
+            :class="cn('text-xs px-2.5 py-1 rounded-full font-medium', getStatusClass(project.status))"
           >
-            {{ t(`projectStatus.${project.status}`) }}
+            {{ getStatusLabel(project.status) }}
           </span>
           <span class="text-xs px-2.5 py-1 rounded-full font-medium bg-secondary text-secondary-foreground">
-            {{ t(`projectType.${project.type}`) }}
+            {{ getTypeLabel(project.type) }}
           </span>
         </div>
 
@@ -49,7 +49,7 @@
         </div>
 
         <!-- Dates -->
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div v-if="project.startDate">
             <p class="text-sm font-medium text-muted-foreground mb-1">
               {{ t('project.startDateLabel') }}
@@ -67,6 +67,9 @@
 
       <!-- Sprint Management -->
       <SprintManagement :project-id="project.id" />
+
+      <!-- Member Management -->
+      <ProjectMemberManagement :project-id="project.id" class="mt-6" />
 
       <!-- Edit Project Form -->
       <ProjectForm
@@ -89,9 +92,10 @@ import {
 } from '@/shared/composables/useShellServices';
 import { getProjectById, updateProject } from '@/shared/services';
 import { cn } from '@/shared/lib/utils';
-import { ProjectStatus, type Project, type UpdateProjectPayload } from '@/shared/types/project';
+import { ProjectStatus, ProjectType, type Project, type CreateProjectPayload, type UpdateProjectPayload } from '@/shared/types/project';
 import { Button } from '@/shared/components/ui/button';
 import SprintManagement from './SprintManagement.vue';
+import ProjectMemberManagement from './ProjectMemberManagement.vue';
 import ProjectForm from './ProjectForm.vue';
 
 const route = useRoute();
@@ -110,6 +114,35 @@ const statusClasses: Record<ProjectStatus, string> = {
   [ProjectStatus.COMPLETED]: 'bg-blue-100 text-blue-700',
   [ProjectStatus.ON_HOLD]: 'bg-yellow-100 text-yellow-700',
 };
+
+const fallbackStatusClass = 'bg-gray-100 text-gray-600';
+const projectStatusValues = new Set<string>(Object.values(ProjectStatus));
+const projectTypeValues = new Set<string>(Object.values(ProjectType));
+
+function normalizeProjectStatus(value: string): ProjectStatus | null {
+  const normalized = value.trim().toUpperCase().replace(/[\s-]+/g, '_');
+  return projectStatusValues.has(normalized) ? (normalized as ProjectStatus) : null;
+}
+
+function normalizeProjectType(value: string): ProjectType | null {
+  const normalized = value.trim().toUpperCase().replace(/[\s-]+/g, '_');
+  return projectTypeValues.has(normalized) ? (normalized as ProjectType) : null;
+}
+
+function getStatusClass(value: string): string {
+  const normalized = normalizeProjectStatus(value);
+  return normalized ? statusClasses[normalized] : fallbackStatusClass;
+}
+
+function getStatusLabel(value: string): string {
+  const normalized = normalizeProjectStatus(value);
+  return normalized ? t(`projectStatus.${normalized}`) : value;
+}
+
+function getTypeLabel(value: string): string {
+  const normalized = normalizeProjectType(value);
+  return normalized ? t(`projectType.${normalized}`) : value;
+}
 
 onMounted(async () => {
   const apiClient = getApiClient();
@@ -131,7 +164,7 @@ onMounted(async () => {
 });
 
 function goBack() {
-  router.push({ name: 'configure' });
+  router.push({ name: 'project-list' });
 }
 
 function openEditForm() {
@@ -142,7 +175,9 @@ function closeEditForm() {
   showEditForm.value = false;
 }
 
-async function handleProjectUpdate(data: UpdateProjectPayload) {
+async function handleProjectUpdate(data: CreateProjectPayload | UpdateProjectPayload, isEdit: boolean) {
+  if (!isEdit) return;
+
   const apiClient = getApiClient();
   const toast = getToastService();
 
@@ -152,7 +187,7 @@ async function handleProjectUpdate(data: UpdateProjectPayload) {
   }
 
   try {
-    project.value = await updateProject(apiClient, project.value.id, data);
+    project.value = await updateProject(apiClient, project.value.id, data as UpdateProjectPayload);
     toast?.success(t('toast.projectUpdated'));
     closeEditForm();
   } catch (err) {
