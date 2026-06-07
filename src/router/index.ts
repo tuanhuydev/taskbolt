@@ -3,7 +3,9 @@ import ActiveSprintPage from "@/features/active-sprint/ActiveSprintPage.vue";
 import BacklogsPage from "@/features/backlogs/BacklogsPage.vue";
 import ReportsPage from "@/features/reports/ReportsPage.vue";
 import ConfigurePage from "@/features/configure/ConfigurePage.vue";
-
+import ConfigureHomePage from "@/features/configure/ConfigureHomePage.vue";
+import ConfigureProjectsPage from "@/features/configure/ConfigureProjectsPage.vue";
+import ProjectDetailPage from "@/features/projects/ProjectDetailPage.vue";
 const routes = [
 	{
 		path: "/",
@@ -28,6 +30,23 @@ const routes = [
 		path: "/configure",
 		name: "configure",
 		component: ConfigurePage,
+		children: [
+			{
+				path: "",
+				name: "configure-home",
+				component: ConfigureHomePage,
+			},
+			{
+				path: "projects",
+				name: "project-list",
+				component: ConfigureProjectsPage,
+			},
+			{
+				path: "projects/:projectId",
+				name: "project-detail",
+				component: ProjectDetailPage,
+			}
+		],
 	},
 ];
 

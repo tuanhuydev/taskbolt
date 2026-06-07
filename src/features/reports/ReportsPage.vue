@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h2 class="text-2xl font-semibold mb-6">Reports</h2>
+    <h2 class="text-2xl font-semibold mb-3">Reports</h2>
     <p class="text-muted-foreground">Reports page content</p>
   </div>
 </template>

@@ -1,6 +1,6 @@
 <template>
-  <h2 class="text-2xl font-semibold mb-6">Backlogs</h2>
-  <header class="h-14 bg-background flex items-center justify-between">
+  <h2 class="text-2xl font-semibold mb-3">Backlogs</h2>
+  <header class="h-14 bg-background flex items-center justify-between p-2 mb-3 rounded-md">
     <div class="flex items-center gap-4">
       <Input
         type="text"
@@ -18,7 +18,7 @@
   <p v-if="loading" class="text-muted-foreground">Loading tasks…</p>
   <p v-else-if="error" class="text-destructive">{{ error }}</p>
 
-  <ul v-else class="p-0 list-none overflow-auto max-h-4/5">
+  <ul v-else class="list-none overflow-auto max-h-4/5 p-2 bg-white rounded-md flex-1">
     <TaskGroup
       v-for="task in parentTasks"
       :key="task.id"

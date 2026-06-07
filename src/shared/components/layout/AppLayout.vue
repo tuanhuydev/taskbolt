@@ -2,7 +2,7 @@
   <div class="flex h-screen w-full bg-background">
     <AppSidebar :current-path="currentPath" @navigate="handleNavigate" />
     <main class="flex-1 flex flex-col overflow-hidden">
-      <div class="flex flex-col flex-1 overflow-auto p-3">
+      <div class="flex flex-col flex-1 overflow-auto p-3 bg-accent/50">
         <router-view />
       </div>
     </main>
