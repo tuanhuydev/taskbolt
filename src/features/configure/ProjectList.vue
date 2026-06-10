@@ -40,9 +40,12 @@ import {
   useTaskboltTranslation,
 } from '@/shared/composables/useShellServices';
 import { getProjects } from '@/shared/services';
+import {
+  getProjectStatusClass,
+  getProjectStatusTranslationKey,
+} from '@/shared/lib/helpers';
 import { cn } from '@/shared/lib/utils';
 import type { Project } from '@/shared/types/project';
-import { ProjectStatus } from '@/shared/types/project';
 
 const router = useRouter();
 const { getApiClient } = useShellServices();
@@ -52,29 +55,13 @@ const projects = ref<Project[]>([]);
 const loading = ref(true);
 const error = ref<string | null>(null);
 
-const statusClasses: Record<ProjectStatus, string> = {
-  [ProjectStatus.ACTIVE]: 'bg-green-100 text-green-700',
-  [ProjectStatus.INACTIVE]: 'bg-gray-100 text-gray-600',
-  [ProjectStatus.COMPLETED]: 'bg-blue-100 text-blue-700',
-  [ProjectStatus.ON_HOLD]: 'bg-yellow-100 text-yellow-700',
-};
-
-const fallbackStatusClass = 'bg-gray-100 text-gray-600';
-const projectStatusValues = new Set<string>(Object.values(ProjectStatus));
-
-function normalizeProjectStatus(value: string): ProjectStatus | null {
-  const normalized = value?.trim()?.toUpperCase()?.replace(/[\s-]+/g, '_') ?? ProjectStatus.INACTIVE;
-  return projectStatusValues.has(normalized) ? (normalized as ProjectStatus) : null;
-}
-
 function getStatusClass(value: string): string {
-  const normalized = normalizeProjectStatus(value);
-  return normalized ? statusClasses[normalized] : fallbackStatusClass;
+  return getProjectStatusClass(value);
 }
 
 function getStatusLabel(value: string): string {
-  const normalized = normalizeProjectStatus(value);
-  return normalized ? t(`projectStatus.${normalized}`) : value;
+  const translationKey = getProjectStatusTranslationKey(value);
+  return translationKey ? t(translationKey) : value;
 }
 
 onMounted(async () => {

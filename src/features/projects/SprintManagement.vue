@@ -80,6 +80,7 @@ import {
   updateSprint,
   deleteSprint,
 } from '@/shared/services';
+import { formatDate } from '@/shared/lib/helpers';
 import { cn } from '@/shared/lib/utils';
 import {
   SprintStatus,
@@ -196,7 +197,4 @@ async function confirmDelete(sprint: Sprint) {
   }
 }
 
-function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString();
-}
 </script>

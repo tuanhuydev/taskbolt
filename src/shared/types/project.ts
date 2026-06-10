@@ -1,15 +1,14 @@
 export enum ProjectStatus {
-  ACTIVE = 'ACTIVE',
-  INACTIVE = 'INACTIVE',
-  COMPLETED = 'COMPLETED',
-  ON_HOLD = 'ON_HOLD',
+  GOING = 'going',
+  PLAN = 'plan',
+  CANCELLED = 'cancelled',
+  CLOSED = 'closed',
 }
 
 export enum ProjectType {
-  INTERNAL = 'INTERNAL',
-  EXTERNAL = 'EXTERNAL',
-  RESEARCH = 'RESEARCH',
-  MAINTENANCE = 'MAINTENANCE',
+  OUTSOURCE = 'outsource',
+  PRODUCT = 'product',
+  POC = 'poc',
 }
 
 export interface Project {

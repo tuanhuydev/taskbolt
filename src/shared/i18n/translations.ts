@@ -74,16 +74,15 @@ export const taskboltTranslations = {
       VIEWER: "Viewer",
     },
     projectStatus: {
-      ACTIVE: "Active",
-      INACTIVE: "Inactive",
-      COMPLETED: "Completed",
-      ON_HOLD: "On Hold",
+      going: "Going",
+      plan: "Plan",
+      cancelled: "Cancelled",
+      closed: "Closed",
     },
     projectType: {
-      INTERNAL: "Internal",
-      EXTERNAL: "External",
-      RESEARCH: "Research",
-      MAINTENANCE: "Maintenance",
+      outsource: "Outsource",
+      product: "Product",
+      poc: "POC",
     },
     sprint: {
       title: "Sprints",
@@ -147,7 +146,6 @@ export const taskboltTranslations = {
     taskStatus: {
       TODO: "To Do",
       IN_PROGRESS: "In Progress",
-      IN_REVIEW: "In Review",
       DONE: "Done",
     },
     taskPriority: {
@@ -254,16 +252,15 @@ export const taskboltTranslations = {
       VIEWER: "Người xem",
     },
     projectStatus: {
-      ACTIVE: "Đang hoạt động",
-      INACTIVE: "Không hoạt động",
-      COMPLETED: "Hoàn thành",
-      ON_HOLD: "Tạm dừng",
+      going: "Đang thực hiện",
+      plan: "Lập kế hoạch",
+      cancelled: "Đã hủy",
+      closed: "Đã đóng",
     },
     projectType: {
-      INTERNAL: "Nội bộ",
-      EXTERNAL: "Bên ngoài",
-      RESEARCH: "Nghiên cứu",
-      MAINTENANCE: "Bảo trì",
+      outsource: "Thuê ngoài",
+      product: "Sản phẩm",
+      poc: "POC",
     },
     sprint: {
       title: "Sprint",
@@ -327,7 +324,6 @@ export const taskboltTranslations = {
     taskStatus: {
       TODO: "Cần làm",
       IN_PROGRESS: "Đang thực hiện",
-      IN_REVIEW: "Đang xem xét",
       DONE: "Hoàn thành",
     },
     taskPriority: {

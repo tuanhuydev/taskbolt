@@ -28,3 +28,5 @@ export interface UpdateSprintPayload extends Partial<Omit<CreateSprintPayload, '
   id: string;
   status?: SprintStatus;
 }
+
+export type UpdateSprintRequestPayload = Omit<UpdateSprintPayload, 'id'>;

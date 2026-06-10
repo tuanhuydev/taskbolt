@@ -6,7 +6,7 @@
     :open="props.open"
     @update:open="handleDrawerUpdate"
   >
-    <DrawerContent class="w-full max-w-[95vw] sm:max-w-[560px]">
+    <DrawerContent class="w-full max-w-[95vw] sm:max-w-140">
       <DrawerHeader>
         <DrawerTitle>
           {{ isEditMode ? t('sprint.editTitle') : t('sprint.createTitle') }}

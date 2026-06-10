@@ -19,8 +19,6 @@ function getStatusColor(status: TaskStatus): string {
       return "#78909C";
     case TaskStatus.IN_PROGRESS:
       return "#FFD600";
-    case TaskStatus.IN_REVIEW:
-      return "#FFD600";
     case TaskStatus.DONE:
       return "#00C853";
     default:

@@ -153,8 +153,8 @@ const formData = ref({
   name: '',
   clientName: '',
   description: '',
-  status: ProjectStatus.ACTIVE as ProjectStatus,
-  type: ProjectType.INTERNAL as ProjectType,
+  status: ProjectStatus.PLAN as ProjectStatus,
+  type: ProjectType.PRODUCT as ProjectType,
   startDate: '',
   endDate: '',
 });

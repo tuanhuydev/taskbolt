@@ -87,7 +87,6 @@ describe('sprint.service', () => {
       } as Response);
 
       const result = await updateSprint(mockApiClient, 'sprint-1', {
-        id: 'sprint-1',
         name: 'Sprint 1 Updated',
         status: SprintStatus.ACTIVE,
       });

@@ -106,7 +106,7 @@
     :open="showParentTaskPopup"
     @update:open="closeParentTaskPopup"
   >
-    <DialogContent class="max-w-xl p-0 shrink-1">
+    <DialogContent class="max-w-xl p-0 shrink">
       <DialogHeader class="px-4 py-3 border-b">
         <DialogTitle class="text-sm">Convert to sub-task</DialogTitle>
       </DialogHeader>

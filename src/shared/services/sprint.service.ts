@@ -1,6 +1,10 @@
 import { APP_AUTH_URL } from "@/shared/lib/constants";
 import { ApiClient } from "@/shared/types/shell-services";
-import { Sprint, CreateSprintPayload, UpdateSprintPayload } from "@/shared/types/sprint";
+import {
+  Sprint,
+  CreateSprintPayload,
+  type UpdateSprintRequestPayload,
+} from "@/shared/types/sprint";
 
 interface SprintResponse {
   sprints: Array<Sprint>;
@@ -63,7 +67,7 @@ export const createSprint = async (
 export const updateSprint = async (
   apiClient: ApiClient,
   sprintId: string,
-  data: UpdateSprintPayload,
+  data: UpdateSprintRequestPayload,
 ) => {
   try {
     const response = await apiClient.request(`${APP_AUTH_URL}/sprints/${sprintId}`, {

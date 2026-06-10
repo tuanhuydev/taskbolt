@@ -91,8 +91,14 @@ import {
   useTaskboltTranslation,
 } from '@/shared/composables/useShellServices';
 import { getProjectById, updateProject } from '@/shared/services';
+import {
+  formatDate,
+  getProjectStatusClass,
+  getProjectStatusTranslationKey,
+  getProjectTypeTranslationKey,
+} from '@/shared/lib/helpers';
 import { cn } from '@/shared/lib/utils';
-import { ProjectStatus, ProjectType, type Project, type CreateProjectPayload, type UpdateProjectPayload } from '@/shared/types/project';
+import { type Project, type CreateProjectPayload, type UpdateProjectPayload } from '@/shared/types/project';
 import { Button } from '@/shared/components/ui/button';
 import SprintManagement from './SprintManagement.vue';
 import ProjectMemberManagement from './ProjectMemberManagement.vue';
@@ -108,40 +114,18 @@ const loading = ref(true);
 const error = ref<string | null>(null);
 const showEditForm = ref(false);
 
-const statusClasses: Record<ProjectStatus, string> = {
-  [ProjectStatus.ACTIVE]: 'bg-green-100 text-green-700',
-  [ProjectStatus.INACTIVE]: 'bg-gray-100 text-gray-600',
-  [ProjectStatus.COMPLETED]: 'bg-blue-100 text-blue-700',
-  [ProjectStatus.ON_HOLD]: 'bg-yellow-100 text-yellow-700',
-};
-
-const fallbackStatusClass = 'bg-gray-100 text-gray-600';
-const projectStatusValues = new Set<string>(Object.values(ProjectStatus));
-const projectTypeValues = new Set<string>(Object.values(ProjectType));
-
-function normalizeProjectStatus(value: string): ProjectStatus | null {
-  const normalized = value.trim().toUpperCase().replace(/[\s-]+/g, '_');
-  return projectStatusValues.has(normalized) ? (normalized as ProjectStatus) : null;
-}
-
-function normalizeProjectType(value: string): ProjectType | null {
-  const normalized = value.trim().toUpperCase().replace(/[\s-]+/g, '_');
-  return projectTypeValues.has(normalized) ? (normalized as ProjectType) : null;
-}
-
 function getStatusClass(value: string): string {
-  const normalized = normalizeProjectStatus(value);
-  return normalized ? statusClasses[normalized] : fallbackStatusClass;
+  return getProjectStatusClass(value);
 }
 
 function getStatusLabel(value: string): string {
-  const normalized = normalizeProjectStatus(value);
-  return normalized ? t(`projectStatus.${normalized}`) : value;
+  const translationKey = getProjectStatusTranslationKey(value);
+  return translationKey ? t(translationKey) : value;
 }
 
 function getTypeLabel(value: string): string {
-  const normalized = normalizeProjectType(value);
-  return normalized ? t(`projectType.${normalized}`) : value;
+  const translationKey = getProjectTypeTranslationKey(value);
+  return translationKey ? t(translationKey) : value;
 }
 
 onMounted(async () => {
@@ -197,7 +181,4 @@ async function handleProjectUpdate(data: CreateProjectPayload | UpdateProjectPay
   }
 }
 
-function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString();
-}
 </script>

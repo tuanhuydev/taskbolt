@@ -11,8 +11,8 @@ const mockProject: Project = {
   users: [],
   startDate: '2024-01-01',
   endDate: '2024-12-31',
-  status: ProjectStatus.ACTIVE,
-  type: ProjectType.INTERNAL,
+  status: ProjectStatus.GOING,
+  type: ProjectType.PRODUCT,
   createdById: 'user-1',
   createdAt: '2024-01-01T00:00:00Z',
   updatedAt: '2024-01-01T00:00:00Z',
@@ -52,10 +52,10 @@ describe('project.service', () => {
         json: async () => ({ projects: [], total: 0 }),
       } as Response);
 
-      await getProjects(mockApiClient, { status: 'ACTIVE' });
+      await getProjects(mockApiClient, { status: ProjectStatus.GOING });
 
       expect(mockApiClient.request).toHaveBeenCalledWith(
-        expect.stringContaining('status=ACTIVE'),
+        expect.stringContaining(`status=${ProjectStatus.GOING}`),
         expect.any(Object),
       );
     });
