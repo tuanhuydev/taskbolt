@@ -14,12 +14,18 @@ import AppLayout from "@/shared/components/layout/AppLayout.vue";
 import "@/shared/styles/globals.css";
 import { shellServicesPlugin } from "@/shared/plugins/shell-services";
 import { createAppRouter } from "@/router";
+import { createPinia } from "pinia";
 
 const app = getCurrentInstance()!.appContext.app;
+const pinia = createPinia()
+
 
 if (!app.config.globalProperties.$router) {
   app.use(shellServicesPlugin);
+  app.use(pinia)
   const router = createAppRouter("/dashboard/taskbolt");
   app.use(router as unknown as Plugin);
+
 }
+
 </script>

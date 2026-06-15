@@ -1,5 +1,5 @@
 <template>
-  <aside class="w-50 bg-background flex flex-col">
+  <aside class="w-50 bg-background flex flex-col rounded-lg shadow">
     <!-- Navigation -->
     <nav class="flex-1 px-2 flex flex-col gap-1">
       <!-- Project Selector -->
@@ -33,8 +33,6 @@
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-
-      <!-- Menu Items -->
       <a
         v-for="item in menuItems"
         :key="item.path"
@@ -56,7 +54,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import {
-  ChevronDown,
+  House,
   Zap,
   ListTodo,
   BarChart2,
@@ -127,6 +125,12 @@ onMounted(() => {
 });
 
 const menuItems = [
+  {
+    label: "Home",
+    labelKey: "sidebar.home",
+    path: "/home",
+    icon: House,
+  },
   {
     label: "Active Sprint",
     labelKey: "sidebar.activeSprint",
