@@ -6,10 +6,17 @@ import ConfigurePage from "@/features/configure/ConfigurePage.vue";
 import ConfigureHomePage from "@/features/configure/ConfigureHomePage.vue";
 import ConfigureProjectsPage from "@/features/configure/ConfigureProjectsPage.vue";
 import ProjectDetailPage from "@/features/projects/ProjectDetailPage.vue";
+import HomePage from "@/features/home/HomePage.vue";
+
 const routes = [
 	{
 		path: "/",
-		redirect: "/active-sprint",
+		redirect: "/home",
+	},
+	{
+		path: "/home",
+		name: "home",
+		component: HomePage,
 	},
 	{
 		path: "/active-sprint",

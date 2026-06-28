@@ -7,6 +7,7 @@ export const taskboltTranslations = {
     sidebar: {
       selectProject: "Select project",
       projects: "Projects",
+      home: "Home",
       personalWorkspace: "Personal workspace",
       activeSprint: "Active Sprint",
       backlogs: "Backlogs",
@@ -21,6 +22,7 @@ export const taskboltTranslations = {
       title: "Active Sprint",
       noSprint: "No active sprint",
       empty: "No issues in this sprint",
+      addTask: "Add task",
     },
     backlogs: {
       title: "Backlogs",
@@ -180,12 +182,27 @@ export const taskboltTranslations = {
       apiClientUnavailable: "API client not available",
       genericError: "Something went wrong",
     },
+    widgets: {
+      pomodoro: {
+        title: "Pomodoro Timer",
+        start: "Start",
+        pause: "Pause",
+        reset: "Reset",
+      },
+       greeting: {
+        morning: "Good morning",
+        afternoon: "Good afternoon",
+        evening: "Good evening",
+        description: "A friendly greeting to you my friend",
+      }
+    }
   },
   vi: {
     sidebar: {
       selectProject: "Chọn dự án",
       projects: "Dự án",
       personalWorkspace: "Không gian cá nhân",
+      home: "Trang chủ",
       activeSprint: "Sprint hiện tại",
       backlogs: "Backlogs",
       reports: "Báo cáo",
@@ -199,6 +216,7 @@ export const taskboltTranslations = {
       title: "Sprint hiện tại",
       noSprint: "Không có sprint nào đang hoạt động",
       empty: "Không có issue nào trong sprint này",
+      addTask: "Thêm công việc",
     },
     backlogs: {
       title: "Backlogs",
@@ -358,6 +376,20 @@ export const taskboltTranslations = {
       apiClientUnavailable: "Không thể kết nối dịch vụ",
       genericError: "Đã xảy ra lỗi",
     },
+    widgets: {
+      pomodoro: {
+        title: "Bộ đếm Pomodoro",
+        start: "Bắt đầu",
+        pause: "Tạm dừng",
+        reset: "Đặt lại",
+      },
+      greeting: {
+        morning: "Chào buổi sáng",
+        afternoon: "Chào buổi chiều",
+        evening: "Chào buổi tối",
+        description: "Lời chào thân thiện đến bạn của tôi",
+      }
+    }
   },
 } as const;
 

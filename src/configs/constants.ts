@@ -1,0 +1,1 @@
+export const APP_AUTH_URL = process.env.APP_AUTH_URL || "http://localhost:8888";
