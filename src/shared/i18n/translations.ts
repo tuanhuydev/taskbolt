@@ -22,6 +22,7 @@ export const taskboltTranslations = {
       title: "Active Sprint",
       noSprint: "No active sprint",
       empty: "No issues in this sprint",
+      addTask: "Add task",
     },
     backlogs: {
       title: "Backlogs",
@@ -215,6 +216,7 @@ export const taskboltTranslations = {
       title: "Sprint hiện tại",
       noSprint: "Không có sprint nào đang hoạt động",
       empty: "Không có issue nào trong sprint này",
+      addTask: "Thêm công việc",
     },
     backlogs: {
       title: "Backlogs",
