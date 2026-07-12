@@ -5,7 +5,7 @@ interface ProjectContext {
   setSelectedProjectId: (projectId: string | null) => void;
 }
 
-const ProjectContextKey: InjectionKey<ProjectContext> =
+export const ProjectContextKey: InjectionKey<ProjectContext> =
   Symbol("ProjectContext");
 
 /**

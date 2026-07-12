@@ -1,11 +1,17 @@
 <template>
-  <section>
-    <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <h3 class="text-lg font-medium">{{ t('member.title') }}</h3>
-      <Button size="sm" class="w-full sm:w-auto" @click="openAddForm">
+  <section class="space-y-3">
+    <div class="flex items-center justify-between gap-2">
+      <div class="flex items-baseline gap-2.5">
+        <h3 class="text-[17px] font-extrabold tracking-tight">{{ t('member.title') }}</h3>
+        <span v-if="!loading && !error" class="font-mono text-sm text-muted-foreground">
+          {{ members.length }}
+        </span>
+      </div>
+      <Button size="sm" @click="openAddForm">
         {{ t('member.addMember') }}
       </Button>
     </div>
+    <p class="text-sm text-muted-foreground">{{ t('member.subtitle') }}</p>
 
     <p v-if="loading" class="text-muted-foreground text-sm">
       {{ t('common.loading') }}
@@ -14,22 +20,21 @@
     <p v-else-if="members.length === 0" class="text-muted-foreground text-sm">
       {{ t('member.noMembers') }}
     </p>
-    <ul v-else class="space-y-2">
-      <li
+    <div v-else class="overflow-hidden rounded-2xl border bg-card shadow-sm">
+      <div
         v-for="member in members"
         :key="member.id"
-        class="flex flex-col items-start gap-3 rounded-lg border bg-card p-4 sm:flex-row sm:items-center sm:justify-between"
+        class="mrow flex flex-col items-start gap-3 border-t p-4 transition-colors first:border-t-0 sm:flex-row sm:items-center sm:justify-between"
       >
-        <div class="flex-1 min-w-0">
-          <p class="font-medium truncate">{{ member.userName }}</p>
-          <p class="text-sm text-muted-foreground truncate">{{ member.userEmail }}</p>
+        <div class="flex min-w-0 flex-1 items-center gap-3">
+          <AvatarInitials :name="member.userName" size="sm" />
+          <div class="min-w-0 flex-1">
+            <p class="truncate font-bold">{{ member.userName }}</p>
+            <p class="truncate font-mono text-xs text-muted-foreground">{{ member.userEmail }}</p>
+          </div>
         </div>
         <div class="flex w-full items-center justify-between sm:ml-4 sm:w-auto sm:justify-end sm:gap-2 sm:shrink-0">
-          <span
-            :class="cn('text-xs px-2 py-1 rounded-full font-medium', roleClass(member.role))"
-          >
-            {{ roleLabel(member.role) }}
-          </span>
+          <Badge :variant="roleVariant(member.role)">{{ roleLabel(member.role) }}</Badge>
           <Button
             variant="ghost"
             size="sm"
@@ -47,8 +52,8 @@
             <Trash2 class="w-3.5 h-3.5" />
           </Button>
         </div>
-      </li>
-    </ul>
+      </div>
+    </div>
 
     <MemberForm
       :open="showMemberForm"
@@ -62,7 +67,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { Pencil, Trash2 } from 'lucide-vue-next';
 import {
   useShellServices,
@@ -74,7 +79,6 @@ import {
   updateMemberRole,
   removeProjectMember,
 } from '@/shared/services';
-import { cn } from '@/shared/lib/utils';
 import { roleDisplayName } from '@/shared/lib/role';
 import {
   type ProjectMember,
@@ -82,6 +86,8 @@ import {
   type UpdateMemberRolePayload,
 } from '@/shared/types/member';
 import { Button } from '@/shared/components/ui/button';
+import { Badge, type BadgeVariants } from '@/shared/components/ui/badge';
+import { AvatarInitials } from '@/shared/components/ui/avatar';
 import MemberForm from './MemberForm.vue';
 
 const props = defineProps<{ projectId: string }>();
@@ -95,20 +101,20 @@ const error = ref<string | null>(null);
 const showMemberForm = ref(false);
 const selectedMember = ref<ProjectMember | null>(null);
 
-// Roles are dynamic tenant data now (not a fixed enum), so the pill color
+// Roles are dynamic tenant data now (not a fixed enum), so the badge variant
 // is derived from the role name the same way avatar colors are derived
 // from a person's name — a stable hash, not a lookup table.
-const ROLE_PILL_COLORS = [
-  'bg-purple-100 text-purple-700',
-  'bg-blue-100 text-blue-700',
-  'bg-green-100 text-green-700',
-  'bg-gray-100 text-gray-600',
-  'bg-amber-100 text-amber-700',
+const ROLE_BADGE_VARIANTS: NonNullable<BadgeVariants['variant']>[] = [
+  'purple',
+  'brand',
+  'success',
+  'neutral',
+  'warning',
 ];
 
-function roleClass(role: string): string {
+function roleVariant(role: string): BadgeVariants['variant'] {
   const hash = [...role].reduce((a, c) => a + c.charCodeAt(0), 0);
-  return ROLE_PILL_COLORS[hash % ROLE_PILL_COLORS.length];
+  return ROLE_BADGE_VARIANTS[hash % ROLE_BADGE_VARIANTS.length];
 }
 
 function roleLabel(role: string): string {
@@ -116,6 +122,10 @@ function roleLabel(role: string): string {
 }
 
 onMounted(fetchMembers);
+// projectId can change live (e.g. Configure home reuses this bound to the
+// sidebar's selectedProjectId), unlike ProjectDetailPage where it only ever
+// changed via a route change that remounts the whole page.
+watch(() => props.projectId, fetchMembers);
 
 async function fetchMembers() {
   const apiClient = getApiClient();

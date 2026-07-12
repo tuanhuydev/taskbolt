@@ -33,13 +33,22 @@ export const taskboltTranslations = {
     },
     configure: {
       title: "Configure",
-      homeTitle: "Home Page",
       projectManagement: "Project Management",
       projectManagementDescription:
         "Manage project setup, members, and delivery settings.",
-      sectionOverview: "Choose a configuration area to manage its settings.",
-      openSection: "Open",
       noProjects: "No projects found",
+      selectProjectPrompt: "Select a project from the sidebar to configure it.",
+      comingSoon: "Coming soon",
+      plannedBadge: "Planned",
+      boardsTitle: "Boards & columns",
+      boardsDescription:
+        "Kanban columns, WIP limits, swimlanes and card fields shown on the board.",
+      workflowTitle: "Workflow",
+      workflowDescription:
+        "Statuses, transitions and automation rules that move tasks across the board.",
+      notificationsTitle: "Notifications",
+      notificationsDescription:
+        "Choose which events notify the team — mentions, moves, blockers, due dates.",
     },
     project: {
       title: "Project Details",
@@ -59,7 +68,9 @@ export const taskboltTranslations = {
       backToConfigure: "Back to Configure",
     },
     member: {
-      title: "Members",
+      title: "Members & permissions",
+      subtitle:
+        "Invite people, group them into teams and control who can edit sprints, tasks and reports.",
       addMember: "Add Member",
       noMembers: "No members yet",
       addMemberTitle: "Add Member",
@@ -250,13 +261,22 @@ export const taskboltTranslations = {
     },
     configure: {
       title: "Cấu hình",
-      homeTitle: "Trang chủ",
       projectManagement: "Quản lý dự án",
       projectManagementDescription:
         "Quản lý thiết lập dự án, thành viên và cấu hình triển khai.",
-      sectionOverview: "Chọn một khu vực cấu hình để quản lý cài đặt của nó.",
-      openSection: "Mở",
       noProjects: "Không có dự án nào",
+      selectProjectPrompt: "Chọn một dự án từ thanh bên để cấu hình.",
+      comingSoon: "Sắp ra mắt",
+      plannedBadge: "Dự kiến",
+      boardsTitle: "Bảng & cột",
+      boardsDescription:
+        "Cột Kanban, giới hạn WIP, làn công việc và các trường hiển thị trên bảng.",
+      workflowTitle: "Quy trình",
+      workflowDescription:
+        "Trạng thái, chuyển tiếp và quy tắc tự động di chuyển công việc trên bảng.",
+      notificationsTitle: "Thông báo",
+      notificationsDescription:
+        "Chọn sự kiện nào sẽ thông báo cho nhóm — nhắc đến, di chuyển, vướng mắc, hạn chót.",
     },
     project: {
       title: "Chi tiết dự án",
@@ -276,7 +296,9 @@ export const taskboltTranslations = {
       backToConfigure: "Quay lại Cấu hình",
     },
     member: {
-      title: "Thành viên",
+      title: "Thành viên & phân quyền",
+      subtitle:
+        "Mời mọi người, nhóm họ thành các đội và kiểm soát ai có thể chỉnh sửa sprint, công việc và báo cáo.",
       addMember: "Thêm thành viên",
       noMembers: "Chưa có thành viên",
       addMemberTitle: "Thêm thành viên",

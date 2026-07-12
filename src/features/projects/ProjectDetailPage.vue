@@ -1,3 +1,9 @@
+<!--
+  @deprecated Configure home (ConfigureHomePage.vue) now renders this same
+  info/edit/sprints/members flow inline for the sidebar-selected project, so
+  this route is no longer part of the primary navigation. Still routed
+  (only reachable via the deprecated project-list) — slated for cleanup.
+-->
 <template>
   <div>
     <!-- Header -->

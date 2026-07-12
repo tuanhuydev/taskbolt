@@ -1,3 +1,4 @@
+<!-- @deprecated Only reached via the deprecated ConfigureProjectsPage.vue now. -->
 <template>
   <div class="space-y-2">
     <p v-if="loading" class="text-muted-foreground text-sm">

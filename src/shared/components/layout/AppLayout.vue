@@ -1,6 +1,14 @@
 <template>
-  <div class="flex h-screen w-full bg-background overflow-hidden">
-
+  <!--
+    The React shell mounts this remote below its own fixed MUI AppBar (48px,
+    position: fixed — doesn't push flow but the shell's wrapper still reserves
+    the space). h-screen/100vh here would claim the full viewport and push
+    our own bottom 48px off-screen, unreachable by any scroll container.
+    dvh (not vh) keeps this correct on mobile browsers with resizing chrome.
+  -->
+  <div
+    class="flex h-[calc(100dvh-48px)] w-full bg-background overflow-hidden min-h-0"
+  >
     <!-- Mobile backdrop -->
     <Transition name="fade">
       <div
@@ -17,9 +25,11 @@
       @close="sidebarOpen = false"
     />
 
-    <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+    <div class="flex-1 flex flex-col min-w-0 overflow-auto min-h-0">
       <!-- Mobile top bar -->
-      <header class="flex-none h-12 px-4 flex items-center gap-3 border-b border-border bg-background md:hidden">
+      <header
+        class="flex-none h-12 px-4 flex items-center gap-3 border-b border-border bg-background md:hidden"
+      >
         <button
           class="flex items-center justify-center w-8 h-8 rounded-md text-muted-foreground hover:bg-accent transition-colors"
           @click="sidebarOpen = true"
@@ -29,8 +39,10 @@
         <span class="font-semibold text-sm text-foreground">Taskbolt</span>
       </header>
 
-      <main class="flex-1 flex flex-col overflow-hidden">
-        <div class="flex flex-col flex-1 overflow-auto p-3 bg-accent/50">
+      <main class="flex-1 flex flex-col min-h-0 overflow-hidden">
+        <div
+          class="flex flex-col flex-1 min-h-0 overflow-auto p-3 bg-accent/50"
+        >
           <router-view />
         </div>
       </main>

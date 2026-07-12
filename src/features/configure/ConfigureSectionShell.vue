@@ -1,11 +1,17 @@
 <template>
-  <section class="space-y-4">
-    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+  <section class="space-y-8">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
       <div class="space-y-1">
-        <h2 class="text-2xl font-semibold">{{ t(titleKey) }}</h2>
+        <div
+          v-if="$slots.eyebrow"
+          class="flex items-center gap-2 text-xs font-semibold text-muted-foreground"
+        >
+          <slot name="eyebrow" />
+        </div>
+        <h2 class="text-2xl font-extrabold tracking-tight">{{ t(titleKey) }}</h2>
         <p v-if="descriptionKey" class="text-sm text-muted-foreground">{{ t(descriptionKey) }}</p>
       </div>
-      <div class="w-full sm:w-auto">
+      <div class="shrink-0">
         <slot name="actions" />
       </div>
     </div>

@@ -36,8 +36,10 @@
       <template v-else>
         <div v-if="task" class="flex-1 min-h-0 flex overflow-hidden">
           <!-- Content column -->
-          <div class="flex-1 min-w-0 overflow-auto px-4 py-4 space-y-6">
-            <div v-if="task.description" class="space-y-2">
+          <div
+            class="flex-1 min-w-0 overflow-auto px-4 py-4 space-y-6 flex flex-col"
+          >
+            <div v-if="task.description" class="space-y-2 flex-1">
               <span
                 class="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
               >
@@ -452,10 +454,14 @@ const memberMap = computed(() => {
 });
 
 const assigneeMember = computed(() =>
-  props.task?.assigneeId ? memberMap.value.get(props.task.assigneeId) : undefined,
+  props.task?.assigneeId
+    ? memberMap.value.get(props.task.assigneeId)
+    : undefined,
 );
 const reporterMember = computed(() =>
-  props.task?.createdById ? memberMap.value.get(props.task.createdById) : undefined,
+  props.task?.createdById
+    ? memberMap.value.get(props.task.createdById)
+    : undefined,
 );
 
 const sprintName = computed(() => {
@@ -471,7 +477,10 @@ const newCommentText = ref("");
 const submittingComment = ref(false);
 
 function commentAuthorName(comment: Comment): string {
-  return memberMap.value.get(comment.createdById)?.userName ?? t("taskDetail.unknownUser");
+  return (
+    memberMap.value.get(comment.createdById)?.userName ??
+    t("taskDetail.unknownUser")
+  );
 }
 
 // Resolves the current user against the project member list (via the JWT's
@@ -530,7 +539,10 @@ async function submitComment() {
 
   submittingComment.value = true;
   try {
-    const comment = await createComment(apiClient, { taskId: props.task.id, content });
+    const comment = await createComment(apiClient, {
+      taskId: props.task.id,
+      content,
+    });
     comments.value = [...comments.value, comment];
     newCommentText.value = "";
   } catch (err) {

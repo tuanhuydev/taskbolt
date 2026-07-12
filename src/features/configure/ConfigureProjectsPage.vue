@@ -1,3 +1,11 @@
+<!--
+  @deprecated The Configure home page (ConfigureHomePage.vue) no longer links
+  here as its primary flow — project scoping now happens via the sidebar's
+  project switcher, and member management moved to Configure home directly.
+  Still routed (`project-list` / `project-detail` -> edit) so project
+  creation/editing remains reachable. Slated for cleanup once the product
+  decision on project CRUD's new home lands.
+-->
 <template>
   <section class="space-y-4">
     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
