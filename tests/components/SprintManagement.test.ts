@@ -1,29 +1,33 @@
-import { describe, it, expect, vi } from 'vitest';
-import { mount } from '@vue/test-utils';
-import { createRouter, createMemoryHistory } from 'vue-router';
-import SprintManagement from '@/features/projects/SprintManagement.vue';
-import { mockApiClient, mockToastService, mockShellServices } from '../mocks/shell-services';
-import { SprintStatus, type Sprint } from '@/shared/types/sprint';
-import { SHELL_SERVICES_KEY } from '@/shared/composables/useShellServices';
+import { describe, it, expect, vi } from "vitest";
+import { mount } from "@vue/test-utils";
+import { createRouter, createMemoryHistory } from "vue-router";
+import SprintManagement from "@/features/projects/SprintManagement.vue";
+import {
+  mockApiClient,
+  mockToastService,
+  mockShellServices,
+} from "../mocks/shell-services";
+import { SprintStatus, type Sprint } from "@/shared/types/sprint";
+import { SHELL_SERVICES_KEY } from "@/shared/composables/useShellServices";
 
 const router = createRouter({
   history: createMemoryHistory(),
-  routes: [{ path: '/', component: { template: '<div />' } }],
+  routes: [{ path: "/", component: { template: "<div />" } }],
 });
 
 const mockSprint: Sprint = {
-  id: 'sprint-1',
-  name: 'Sprint 1',
-  projectId: 'proj-1',
-  status: SprintStatus.PLANNING,
-  startDate: '2024-01-01',
-  endDate: '2024-01-14',
-  goal: 'Deliver MVP',
-  createdAt: '2024-01-01T00:00:00Z',
-  updatedAt: '2024-01-01T00:00:00Z',
+  id: "sprint-1",
+  name: "Sprint 1",
+  projectId: "proj-1",
+  status: SprintStatus.PLANNED,
+  startDate: "2024-01-01",
+  endDate: "2024-01-14",
+  goal: "Deliver MVP",
+  createdAt: "2024-01-01T00:00:00Z",
+  updatedAt: "2024-01-01T00:00:00Z",
 };
 
-function mountComponent(projectId = 'proj-1') {
+function mountComponent(projectId = "proj-1") {
   return mount(SprintManagement, {
     props: { projectId },
     global: {
@@ -31,21 +35,21 @@ function mountComponent(projectId = 'proj-1') {
       provide: { [SHELL_SERVICES_KEY as symbol]: mockShellServices },
       stubs: {
         SprintForm: true,
-        Drawer: { template: '<div><slot /></div>' },
-        DrawerContent: { template: '<div><slot /></div>' },
+        Drawer: { template: "<div><slot /></div>" },
+        DrawerContent: { template: "<div><slot /></div>" },
       },
     },
   });
 }
 
-describe('SprintManagement', () => {
-  it('shows loading state initially', () => {
+describe("SprintManagement", () => {
+  it("shows loading state initially", () => {
     vi.mocked(mockApiClient.request).mockReturnValue(new Promise(() => {}));
     const wrapper = mountComponent();
-    expect(wrapper.text()).toContain('common.loading');
+    expect(wrapper.text()).toContain("common.loading");
   });
 
-  it('renders sprints after loading', async () => {
+  it("renders sprints after loading", async () => {
     vi.mocked(mockApiClient.request).mockResolvedValueOnce({
       ok: true,
       json: async () => ({ sprints: [mockSprint], total: 1 }),
@@ -55,11 +59,11 @@ describe('SprintManagement', () => {
     await new Promise((r) => setTimeout(r, 0));
     await wrapper.vm.$nextTick();
 
-    expect(wrapper.text()).toContain('Sprint 1');
-    expect(wrapper.text()).toContain('Deliver MVP');
+    expect(wrapper.text()).toContain("Sprint 1");
+    expect(wrapper.text()).toContain("Deliver MVP");
   });
 
-  it('shows empty message when no sprints', async () => {
+  it("shows empty message when no sprints", async () => {
     vi.mocked(mockApiClient.request).mockResolvedValueOnce({
       ok: true,
       json: async () => ({ sprints: [], total: 0 }),
@@ -69,10 +73,10 @@ describe('SprintManagement', () => {
     await new Promise((r) => setTimeout(r, 0));
     await wrapper.vm.$nextTick();
 
-    expect(wrapper.text()).toContain('sprint.noSprints');
+    expect(wrapper.text()).toContain("sprint.noSprints");
   });
 
-  it('shows the Add Sprint button', async () => {
+  it("shows the Add Sprint button", async () => {
     vi.mocked(mockApiClient.request).mockResolvedValueOnce({
       ok: true,
       json: async () => ({ sprints: [], total: 0 }),
@@ -82,18 +86,18 @@ describe('SprintManagement', () => {
     await new Promise((r) => setTimeout(r, 0));
     await wrapper.vm.$nextTick();
 
-    expect(wrapper.text()).toContain('sprint.addSprint');
+    expect(wrapper.text()).toContain("sprint.addSprint");
   });
 
-  it('shows error on API failure', async () => {
+  it("shows error on API failure", async () => {
     vi.mocked(mockApiClient.request).mockRejectedValueOnce(
-      new Error('Sprint fetch error'),
+      new Error("Sprint fetch error"),
     );
 
     const wrapper = mountComponent();
     await new Promise((r) => setTimeout(r, 0));
     await wrapper.vm.$nextTick();
 
-    expect(wrapper.text()).toContain('Sprint fetch error');
+    expect(wrapper.text()).toContain("Sprint fetch error");
   });
 });

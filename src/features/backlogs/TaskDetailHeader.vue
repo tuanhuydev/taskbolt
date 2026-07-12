@@ -19,6 +19,10 @@
               </TooltipContent>
             </Tooltip>
 
+            <Badge v-if="task" :variant="taskTypeVariant(task.type)" class="shrink-0">
+              {{ t(`taskType.${task.type}`) }}
+            </Badge>
+
             <Tooltip :open="copiedOpen" :disable-hoverable-content="true">
               <TooltipTrigger as-child>
                 <span
@@ -110,6 +114,8 @@ import { Button } from "@/shared/components/ui/button";
 import type { Task } from "@/shared/types/task";
 import { useTaskboltTranslation } from "@/shared/composables/useShellServices";
 import TaskTypeIcon from "@/shared/components/ui/task-item/TaskTypeIcon.vue";
+import { Badge } from "@/shared/components/ui/badge";
+import { taskTypeVariant } from "@/shared/lib/task-display";
 import {
   Pencil,
   X,

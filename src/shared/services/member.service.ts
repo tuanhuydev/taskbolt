@@ -1,39 +1,50 @@
-import { APP_AUTH_URL } from "@/shared/lib/constants";
 import { ApiClient } from "@/shared/types/shell-services";
-import {
-  ProjectMember,
-  AddProjectMemberPayload,
-  UpdateMemberRolePayload,
-} from "@/shared/types/member";
+import { ProjectMember, AddProjectMemberPayload, UpdateMemberRolePayload } from "@/shared/types/member";
+import { GrantResourceType } from "@/shared/types/resource-grant";
+import { AccountStatus } from "@/shared/types/user";
+import { getResourceGrants, createResourceGrant, updateResourceGrant, deleteResourceGrant } from "./resource-grant.service";
+import { getRoles } from "./role.service";
+import { getUsers } from "./user.service";
 
-interface MemberResponse {
-  members: Array<ProjectMember>;
-  total: number;
-}
-
+/**
+ * "Project members" aren't a first-class backend resource — access is
+ * modeled as a ResourceGrant (userId + roleId) scoped to the project. This
+ * joins grants + roles + users client-side into the ProjectMember shape the
+ * rest of the app (TaskDetail assignee/reporter, TaskFormFields assignee
+ * select, ProjectMemberManagement) already consumes.
+ */
 export const getProjectMembers = async (
   apiClient: ApiClient,
   projectId: string,
-  filter: Record<string, unknown> = {},
-) => {
-  const queryParams = new URLSearchParams(filter as Record<string, string>).toString();
+): Promise<ProjectMember[]> => {
   try {
-    const response = await apiClient.request(
-      `${APP_AUTH_URL}/projects/${projectId}/members${queryParams ? `?${queryParams}` : ''}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      },
-    );
+    const [grants, roles, users] = await Promise.all([
+      getResourceGrants(apiClient, {
+        resourceType: GrantResourceType.PROJECT,
+        resourceId: projectId,
+      }),
+      getRoles(apiClient),
+      getUsers(apiClient, { status: AccountStatus.ACTIVE, limit: 1000 }),
+    ]);
 
-    if (!response.ok) {
-      throw new Error(`Failed to fetch project members (${response.status})`);
-    }
+    const roleMap = new Map(roles.map((role) => [role.id, role]));
+    const userMap = new Map(users.map((user) => [user.id, user]));
 
-    const { members }: MemberResponse = await response.json();
-    return members;
+    return grants.reduce<ProjectMember[]>((members, grant) => {
+      const user = userMap.get(grant.userId);
+      if (!user) return members;
+
+      members.push({
+        id: grant.id,
+        userId: grant.userId,
+        userName: user.name,
+        userEmail: user.email,
+        projectId,
+        role: roleMap.get(grant.roleId)?.name ?? grant.roleId,
+        addedAt: grant.createdAt,
+      });
+      return members;
+    }, []);
   } catch (error) {
     console.error("Error fetching project members:", error);
     throw error;
@@ -45,80 +56,28 @@ export const addProjectMember = async (
   projectId: string,
   data: AddProjectMemberPayload,
 ) => {
-  try {
-    const response = await apiClient.request(`${APP_AUTH_URL}/projects/${projectId}/members`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to add project member (${response.status})`);
-    }
-
-    const member: ProjectMember = await response.json();
-    return member;
-  } catch (error) {
-    console.error("Error adding project member:", error);
-    throw error;
-  }
+  return createResourceGrant(apiClient, {
+    userId: data.userId,
+    resourceType: GrantResourceType.PROJECT,
+    resourceId: projectId,
+    roleId: data.roleId,
+  });
 };
 
 export const updateMemberRole = async (
   apiClient: ApiClient,
-  projectId: string,
+  _projectId: string,
   memberId: string,
   data: UpdateMemberRolePayload,
 ) => {
-  try {
-    const response = await apiClient.request(
-      `${APP_AUTH_URL}/projects/${projectId}/members/${memberId}`,
-      {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      },
-    );
-
-    if (!response.ok) {
-      throw new Error(`Failed to update member role (${response.status})`);
-    }
-
-    const member: ProjectMember = await response.json();
-    return member;
-  } catch (error) {
-    console.error("Error updating member role:", error);
-    throw error;
-  }
+  return updateResourceGrant(apiClient, memberId, { roleId: data.roleId });
 };
 
 export const removeProjectMember = async (
   apiClient: ApiClient,
-  projectId: string,
+  _projectId: string,
   memberId: string,
 ) => {
-  try {
-    const response = await apiClient.request(
-      `${APP_AUTH_URL}/projects/${projectId}/members/${memberId}`,
-      {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      },
-    );
-
-    if (!response.ok) {
-      throw new Error(`Failed to remove project member (${response.status})`);
-    }
-
-    return true;
-  } catch (error) {
-    console.error("Error removing project member:", error);
-    throw error;
-  }
+  await deleteResourceGrant(apiClient, memberId);
+  return true;
 };

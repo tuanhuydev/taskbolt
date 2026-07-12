@@ -1,7 +1,7 @@
 export enum SprintStatus {
-  PLANNING = 'PLANNING',
-  ACTIVE = 'ACTIVE',
-  COMPLETED = 'COMPLETED',
+  PLANNED = "planned",
+  ACTIVE = "active",
+  COMPLETED = "completed",
 }
 
 export interface Sprint {
@@ -24,9 +24,11 @@ export interface CreateSprintPayload {
   goal?: string | null;
 }
 
-export interface UpdateSprintPayload extends Partial<Omit<CreateSprintPayload, 'projectId'>> {
+export interface UpdateSprintPayload extends Partial<
+  Omit<CreateSprintPayload, "projectId">
+> {
   id: string;
   status?: SprintStatus;
 }
 
-export type UpdateSprintRequestPayload = Omit<UpdateSprintPayload, 'id'>;
+export type UpdateSprintRequestPayload = Omit<UpdateSprintPayload, "id">;

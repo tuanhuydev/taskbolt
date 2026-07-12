@@ -26,9 +26,9 @@
         </div>
         <div class="flex w-full items-center justify-between sm:ml-4 sm:w-auto sm:justify-end sm:gap-2 sm:shrink-0">
           <span
-            :class="cn('text-xs px-2 py-1 rounded-full font-medium', roleClasses[member.role])"
+            :class="cn('text-xs px-2 py-1 rounded-full font-medium', roleClass(member.role))"
           >
-            {{ t(`memberRole.${member.role}`) }}
+            {{ roleLabel(member.role) }}
           </span>
           <Button
             variant="ghost"
@@ -54,6 +54,7 @@
       :open="showMemberForm"
       :project-id="projectId"
       :initial-data="selectedMember"
+      :existing-member-user-ids="members.map((m) => m.userId)"
       @submit="handleMemberSubmit"
       @close="closeMemberForm"
     />
@@ -74,8 +75,8 @@ import {
   removeProjectMember,
 } from '@/shared/services';
 import { cn } from '@/shared/lib/utils';
+import { roleDisplayName } from '@/shared/lib/role';
 import {
-  MemberRole,
   type ProjectMember,
   type AddProjectMemberPayload,
   type UpdateMemberRolePayload,
@@ -94,12 +95,25 @@ const error = ref<string | null>(null);
 const showMemberForm = ref(false);
 const selectedMember = ref<ProjectMember | null>(null);
 
-const roleClasses: Record<MemberRole, string> = {
-  [MemberRole.OWNER]: 'bg-purple-100 text-purple-700',
-  [MemberRole.ADMIN]: 'bg-blue-100 text-blue-700',
-  [MemberRole.MEMBER]: 'bg-green-100 text-green-700',
-  [MemberRole.VIEWER]: 'bg-gray-100 text-gray-600',
-};
+// Roles are dynamic tenant data now (not a fixed enum), so the pill color
+// is derived from the role name the same way avatar colors are derived
+// from a person's name — a stable hash, not a lookup table.
+const ROLE_PILL_COLORS = [
+  'bg-purple-100 text-purple-700',
+  'bg-blue-100 text-blue-700',
+  'bg-green-100 text-green-700',
+  'bg-gray-100 text-gray-600',
+  'bg-amber-100 text-amber-700',
+];
+
+function roleClass(role: string): string {
+  const hash = [...role].reduce((a, c) => a + c.charCodeAt(0), 0);
+  return ROLE_PILL_COLORS[hash % ROLE_PILL_COLORS.length];
+}
+
+function roleLabel(role: string): string {
+  return roleDisplayName(t, role);
+}
 
 onMounted(fetchMembers);
 

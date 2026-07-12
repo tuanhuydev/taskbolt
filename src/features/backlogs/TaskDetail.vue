@@ -10,7 +10,7 @@
       }
     "
   >
-    <DrawerContent class="w-150">
+    <DrawerContent class="w-[720px]! max-w-[92vw]!">
       <TaskDetailHeader
         :task="task"
         :is-editing="isEditing"
@@ -25,6 +25,8 @@
       <template v-if="isEditing && task">
         <TaskFormFields
           :initial-data="task"
+          :members="props.members"
+          :sprints="props.sprints"
           @submit="handleFormSubmit"
           @cancel="cancelEditing"
         />
@@ -32,53 +34,236 @@
 
       <!-- Show task details when not editing -->
       <template v-else>
-        <div v-if="task" class="flex-1 overflow-auto">
-          <div class="space-y-6 px-3">
-            <div class="grid grid-cols-1 gap-2 text-muted-foreground">
-              <div class="flex items-center">
-                <span class="font-medium text-xs w-28"
-                  >{{ t("taskForm.statusLabel") }}:</span
-                >
-                <span class="flex items-center gap-1 ml-1 text-sm">
-                  <TaskItemStatus :status="task.status" />
-                  {{ t(`taskStatus.${task.status}`) }}
-                </span>
-              </div>
-              <div class="flex items-center">
-                <span class="font-medium text-xs w-28"
-                  >{{ t("taskForm.priorityLabel") }}:</span
-                >
-                <span class="flex items-center gap-1 ml-1 text-sm">
-                  <TaskItemPriority :priority="taskPriority" />
-                  {{ t(`taskPriority.${taskPriority}`) }}
-                </span>
-              </div>
-              <div v-if="task.type !== TaskType.EPIC" class="flex items-center">
-                <span class="font-medium text-xs w-28"
-                  >{{ t("taskForm.storyPointLabel") }}:</span
-                >
+        <div v-if="task" class="flex-1 min-h-0 flex overflow-hidden">
+          <!-- Content column -->
+          <div class="flex-1 min-w-0 overflow-auto px-4 py-4 space-y-6">
+            <div v-if="task.description" class="space-y-2">
+              <span
+                class="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+              >
+                {{ t("taskForm.descriptionLabel") }}
+              </span>
+              <div
+                class="prose prose-sm max-w-none text-foreground bg-muted/20 rounded-lg py-3 text-sm"
+                v-html="renderMarkdown(task.description)"
+              ></div>
+            </div>
+
+            <div class="space-y-2">
+              <div class="flex items-center gap-2">
                 <span
-                  class="ml-1 text-xs font-medium border bg-gray-100 border-gray-600 rounded-md p-1"
-                  >{{ task.storyPoint ?? "—" }}</span
+                  class="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
                 >
+                  {{ t("taskDetail.subtasksLabel") }}
+                </span>
+                <span
+                  v-if="subtasks.length"
+                  class="text-xs font-mono text-muted-foreground"
+                >
+                  {{ subtasksProgressLabel }}
+                </span>
               </div>
-              <div class="flex items-center">
-                <span class="font-medium text-xs w-28"
-                  >{{ t("taskForm.createdLabel") }}:</span
+              <Progress
+                v-if="subtasks.length"
+                :model-value="doneCount"
+                :max="subtasks.length"
+              />
+              <div
+                v-if="subtasks.length"
+                class="flex flex-col border rounded-md overflow-hidden divide-y"
+              >
+                <div
+                  v-for="sub in subtasks"
+                  :key="sub.id"
+                  class="flex items-center gap-3 px-3 py-2.5 hover:bg-muted/40"
                 >
-                <span class="ml-1 text-xs">{{
-                  formatDate(task.createdAt)
+                  <Checkbox
+                    :model-value="sub.status === TaskStatus.DONE"
+                    @update:model-value="() => toggleSubtask(sub)"
+                  />
+                  <span
+                    class="flex-1 text-sm font-medium"
+                    :class="
+                      sub.status === TaskStatus.DONE
+                        ? 'line-through text-muted-foreground'
+                        : 'text-foreground'
+                    "
+                  >
+                    {{ sub.title }}
+                  </span>
+                  <span class="text-xs font-mono text-muted-foreground">{{
+                    formatId(sub.id)
+                  }}</span>
+                </div>
+              </div>
+              <p v-else class="text-sm text-muted-foreground">
+                {{ t("taskDetail.noSubtasks") }}
+              </p>
+            </div>
+
+            <div class="space-y-2">
+              <div class="flex items-center gap-2">
+                <span
+                  class="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+                >
+                  {{ t("taskDetail.commentsLabel") }}
+                </span>
+                <span
+                  v-if="comments.length"
+                  class="text-xs font-mono text-muted-foreground"
+                >
+                  {{ comments.length }}
+                </span>
+              </div>
+
+              <p v-if="commentsLoading" class="text-sm text-muted-foreground">
+                {{ t("common.loading") }}
+              </p>
+              <template v-else>
+                <div
+                  v-if="comments.length"
+                  class="max-h-60 overflow-y-auto space-y-3 pr-1"
+                >
+                  <div
+                    v-for="comment in comments"
+                    :key="comment.id"
+                    class="flex items-start gap-3"
+                  >
+                    <AvatarInitials
+                      :name="commentAuthorName(comment)"
+                      :color-key="comment.createdById"
+                      size="sm"
+                      class="mt-0.5"
+                    />
+                    <div class="flex-1 min-w-0 space-y-1">
+                      <div class="flex items-baseline gap-2">
+                        <span class="text-sm font-semibold text-foreground">{{
+                          commentAuthorName(comment)
+                        }}</span>
+                        <span class="text-xs font-mono text-muted-foreground">{{
+                          formatDate(comment.createdAt)
+                        }}</span>
+                      </div>
+                      <div
+                        class="bg-muted/40 border rounded-md px-3 py-2 text-sm text-foreground whitespace-pre-wrap wrap-break-word"
+                      >
+                        {{ comment.content }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <p v-else class="text-sm text-muted-foreground">
+                  {{ t("taskDetail.noComments") }}
+                </p>
+              </template>
+
+              <div class="flex items-center gap-3 pt-1">
+                <AvatarInitials
+                  v-if="selfMember"
+                  :name="selfMember.userName"
+                  :color-key="selfMember.userId"
+                  size="sm"
+                />
+                <Input
+                  v-model="newCommentText"
+                  :placeholder="t('taskDetail.commentPlaceholder')"
+                  :disabled="submittingComment"
+                  class="flex-1"
+                  @keydown.enter="submitComment"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Properties rail -->
+          <div
+            class="w-58 flex-none border-l bg-muted/30 overflow-auto px-4 py-4 space-y-5"
+          >
+            <span
+              class="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+            >
+              {{ t("taskDetail.detailsLabel") }}
+            </span>
+
+            <div class="space-y-1">
+              <span class="block text-xs font-medium text-muted-foreground">{{
+                t("taskForm.statusLabel")
+              }}</span>
+              <span class="flex items-center gap-1.5 text-sm">
+                <TaskItemStatus :status="task.status" />
+                {{ t(`taskStatus.${task.status}`) }}
+              </span>
+            </div>
+
+            <div class="space-y-1">
+              <span class="block text-xs font-medium text-muted-foreground">{{
+                t("taskForm.priorityLabel")
+              }}</span>
+              <span class="flex items-center gap-1.5 text-sm">
+                <TaskItemPriority :priority="taskPriority" />
+                {{ t(`taskPriority.${taskPriority}`) }}
+              </span>
+            </div>
+
+            <div v-if="task.type !== TaskType.EPIC" class="space-y-1">
+              <span class="block text-xs font-medium text-muted-foreground">{{
+                t("taskForm.storyPointLabel")
+              }}</span>
+              <span
+                class="inline-flex text-xs font-medium border bg-gray-100 border-gray-300 rounded-md px-2 py-1"
+                >{{ task.storyPoint ?? "—" }}</span
+              >
+            </div>
+
+            <div class="space-y-1">
+              <span class="block text-xs font-medium text-muted-foreground">{{
+                t("taskDetail.assigneeLabel")
+              }}</span>
+              <div v-if="assigneeMember" class="flex items-center gap-2">
+                <AvatarInitials :name="assigneeMember.userName" size="sm" />
+                <span class="text-sm font-medium">{{
+                  assigneeMember.userName
                 }}</span>
               </div>
-              <div v-if="task.description">
-                <span class="font-medium text-xs w-28">
-                  {{ t("taskForm.descriptionLabel") }}:</span
-                >
-                <div
-                  class="prose prose-sm max-w-none text-foreground bg-muted/20 rounded-lg py-3 text-sm"
-                  v-html="renderMarkdown(task.description)"
-                ></div>
+              <span v-else class="text-sm text-muted-foreground">{{
+                t("taskDetail.unassigned")
+              }}</span>
+            </div>
+
+            <div class="space-y-1">
+              <span class="block text-xs font-medium text-muted-foreground">{{
+                t("taskDetail.reporterLabel")
+              }}</span>
+              <div v-if="reporterMember" class="flex items-center gap-2">
+                <AvatarInitials :name="reporterMember.userName" size="sm" />
+                <span class="text-sm font-medium">{{
+                  reporterMember.userName
+                }}</span>
               </div>
+              <span v-else class="text-sm text-muted-foreground">—</span>
+            </div>
+
+            <div class="h-px bg-border"></div>
+
+            <div class="space-y-1">
+              <span class="block text-xs font-medium text-muted-foreground">{{
+                t("taskDetail.sprintLabel")
+              }}</span>
+              <span class="text-sm font-medium">{{ sprintName }}</span>
+            </div>
+
+            <div class="space-y-1">
+              <span class="block text-xs font-medium text-muted-foreground">{{
+                t("taskForm.createdLabel")
+              }}</span>
+              <span class="text-xs">{{ formatDate(task.createdAt) }}</span>
+            </div>
+
+            <div class="space-y-1">
+              <span class="block text-xs font-medium text-muted-foreground">{{
+                t("taskDetail.updatedLabel")
+              }}</span>
+              <span class="text-xs">{{ formatDate(task.updatedAt) }}</span>
             </div>
           </div>
         </div>
@@ -94,6 +279,8 @@
       </DialogHeader>
       <TaskFormFields
         :initial-data="subTaskInitialData"
+        :members="props.members"
+        :sprints="props.sprints"
         @submit="handleCreateSubTaskSubmit"
         @cancel="closeCreateSubTaskModal"
       />
@@ -144,7 +331,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import { Drawer, DrawerContent } from "@/shared/components/ui/drawer";
 import {
   Dialog,
@@ -155,22 +342,43 @@ import {
 import {
   Task,
   TaskType,
+  TaskStatus,
   TaskPriority,
   type CreateTaskPayload,
   type UpdateTaskPayload,
 } from "@/shared/types/task";
-import { useTaskboltTranslation } from "@/shared/composables/useShellServices";
+import type { ProjectMember } from "@/shared/types/member";
+import type { Sprint } from "@/shared/types/sprint";
+import type { Comment } from "@/shared/types/comment";
+import {
+  useShellServices,
+  useTaskboltTranslation,
+} from "@/shared/composables/useShellServices";
+import { formatDate } from "@/shared/lib/date";
+import { decodeJwtPayload } from "@/shared/lib/jwt";
+import { getComments, createComment } from "@/shared/services";
 import TaskFormFields from "./TaskFormFields.vue";
 import TaskDetailHeader from "./TaskDetailHeader.vue";
 import TaskItemPriority from "@/shared/components/ui/task-item/TaskItemPriority.vue";
 import TaskItemStatus from "@/shared/components/ui/task-item/TaskItemStatus.vue";
 import { Input } from "@/shared/components/ui/input";
+import { Progress } from "@/shared/components/ui/progress";
+import { Checkbox } from "@/shared/components/ui/checkbox";
+import { AvatarInitials } from "@/shared/components/ui/avatar";
 
-const props = defineProps<{
-  open: boolean;
-  task: Task | null;
-  tasks: Task[];
-}>();
+const props = withDefaults(
+  defineProps<{
+    open: boolean;
+    task: Task | null;
+    tasks: Task[];
+    members?: ProjectMember[];
+    sprints?: Sprint[];
+  }>(),
+  {
+    members: () => [],
+    sprints: () => [],
+  },
+);
 const emits = defineEmits<{
   (e: "close"): void;
   (e: "update", data: UpdateTaskPayload): void;
@@ -180,6 +388,7 @@ const emits = defineEmits<{
 const isSubTask = computed(() => !!props.task?.parentId);
 
 const { t } = useTaskboltTranslation();
+const { getApiClient, getToastService } = useShellServices();
 const isEditing = ref<boolean>(false);
 const showParentTaskPopup = ref(false);
 const parentTaskQuery = ref("");
@@ -215,6 +424,122 @@ function handleCreateSubTaskSubmit(
 const taskPriority = computed(() => {
   return props.task?.priority || TaskPriority.LOW;
 });
+
+// Subtasks: direct children of the current task, derived from the flat task list
+const subtasks = computed(() =>
+  props.tasks.filter((candidate) => candidate.parentId === props.task?.id),
+);
+const doneCount = computed(
+  () => subtasks.value.filter((sub) => sub.status === TaskStatus.DONE).length,
+);
+const subtasksProgressLabel = computed(() =>
+  t("taskDetail.subtasksProgress")
+    .replace("{{done}}", String(doneCount.value))
+    .replace("{{total}}", String(subtasks.value.length)),
+);
+
+function toggleSubtask(subtask: Task) {
+  const nextStatus =
+    subtask.status === TaskStatus.DONE ? TaskStatus.TODO : TaskStatus.DONE;
+  emits("update", { id: subtask.id, status: nextStatus });
+}
+
+// Assignee / reporter resolution against the project member list
+const memberMap = computed(() => {
+  const map = new Map<string, ProjectMember>();
+  props.members.forEach((member) => map.set(member.userId, member));
+  return map;
+});
+
+const assigneeMember = computed(() =>
+  props.task?.assigneeId ? memberMap.value.get(props.task.assigneeId) : undefined,
+);
+const reporterMember = computed(() =>
+  props.task?.createdById ? memberMap.value.get(props.task.createdById) : undefined,
+);
+
+const sprintName = computed(() => {
+  const sprint = props.sprints.find((s) => s.id === props.task?.sprintId);
+  return sprint?.name ?? t("taskDetail.noSprint");
+});
+
+// Comments — fetched per-task on demand (not prop-drilled) since they're a
+// sub-resource of "viewing this specific task", not page-level list data.
+const comments = ref<Comment[]>([]);
+const commentsLoading = ref(false);
+const newCommentText = ref("");
+const submittingComment = ref(false);
+
+function commentAuthorName(comment: Comment): string {
+  return memberMap.value.get(comment.createdById)?.userName ?? t("taskDetail.unknownUser");
+}
+
+// Resolves the current user against the project member list (via the JWT's
+// `sub` claim) purely to show their avatar next to the compose box — no
+// dedicated "current user" endpoint call needed for that.
+const selfMember = computed(() => {
+  const apiClient = getApiClient();
+  const token = apiClient?.getAccessToken();
+  if (!token) return undefined;
+
+  const decoded = decodeJwtPayload(token);
+  return decoded?.sub ? memberMap.value.get(decoded.sub) : undefined;
+});
+
+async function fetchComments(taskId: string) {
+  const apiClient = getApiClient();
+  if (!apiClient) return;
+
+  commentsLoading.value = true;
+  try {
+    comments.value = await getComments(apiClient, {
+      taskId,
+      sortBy: "createdAt",
+      sortOrder: "asc",
+    });
+  } catch (err) {
+    console.error("Error fetching comments:", err);
+    getToastService()?.error(t("toast.commentsLoadFailed"));
+  } finally {
+    commentsLoading.value = false;
+  }
+}
+
+watch(
+  () => props.task?.id,
+  (taskId) => {
+    newCommentText.value = "";
+    if (taskId) {
+      fetchComments(taskId);
+    } else {
+      comments.value = [];
+    }
+  },
+  { immediate: true },
+);
+
+async function submitComment() {
+  const content = newCommentText.value.trim();
+  if (!content || !props.task) return;
+
+  const apiClient = getApiClient();
+  if (!apiClient) {
+    getToastService()?.error(t("toast.apiClientUnavailable"));
+    return;
+  }
+
+  submittingComment.value = true;
+  try {
+    const comment = await createComment(apiClient, { taskId: props.task.id, content });
+    comments.value = [...comments.value, comment];
+    newCommentText.value = "";
+  } catch (err) {
+    console.error("Error creating comment:", err);
+    getToastService()?.error(t("toast.commentAddFailed"));
+  } finally {
+    submittingComment.value = false;
+  }
+}
 
 const descendantTaskIds = computed(() => {
   const currentTaskId = props.task?.id;
@@ -309,33 +634,6 @@ function renderMarkdown(markdown: string): string {
     .replace(/\n/gim, "<br>");
 
   return `<p>${html}</p>`;
-}
-
-// Date formatter
-function formatDate(dateString: string): string {
-  if (!dateString) return "—";
-
-  try {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
-
-    if (diffMins < 1) return "Just now";
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    if (diffDays < 7) return `${diffDays}d ago`;
-
-    return date.toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  } catch {
-    return dateString;
-  }
 }
 
 const formatId = (taskId: string) => {

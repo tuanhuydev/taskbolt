@@ -87,17 +87,53 @@
           </div>
 
           <!-- Story Points Field (hidden for EPIC) -->
-          <div v-if="showStoryPoint">
+          <div v-if="showStoryPoint" class="col-span-2">
             <label class="text-sm font-medium block mb-1.5">
               {{ t("taskForm.storyPointLabel") }}
             </label>
-            <Input
-              v-model.number="formData.storyPoint"
-              type="number"
-              :placeholder="t('taskForm.storyPointPlaceholder')"
-              min="0"
-              step="1"
-            />
+            <StoryPointPicker v-model="formData.storyPoint" />
+          </div>
+
+          <!-- Assignee Field -->
+          <div>
+            <label class="text-sm font-medium block mb-1.5">
+              {{ t("taskForm.assigneeLabel") }}
+            </label>
+            <Select v-model="formData.assigneeId">
+              <SelectTrigger>
+                <SelectValue :placeholder="t('taskForm.assigneeLabel')" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem
+                  v-for="member in props.members"
+                  :key="member.userId"
+                  :value="member.userId"
+                >
+                  {{ member.userName }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <!-- Sprint Field -->
+          <div>
+            <label class="text-sm font-medium block mb-1.5">
+              {{ t("taskForm.sprintLabel") }}
+            </label>
+            <Select v-model="formData.sprintId">
+              <SelectTrigger>
+                <SelectValue :placeholder="t('taskForm.sprintLabel')" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem
+                  v-for="sprint in props.sprints"
+                  :key="sprint.id"
+                  :value="sprint.id"
+                >
+                  {{ sprint.name }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
@@ -115,7 +151,14 @@
     </div>
   </div>
 
-  <div class="flex flex-row gap-2 p-4 border-t">
+  <div class="flex flex-row items-center gap-2 p-4 border-t">
+    <span
+      v-if="isEditMode && props.initialData?.updatedAt"
+      class="flex-1 text-xs text-muted-foreground"
+    >
+      {{ t("taskDetail.lastEditedPrefix") }} {{ formatDate(props.initialData.updatedAt) }}
+    </span>
+    <div v-else class="flex-1"></div>
     <Button variant="outline" type="button" @click="emit('cancel')">
       {{ t("taskForm.cancelButton") }}
     </Button>
@@ -137,6 +180,7 @@ import {
   SelectValue,
 } from "@/shared/components/ui/select";
 import { MarkdownEditor } from "@/shared/components/ui/markdown-editor";
+import { StoryPointPicker } from "@/shared/components/ui/story-point-picker";
 import {
   TaskType,
   TaskStatus,
@@ -145,12 +189,23 @@ import {
   type CreateTaskPayload,
   type UpdateTaskPayload,
 } from "@/shared/types/task";
+import type { ProjectMember } from "@/shared/types/member";
+import type { Sprint } from "@/shared/types/sprint";
 import { useTaskboltTranslation } from "@/shared/composables/useShellServices";
 import { isRequired } from "@/shared/lib/form-validation";
+import { formatDate } from "@/shared/lib/date";
 
-const props = defineProps<{
-  initialData?: Partial<Task>;
-}>();
+const props = withDefaults(
+  defineProps<{
+    initialData?: Partial<Task>;
+    members?: ProjectMember[];
+    sprints?: Sprint[];
+  }>(),
+  {
+    members: () => [],
+    sprints: () => [],
+  },
+);
 
 const emit = defineEmits<{
   submit: [data: CreateTaskPayload | UpdateTaskPayload, isEdit: boolean];
@@ -170,6 +225,8 @@ const formData = ref({
   status: undefined as TaskStatus | undefined,
   priority: TaskPriority.MEDIUM,
   storyPoint: undefined as number | undefined,
+  assigneeId: undefined as string | undefined,
+  sprintId: undefined as string | undefined,
 });
 
 const errors = ref<Record<string, string | null>>({
@@ -206,6 +263,8 @@ watch(
           data.storyPoint !== undefined && data.storyPoint !== null
             ? Number(data.storyPoint)
             : undefined,
+        assigneeId: data.assigneeId ?? undefined,
+        sprintId: data.sprintId ?? undefined,
       };
     }
   },
@@ -243,6 +302,8 @@ function handleSubmit() {
       formData.value.storyPoint !== null
         ? Number(formData.value.storyPoint)
         : undefined,
+    assigneeId: formData.value.assigneeId ?? undefined,
+    sprintId: formData.value.sprintId ?? undefined,
   };
 
   if (isEditMode.value && props.initialData?.id) {
@@ -265,6 +326,8 @@ function reset() {
     status: undefined,
     priority: TaskPriority.MEDIUM,
     storyPoint: undefined,
+    assigneeId: undefined,
+    sprintId: undefined,
   };
   errors.value = { title: null, type: null };
 }

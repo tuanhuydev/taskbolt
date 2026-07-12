@@ -34,6 +34,8 @@
   <TaskDetail
     :task="selectedTask"
     :tasks="taskList"
+    :members="members"
+    :sprints="sprints"
     :open="shouldShowTaskDetail"
     @close="closeTaskDetail"
     @update="handleUpdateTask"
@@ -59,12 +61,14 @@ import {
   type CreateTaskPayload,
   type UpdateTaskPayload,
 } from "@/shared/types/task";
+import type { ProjectMember } from "@/shared/types/member";
+import type { Sprint } from "@/shared/types/sprint";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { TaskGroup } from "@/shared/components/ui/task-item";
 import TaskDetail from "./TaskDetail.vue";
 import { TaskForm } from "./index";
-import { getTasks } from "@/shared/services";
+import { getTasks, getProjectMembers, getSprints } from "@/shared/services";
 
 const { getApiClient, getToastService } = useShellServices();
 const { t } = useTaskboltTranslation();
@@ -74,6 +78,8 @@ const shouldShowTaskDetail = ref<boolean>(false);
 const showTaskForm = ref<boolean>(false);
 
 const taskList = ref<Task[]>([]);
+const members = ref<ProjectMember[]>([]);
+const sprints = ref<Sprint[]>([]);
 
 const taskGroups = computed(() => {
   const parentTaskIds = new Set<string>();
@@ -105,12 +111,12 @@ const loading = ref(true);
 const error = ref<string | null>(null);
 
 onMounted(async () => {
-  await fetchTasks();
+  await Promise.all([fetchTasks(), fetchMembersAndSprints()]);
 });
 
 // Watch for project changes and refetch tasks
 watch(selectedProjectId, async () => {
-  await fetchTasks();
+  await Promise.all([fetchTasks(), fetchMembersAndSprints()]);
 });
 
 async function fetchTasks() {
@@ -140,6 +146,28 @@ async function fetchTasks() {
     error.value = message;
   } finally {
     loading.value = false;
+  }
+}
+
+async function fetchMembersAndSprints() {
+  const apiClient = getApiClient();
+  const projectId = selectedProjectId.value;
+
+  if (!apiClient || !projectId) {
+    members.value = [];
+    sprints.value = [];
+    return;
+  }
+
+  try {
+    const [projectMembers, projectSprints] = await Promise.all([
+      getProjectMembers(apiClient, projectId),
+      getSprints(apiClient, { projectId }),
+    ]);
+    members.value = projectMembers;
+    sprints.value = projectSprints;
+  } catch (err: unknown) {
+    console.error("Error fetching members/sprints:", err);
   }
 }
 

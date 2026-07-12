@@ -9,7 +9,7 @@
     <DrawerContent class="w-full max-w-[95vw] sm:max-w-140">
       <DrawerHeader>
         <DrawerTitle>
-          {{ isEditMode ? t('sprint.editTitle') : t('sprint.createTitle') }}
+          {{ isEditMode ? t("sprint.editTitle") : t("sprint.createTitle") }}
         </DrawerTitle>
       </DrawerHeader>
 
@@ -19,7 +19,7 @@
             <!-- Name Field -->
             <div>
               <label class="text-sm font-medium block mb-1.5">
-                {{ t('sprint.nameLabel') }}
+                {{ t("sprint.nameLabel") }}
                 <span class="text-destructive">*</span>
               </label>
               <Input
@@ -35,7 +35,7 @@
             <!-- Status (edit mode only) -->
             <div v-if="isEditMode">
               <label class="text-sm font-medium block mb-1.5">
-                {{ t('sprint.statusLabel') }}
+                {{ t("sprint.statusLabel") }}
               </label>
               <Select v-model="formData.status">
                 <SelectTrigger>
@@ -57,13 +57,13 @@
             <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
                 <label class="text-sm font-medium block mb-1.5">
-                  {{ t('sprint.startDateLabel') }}
+                  {{ t("sprint.startDateLabel") }}
                 </label>
                 <Input v-model="formData.startDate" type="date" />
               </div>
               <div>
                 <label class="text-sm font-medium block mb-1.5">
-                  {{ t('sprint.endDateLabel') }}
+                  {{ t("sprint.endDateLabel") }}
                 </label>
                 <Input v-model="formData.endDate" type="date" />
               </div>
@@ -72,7 +72,7 @@
             <!-- Goal Field -->
             <div>
               <label class="text-sm font-medium block mb-1.5">
-                {{ t('sprint.goalLabel') }}
+                {{ t("sprint.goalLabel") }}
               </label>
               <Input
                 v-model="formData.goal"
@@ -84,11 +84,16 @@
       </div>
 
       <div class="flex flex-col-reverse gap-2 border-t p-4 sm:flex-row">
-        <Button variant="outline" type="button" class="w-full sm:w-auto" @click="emit('close')">
-          {{ t('common.cancel') }}
+        <Button
+          variant="outline"
+          type="button"
+          class="w-full sm:w-auto"
+          @click="emit('close')"
+        >
+          {{ t("common.cancel") }}
         </Button>
         <Button type="button" class="w-full sm:w-auto" @click="handleSubmit">
-          {{ t('common.save') }}
+          {{ t("common.save") }}
         </Button>
       </div>
     </DrawerContent>
@@ -96,30 +101,30 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch } from "vue";
 import {
   Drawer,
   DrawerContent,
   DrawerHeader,
   DrawerTitle,
-} from '@/shared/components/ui/drawer';
-import { Input } from '@/shared/components/ui/input';
-import { Button } from '@/shared/components/ui/button';
+} from "@/shared/components/ui/drawer";
+import { Input } from "@/shared/components/ui/input";
+import { Button } from "@/shared/components/ui/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/shared/components/ui/select';
-import { useTaskboltTranslation } from '@/shared/composables/useShellServices';
-import { isRequired } from '@/shared/lib/form-validation';
+} from "@/shared/components/ui/select";
+import { useTaskboltTranslation } from "@/shared/composables/useShellServices";
+import { isRequired } from "@/shared/lib/form-validation";
 import {
   SprintStatus,
   type Sprint,
   type CreateSprintPayload,
   type UpdateSprintPayload,
-} from '@/shared/types/sprint';
+} from "@/shared/types/sprint";
 
 const props = defineProps<{
   open: boolean;
@@ -138,11 +143,11 @@ const sprintStatuses = Object.values(SprintStatus);
 const isEditMode = computed(() => !!props.initialData?.id);
 
 const formData = ref({
-  name: '',
-  status: SprintStatus.PLANNING as SprintStatus,
-  startDate: '',
-  endDate: '',
-  goal: '',
+  name: "",
+  status: SprintStatus.PLANNED as SprintStatus,
+  startDate: "",
+  endDate: "",
+  goal: "",
 });
 
 const errors = ref<Record<string, string | null>>({ name: null });
@@ -152,19 +157,19 @@ watch(
   (data) => {
     if (data) {
       formData.value = {
-        name: data.name || '',
-        status: data.status || SprintStatus.PLANNING,
-        startDate: data.startDate ? data.startDate.slice(0, 10) : '',
-        endDate: data.endDate ? data.endDate.slice(0, 10) : '',
-        goal: data.goal || '',
+        name: data.name || "",
+        status: data.status || SprintStatus.PLANNED,
+        startDate: data.startDate ? data.startDate.slice(0, 10) : "",
+        endDate: data.endDate ? data.endDate.slice(0, 10) : "",
+        goal: data.goal || "",
       };
     } else {
       formData.value = {
-        name: '',
-        status: SprintStatus.PLANNING,
-        startDate: '',
-        endDate: '',
-        goal: '',
+        name: "",
+        status: SprintStatus.PLANNED,
+        startDate: "",
+        endDate: "",
+        goal: "",
       };
     }
   },
@@ -172,13 +177,13 @@ watch(
 );
 
 function validateField(field: string) {
-  if (field === 'name') {
+  if (field === "name") {
     errors.value.name = isRequired(formData.value.name);
   }
 }
 
 function validateForm(): boolean {
-  validateField('name');
+  validateField("name");
   return !errors.value.name;
 }
 
@@ -194,7 +199,7 @@ function handleSubmit() {
       endDate: formData.value.endDate || null,
       goal: formData.value.goal || null,
     };
-    emit('submit', updateData, true);
+    emit("submit", updateData, true);
     return;
   }
 
@@ -205,12 +210,12 @@ function handleSubmit() {
     endDate: formData.value.endDate || null,
     goal: formData.value.goal || null,
   };
-  emit('submit', createData, false);
+  emit("submit", createData, false);
 }
 
 function handleDrawerUpdate(isOpen: boolean) {
   if (!isOpen) {
-    emit('close');
+    emit("close");
   }
 }
 </script>
