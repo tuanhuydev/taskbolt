@@ -43,6 +43,8 @@
   />
   <TaskForm
     :open="showTaskForm"
+    :members="members"
+    :sprints="sprints"
     @submit="handleTaskSubmit"
     @close="closeTaskForm"
   />
