@@ -16,6 +16,8 @@
       <TaskFormFields
         ref="formFieldsRef"
         :initial-data="props.initialData"
+        :members="props.members"
+        :sprints="props.sprints"
         @submit="handleFieldsSubmit"
         @cancel="emit('close')"
       />
@@ -38,10 +40,14 @@ import {
 } from "@/shared/types/task";
 import { useTaskboltTranslation } from "@/shared/composables/useShellServices";
 import TaskFormFields from "./TaskFormFields.vue";
+import type { ProjectMember } from "@/shared/types/member";
+import type { Sprint } from "@/shared/types/sprint";
 
 const props = defineProps<{
   open: boolean;
   initialData?: Partial<Task>;
+  members?: ProjectMember[];
+  sprints?: Sprint[];
 }>();
 
 const emit = defineEmits<{

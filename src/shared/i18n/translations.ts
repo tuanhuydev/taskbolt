@@ -140,6 +140,8 @@ export const taskboltTranslations = {
       commentPlaceholder: "Write a comment…",
       noComments: "No comments yet",
       unknownUser: "Unknown user",
+      you: "You",
+      commentSubmit: "Comment",
     },
     common: {
       save: "Save",
@@ -368,6 +370,8 @@ export const taskboltTranslations = {
       commentPlaceholder: "Viết bình luận…",
       noComments: "Chưa có bình luận nào",
       unknownUser: "Người dùng không xác định",
+      you: "Bạn",
+      commentSubmit: "Bình luận",
     },
     common: {
       save: "Lưu",

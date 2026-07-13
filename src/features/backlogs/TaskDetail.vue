@@ -147,10 +147,9 @@
                         }}</span>
                       </div>
                       <div
-                        class="bg-muted/40 border rounded-md px-3 py-2 text-sm text-foreground whitespace-pre-wrap wrap-break-word"
-                      >
-                        {{ comment.content }}
-                      </div>
+                        class="prose prose-sm max-w-none bg-muted/40 border rounded-md px-3 py-2 text-sm text-foreground wrap-break-word"
+                        v-html="renderMarkdown(comment.content)"
+                      ></div>
                     </div>
                   </div>
                 </div>
@@ -159,20 +158,29 @@
                 </p>
               </template>
 
-              <div class="flex items-center gap-3 pt-1">
+              <div class="flex items-start gap-3 pt-1">
                 <AvatarInitials
-                  v-if="selfMember"
-                  :name="selfMember.userName"
-                  :color-key="selfMember.userId"
+                  v-if="currentUserId"
+                  :name="selfMember?.userName ?? t('taskDetail.you')"
+                  :color-key="selfMember?.userId ?? currentUserId"
                   size="sm"
+                  class="mt-0.5"
                 />
-                <Input
-                  v-model="newCommentText"
-                  :placeholder="t('taskDetail.commentPlaceholder')"
-                  :disabled="submittingComment"
-                  class="flex-1"
-                  @keydown.enter="submitComment"
-                />
+                <div class="flex-1 space-y-2">
+                  <MarkdownEditor
+                    v-model="newCommentText"
+                    :placeholder="t('taskDetail.commentPlaceholder')"
+                  />
+                  <div class="flex justify-end">
+                    <Button
+                      size="sm"
+                      :disabled="submittingComment || !newCommentText.trim()"
+                      @click="submitComment"
+                    >
+                      {{ t("taskDetail.commentSubmit") }}
+                    </Button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -357,6 +365,7 @@ import {
   useTaskboltTranslation,
 } from "@/shared/composables/useShellServices";
 import { formatDate } from "@/shared/lib/date";
+import { renderMarkdown } from "@/shared/lib/markdown";
 import { decodeJwtPayload } from "@/shared/lib/jwt";
 import { getComments, createComment } from "@/shared/services";
 import TaskFormFields from "./TaskFormFields.vue";
@@ -364,6 +373,8 @@ import TaskDetailHeader from "./TaskDetailHeader.vue";
 import TaskItemPriority from "@/shared/components/ui/task-item/TaskItemPriority.vue";
 import TaskItemStatus from "@/shared/components/ui/task-item/TaskItemStatus.vue";
 import { Input } from "@/shared/components/ui/input";
+import { Button } from "@/shared/components/ui/button";
+import { MarkdownEditor } from "@/shared/components/ui/markdown-editor";
 import { Progress } from "@/shared/components/ui/progress";
 import { Checkbox } from "@/shared/components/ui/checkbox";
 import { AvatarInitials } from "@/shared/components/ui/avatar";
@@ -476,24 +487,32 @@ const commentsLoading = ref(false);
 const newCommentText = ref("");
 const submittingComment = ref(false);
 
-function commentAuthorName(comment: Comment): string {
-  return (
-    memberMap.value.get(comment.createdById)?.userName ??
-    t("taskDetail.unknownUser")
-  );
-}
-
-// Resolves the current user against the project member list (via the JWT's
-// `sub` claim) purely to show their avatar next to the compose box — no
-// dedicated "current user" endpoint call needed for that.
-const selfMember = computed(() => {
+// Resolves the current user id from the JWT's `sub` claim. Tasks/comments
+// created outside a project (personal workspace) have no member list to
+// join against, so this is also used as a fallback for identifying "your"
+// own comments when the author isn't found in `memberMap`.
+const currentUserId = computed(() => {
   const apiClient = getApiClient();
   const token = apiClient?.getAccessToken();
   if (!token) return undefined;
 
   const decoded = decodeJwtPayload(token);
-  return decoded?.sub ? memberMap.value.get(decoded.sub) : undefined;
+  return decoded?.sub;
 });
+
+function commentAuthorName(comment: Comment): string {
+  const member = memberMap.value.get(comment.createdById);
+  if (member) return member.userName;
+  if (comment.createdById === currentUserId.value) return t("taskDetail.you");
+  return t("taskDetail.unknownUser");
+}
+
+// Resolves the current user against the project member list purely to show
+// their avatar/name next to the compose box — no dedicated "current user"
+// endpoint call needed for that.
+const selfMember = computed(() =>
+  currentUserId.value ? memberMap.value.get(currentUserId.value) : undefined,
+);
 
 async function fetchComments(taskId: string) {
   const apiClient = getApiClient();
@@ -619,33 +638,6 @@ function handleFormSubmit(
   emits("update", data as UpdateTaskPayload);
   isEditing.value = false;
   emits("close");
-}
-
-// Simple markdown to HTML converter
-function renderMarkdown(markdown: string): string {
-  if (!markdown) return "";
-
-  const html = markdown
-    // Headers
-    .replace(/^### (.*$)/gim, "<h3>$1</h3>")
-    .replace(/^## (.*$)/gim, "<h2>$1</h2>")
-    .replace(/^# (.*$)/gim, "<h1>$1</h1>")
-    // Bold
-    .replace(/\*\*(.*?)\*\*/gim, "<strong>$1</strong>")
-    // Italic
-    .replace(/\*(.*?)\*/gim, "<em>$1</em>")
-    // Code inline
-    .replace(/`([^`]+)`/gim, "<code>$1</code>")
-    // Links
-    .replace(
-      /\[([^\]]+)\]\(([^)]+)\)/gim,
-      '<a href="$2" target="_blank">$1</a>',
-    )
-    // Line breaks
-    .replace(/\n\n/gim, "</p><p>")
-    .replace(/\n/gim, "<br>");
-
-  return `<p>${html}</p>`;
 }
 
 const formatId = (taskId: string) => {
