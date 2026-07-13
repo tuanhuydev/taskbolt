@@ -74,7 +74,7 @@
               <label class="text-sm font-medium block mb-1.5">
                 {{ t("sprint.goalLabel") }}
               </label>
-              <Input
+              <MarkdownEditor
                 v-model="formData.goal"
                 :placeholder="t('sprint.goalPlaceholder')"
               />
@@ -117,6 +117,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/components/ui/select";
+import { MarkdownEditor } from "@/shared/components/ui/markdown-editor";
 import { useTaskboltTranslation } from "@/shared/composables/useShellServices";
 import { isRequired } from "@/shared/lib/form-validation";
 import {
