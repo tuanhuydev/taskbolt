@@ -103,7 +103,7 @@
               <SelectTrigger>
                 <SelectValue :placeholder="t('taskForm.assigneeLabel')" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent :empty-text="t('common.noData')">
                 <SelectItem
                   v-for="member in props.members"
                   :key="member.userId"
@@ -124,7 +124,7 @@
               <SelectTrigger>
                 <SelectValue :placeholder="t('taskForm.sprintLabel')" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent :empty-text="t('common.noData')">
                 <SelectItem
                   v-for="sprint in props.sprints"
                   :key="sprint.id"
