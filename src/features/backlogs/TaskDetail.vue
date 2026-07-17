@@ -10,7 +10,7 @@
       }
     "
   >
-    <DrawerContent class="w-[720px]! max-w-[92vw]!">
+    <DrawerContent class="w-full sm:w-[720px]! max-w-full sm:max-w-[92vw]!">
       <TaskDetailHeader
         :task="task"
         :is-editing="isEditing"
@@ -34,10 +34,13 @@
 
       <!-- Show task details when not editing -->
       <template v-else>
-        <div v-if="task" class="flex-1 min-h-0 flex overflow-hidden">
+        <div
+          v-if="task"
+          class="flex-1 min-h-0 flex flex-col sm:flex-row overflow-y-auto sm:overflow-hidden"
+        >
           <!-- Content column -->
           <div
-            class="flex-1 min-w-0 overflow-auto px-4 py-4 space-y-6 flex flex-col"
+            class="flex-1 min-w-0 sm:overflow-auto px-4 py-4 space-y-6 flex flex-col"
           >
             <div v-if="task.description" class="space-y-2 flex-1">
               <span
@@ -187,7 +190,7 @@
 
           <!-- Properties rail -->
           <div
-            class="w-58 flex-none border-l bg-muted/30 overflow-auto px-4 py-4 space-y-5"
+            class="w-full sm:w-58 flex-none border-t sm:border-t-0 sm:border-l bg-muted/30 overflow-auto px-4 py-4 space-y-5"
           >
             <span
               class="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
