@@ -10,7 +10,7 @@
       }
     "
   >
-    <DrawerContent class="w-full max-w-full sm:w-[720px]! sm:max-w-[92vw]!">
+    <DrawerContent class="w-full! max-w-full! sm:w-[720px]! sm:max-w-[92vw]!">
       <TaskDetailHeader
         :task="task"
         :is-editing="isEditing"
