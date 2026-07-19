@@ -181,6 +181,7 @@ export const taskboltTranslations = {
     taskStatus: {
       TODO: "To Do",
       IN_PROGRESS: "In Progress",
+      IN_REVIEW: "In Review",
       DONE: "Done",
     },
     taskPriority: {
@@ -411,6 +412,7 @@ export const taskboltTranslations = {
     taskStatus: {
       TODO: "Cần làm",
       IN_PROGRESS: "Đang thực hiện",
+      IN_REVIEW: "Đang xem xét",
       DONE: "Hoàn thành",
     },
     taskPriority: {

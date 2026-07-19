@@ -6,12 +6,18 @@
   >
     <div
       class="flex justify-between transition-colors hover:bg-accent hover:text-accent-foreground cursor-pointer text-muted-foreground p-2 rounded-sm"
-      @click="emit('click', task)"
+      @click="subTasks.length ? toggle() : emit('click', task)"
     >
       <div class="flex items-center gap-2.5">
         <TaskTypeIcon :type="task.type" />
         <TaskItemPriority :priority="task.priority ?? TaskPriority.MEDIUM" />
-        <h1 :class="{ 'line-through': task.status === TaskStatus.DONE }">
+        <h1
+          :class="{
+            'line-through': task.status === TaskStatus.DONE,
+            'hover:underline': subTasks.length,
+          }"
+          @click.stop="emit('click', task)"
+        >
           {{ task.title }}
         </h1>
       </div>
