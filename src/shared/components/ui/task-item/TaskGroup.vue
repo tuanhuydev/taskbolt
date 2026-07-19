@@ -12,8 +12,10 @@
         <TaskTypeIcon :type="task.type" />
         <TaskItemPriority :priority="task.priority ?? TaskPriority.MEDIUM" />
         <h1
-          :class="{ 'line-through': task.status === TaskStatus.DONE }"
-          class="hover:underline"
+          :class="{
+            'line-through': task.status === TaskStatus.DONE,
+            'hover:underline': subTasks.length,
+          }"
           @click.stop="emit('click', task)"
         >
           {{ task.title }}
