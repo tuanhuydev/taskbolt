@@ -9,7 +9,14 @@
       />
     </div>
 
-    <div class="flex items-center gap-3">
+    <div class="flex items-center gap-4">
+      <label class="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer select-none">
+        <Checkbox
+          :model-value="showClosedTasks"
+          @update:model-value="(v) => (showClosedTasks = !!v)"
+        />
+        {{ t("backlogs.showClosed") }}
+      </label>
       <Button @click="openTaskForm">
         {{ t("header.newIssue") }}
       </Button>
@@ -60,6 +67,7 @@ import { useProjectContext } from "@/shared/composables/useProject";
 import { APP_AUTH_URL } from "@/shared/lib/constants";
 import {
   Task,
+  TaskStatus,
   type CreateTaskPayload,
   type UpdateTaskPayload,
 } from "@/shared/types/task";
@@ -67,6 +75,7 @@ import type { ProjectMember } from "@/shared/types/member";
 import type { Sprint } from "@/shared/types/sprint";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
+import { Checkbox } from "@/shared/components/ui/checkbox";
 import { TaskGroup } from "@/shared/components/ui/task-item";
 import TaskDetail from "./TaskDetail.vue";
 import { TaskForm } from "./index";
@@ -82,13 +91,22 @@ const showTaskForm = ref<boolean>(false);
 const taskList = ref<Task[]>([]);
 const members = ref<ProjectMember[]>([]);
 const sprints = ref<Sprint[]>([]);
+// Closed (obsoleted) tasks aren't actionable but shouldn't be deleted —
+// hide them from the backlog list by default, toggle to reveal.
+const showClosedTasks = ref(false);
+
+const visibleTasks = computed(() =>
+  showClosedTasks.value
+    ? taskList.value
+    : taskList.value.filter((task) => task.status !== TaskStatus.CLOSED),
+);
 
 const taskGroups = computed(() => {
   const parentTaskIds = new Set<string>();
   const childTaskMap = new Map<string, Task[]>();
   const parentTaskList: Task[] = [];
 
-  for (const task of taskList.value) {
+  for (const task of visibleTasks.value) {
     if (task.parentId == null) {
       parentTaskIds.add(task.id);
       parentTaskList.push(task);

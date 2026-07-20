@@ -23,6 +23,8 @@ function getStatusColor(status: TaskStatus): string {
       return "#7C4DFF";
     case TaskStatus.DONE:
       return "#00C853";
+    case TaskStatus.CLOSED:
+      return "#455A64";
     default:
       return "#78909C";
   }

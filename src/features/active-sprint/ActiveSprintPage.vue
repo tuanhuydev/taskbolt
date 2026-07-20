@@ -568,7 +568,10 @@ async function loadData() {
           ? getProjectMembers(apiClient, selectedProjectId.value)
           : Promise.resolve([]),
       ]);
-      tasks.value = sprintTasks;
+      // CLOSED tasks are obsoleted work — keep them out of the active sprint
+      // board (columns and points) entirely rather than giving them a 4th
+      // column; they're still reachable via Backlogs' closed-tasks filter.
+      tasks.value = sprintTasks.filter((t) => t.status !== TaskStatus.CLOSED);
       members.value = projectMembers;
     } else {
       tasks.value = [];

@@ -2,13 +2,19 @@
   <li
     :key="task.id"
     class="flex justify-between transition-colors hover:bg-accent hover:text-accent-foreground cursor-pointer text-muted-foreground p-2 rounded-sm"
-    :class="{ 'opacity-50': task.status === TaskStatus.DONE }"
+    :class="{
+      'opacity-50': task.status === TaskStatus.DONE || task.status === TaskStatus.CLOSED,
+    }"
     @click="emit('click', task)"
   >
     <div class="flex items-center gap-2.5">
       <TaskTypeIcon :type="task.type" />
       <TaskItemPriority :priority="task.priority ?? TaskPriority.MEDIUM" />
-      <h1 :class="{ 'line-through': task.status === TaskStatus.DONE }">
+      <h1
+        :class="{
+          'line-through': task.status === TaskStatus.DONE || task.status === TaskStatus.CLOSED,
+        }"
+      >
         {{ task.title }}
       </h1>
     </div>
