@@ -111,6 +111,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { Folder, Pencil, Columns3, Workflow, Bell } from 'lucide-vue-next';
 import { useShellServices, useTaskboltTranslation } from '@/shared/composables/useShellServices';
 import { useProjectContext } from '@/shared/composables/useProject';
@@ -133,7 +134,9 @@ import ProjectForm from '@/features/projects/ProjectForm.vue';
 
 const { t } = useTaskboltTranslation();
 const { getApiClient, getToastService } = useShellServices();
-const { selectedProjectId } = useProjectContext();
+const { selectedProjectId, setSelectedProjectId } = useProjectContext();
+const route = useRoute();
+const router = useRouter();
 
 const project = ref<Project | null>(null);
 const loading = ref(true);
@@ -186,8 +189,37 @@ async function loadProject(projectId: string | null) {
   }
 }
 
-onMounted(() => loadProject(selectedProjectId.value));
-watch(selectedProjectId, loadProject);
+// The URL's :projectId param and the sidebar's shared selectedProjectId
+// context are kept in sync (both directions) so /configure/:projectId is a
+// deep-linkable, copy/paste-able URL for a specific project's configure
+// view, while switching projects from the sidebar still works everywhere
+// else that reads selectedProjectId (Backlogs, Active Sprint, ...).
+const routeProjectId = () => (route.params.projectId as string | undefined) || null;
+
+onMounted(() => {
+  const fromRoute = routeProjectId();
+  if (fromRoute && fromRoute !== selectedProjectId.value) {
+    setSelectedProjectId(fromRoute);
+  }
+  loadProject(selectedProjectId.value);
+});
+
+watch(selectedProjectId, (projectId) => {
+  loadProject(projectId);
+  if (routeProjectId() !== projectId) {
+    router.replace({ name: 'configure-home', params: { projectId: projectId ?? undefined } });
+  }
+});
+
+watch(
+  () => route.params.projectId,
+  () => {
+    const fromRoute = routeProjectId();
+    if (fromRoute !== selectedProjectId.value) {
+      setSelectedProjectId(fromRoute);
+    }
+  },
+);
 
 function openEditForm() {
   showEditForm.value = true;

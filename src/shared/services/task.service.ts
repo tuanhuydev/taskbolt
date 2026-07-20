@@ -29,6 +29,20 @@ export const getTasks = async (apiClient: ApiClient, filter: Record<string, unkn
   }
 };
 
+export const getTaskById = async (apiClient: ApiClient, taskId: string): Promise<Task> => {
+  try {
+    const response = await apiClient.request(`${APP_AUTH_URL}/tasks/${taskId}`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    });
+    if (!response.ok) throw new Error(`Failed to fetch task (${response.status})`);
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching task:", error);
+    throw error;
+  }
+};
+
 export const updateTask = async (
   apiClient: ApiClient,
   taskId: string,
