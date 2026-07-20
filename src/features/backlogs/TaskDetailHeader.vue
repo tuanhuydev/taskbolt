@@ -109,6 +109,7 @@
 
 <script setup lang="ts">
 import { ref, onBeforeUnmount } from "vue";
+import { useRouter } from "vue-router";
 import { DrawerHeader, DrawerTitle } from "@/shared/components/ui/drawer";
 import { Button } from "@/shared/components/ui/button";
 import type { Task } from "@/shared/types/task";
@@ -151,6 +152,7 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useTaskboltTranslation();
+const router = useRouter();
 const copiedOpen = ref(false);
 let copiedTimer: number | undefined;
 
@@ -165,8 +167,14 @@ const formatId = (taskId: string) => {
 const copyTaskId = async (taskId?: string) => {
   if (!taskId) return;
 
+  // Copy a deep link (resolves to this task's own project + task list)
+  // rather than the bare id, so pasting it elsewhere is directly clickable.
+  const deepLink = `${window.location.origin}${
+    router.resolve({ name: "task-link", params: { taskId } }).href
+  }`;
+
   try {
-    await navigator.clipboard.writeText(taskId);
+    await navigator.clipboard.writeText(deepLink);
     copiedOpen.value = true;
 
     if (copiedTimer) {

@@ -12,7 +12,7 @@ const router = createRouter({
   history: createMemoryHistory(),
   routes: [
     { path: '/', component: { template: '<div />' } },
-    { path: '/configure', name: 'configure', component: { template: '<div />' } },
+    { path: '/configure/:projectId?', name: 'configure-home', component: { template: '<div />' } },
     { path: '/configure/projects', name: 'project-list', component: { template: '<div />' } },
     {
       path: '/configure/projects/:projectId',
@@ -148,5 +148,54 @@ describe('ConfigureHomePage', () => {
 
     const sprintManagement = wrapper.findComponent({ name: 'SprintManagement' });
     expect(sprintManagement.props('isAdmin')).toBe(false);
+  });
+
+  it('syncs the projectId from the URL into the shared project context on load', async () => {
+    mockProjectScopedApi();
+    await router.push('/configure/proj-1');
+
+    const setSelectedProjectId = vi.fn();
+    mount(ConfigureHomePage, {
+      global: {
+        plugins: [router],
+        provide: {
+          [SHELL_SERVICES_KEY as symbol]: mockShellServices,
+          [ProjectContextKey as symbol]: {
+            selectedProjectId: ref<string | null>(null),
+            setSelectedProjectId,
+          },
+        },
+        stubs: { ProjectForm: true, SprintForm: true, MemberForm: true },
+      },
+    });
+    await new Promise((r) => setTimeout(r, 0));
+
+    expect(setSelectedProjectId).toHaveBeenCalledWith('proj-1');
+  });
+
+  it('pushes the projectId into the URL when the shared project context changes', async () => {
+    mockProjectScopedApi();
+    await router.push('/configure');
+
+    const selectedProjectId = ref<string | null>(null);
+    mount(ConfigureHomePage, {
+      global: {
+        plugins: [router],
+        provide: {
+          [SHELL_SERVICES_KEY as symbol]: mockShellServices,
+          [ProjectContextKey as symbol]: {
+            selectedProjectId,
+            setSelectedProjectId: vi.fn(),
+          },
+        },
+        stubs: { ProjectForm: true, SprintForm: true, MemberForm: true },
+      },
+    });
+    await new Promise((r) => setTimeout(r, 0));
+
+    selectedProjectId.value = 'proj-1';
+    await new Promise((r) => setTimeout(r, 0));
+
+    expect(router.currentRoute.value.params.projectId).toBe('proj-1');
   });
 });

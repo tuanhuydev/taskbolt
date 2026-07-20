@@ -59,6 +59,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from "vue";
+import { useRoute } from "vue-router";
 import {
   useShellServices,
   useTaskboltTranslation,
@@ -84,6 +85,7 @@ import { getTasks, getProjectMembers, getSprints } from "@/shared/services";
 const { getApiClient, getToastService } = useShellServices();
 const { t } = useTaskboltTranslation();
 const { selectedProjectId } = useProjectContext();
+const route = useRoute();
 const selectedTask = ref<Task | null>(null);
 const shouldShowTaskDetail = ref<boolean>(false);
 const showTaskForm = ref<boolean>(false);
@@ -132,6 +134,14 @@ const error = ref<string | null>(null);
 
 onMounted(async () => {
   await Promise.all([fetchTasks(), fetchMembersAndSprints()]);
+
+  // Arriving via a /tasks/:taskId deep link (TaskLinkPage) — open that
+  // task's detail once the list it belongs to has loaded.
+  const deepLinkedTaskId = route.query.task as string | undefined;
+  if (deepLinkedTaskId) {
+    const task = taskList.value.find((t) => t.id === deepLinkedTaskId);
+    if (task) selectTask(task);
+  }
 });
 
 // Watch for project changes and refetch tasks

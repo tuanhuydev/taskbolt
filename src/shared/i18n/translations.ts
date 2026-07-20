@@ -154,6 +154,9 @@ export const taskboltTranslations = {
       loading: "Loading...",
       noData: "No data available",
     },
+    taskLink: {
+      notFound: "This task couldn't be found, or you don't have access to it.",
+    },
     taskForm: {
       createTitle: "Create Task",
       editTitle: "Edit Task",
@@ -388,6 +391,9 @@ export const taskboltTranslations = {
       create: "Tạo mới",
       loading: "Đang tải...",
       noData: "Không có dữ liệu",
+    },
+    taskLink: {
+      notFound: "Không tìm thấy công việc này, hoặc bạn không có quyền truy cập.",
     },
     taskForm: {
       createTitle: "Tạo Công Việc",

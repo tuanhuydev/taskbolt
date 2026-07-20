@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { mount } from "@vue/test-utils";
+import { createRouter, createMemoryHistory } from "vue-router";
 import { ref } from "vue";
 import BacklogsPage from "@/features/backlogs/BacklogsPage.vue";
 import { mockApiClient, mockShellServices } from "../mocks/shell-services";
@@ -11,6 +12,11 @@ import {
   TaskPriority,
   type Task,
 } from "@/shared/types/task";
+
+const router = createRouter({
+  history: createMemoryHistory(),
+  routes: [{ path: "/backlogs", name: "backlogs", component: BacklogsPage }],
+});
 
 function makeTask(overrides: Partial<Task>): Task {
   return {
@@ -58,6 +64,7 @@ function mountComponent() {
 
   return mount(BacklogsPage, {
     global: {
+      plugins: [router],
       provide: {
         [SHELL_SERVICES_KEY as symbol]: mockShellServices,
         [ProjectContextKey as symbol]: {
@@ -91,5 +98,62 @@ describe("BacklogsPage — closed tasks filter", () => {
 
     expect(wrapper.text()).toContain("Open task");
     expect(wrapper.text()).toContain("Closed task");
+  });
+});
+
+const taskA = makeTask({ id: "task-a", title: "Task A" });
+const taskB = makeTask({ id: "task-b", title: "Task B" });
+
+function mockScopedApi() {
+  vi.mocked(mockApiClient.request).mockImplementation(async (input) => {
+    const url = String(input);
+    if (url.includes("/tasks"))
+      return { ok: true, json: async () => ({ tasks: [taskA, taskB], total: 2 }) } as Response;
+    if (url.includes("/resource-grants")) return { ok: true, json: async () => [] } as Response;
+    if (url.includes("/roles")) return { ok: true, json: async () => [] } as Response;
+    if (url.includes("/users")) return { ok: true, json: async () => ({ users: [] }) } as Response;
+    if (url.includes("/sprints")) return { ok: true, json: async () => ({ sprints: [], total: 0 }) } as Response;
+    return { ok: true, json: async () => ({}) } as Response;
+  });
+}
+
+function mountAt(path: string) {
+  return router.push(path).then(() =>
+    mount(BacklogsPage, {
+      global: {
+        plugins: [router],
+        provide: {
+          [SHELL_SERVICES_KEY as symbol]: mockShellServices,
+          [ProjectContextKey as symbol]: {
+            selectedProjectId: ref<string | null>(null),
+            setSelectedProjectId: vi.fn(),
+          },
+        },
+        stubs: { TaskForm: true },
+      },
+    }),
+  );
+}
+
+describe("BacklogsPage — deep-linked task", () => {
+  it("opens the task detail drawer for ?task=<id> once the list has loaded", async () => {
+    mockScopedApi();
+    const wrapper = await mountAt("/backlogs?task=task-b");
+    await new Promise((r) => setTimeout(r, 0));
+    await wrapper.vm.$nextTick();
+
+    const taskDetail = wrapper.findComponent({ name: "TaskDetail" });
+    expect(taskDetail.props("open")).toBe(true);
+    expect(taskDetail.props("task")).toMatchObject({ id: "task-b" });
+  });
+
+  it("does not open any task detail when there is no task query param", async () => {
+    mockScopedApi();
+    const wrapper = await mountAt("/backlogs");
+    await new Promise((r) => setTimeout(r, 0));
+    await wrapper.vm.$nextTick();
+
+    const taskDetail = wrapper.findComponent({ name: "TaskDetail" });
+    expect(taskDetail.props("open")).toBe(false);
   });
 });

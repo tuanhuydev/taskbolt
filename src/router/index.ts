@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import ActiveSprintPage from "@/features/active-sprint/ActiveSprintPage.vue";
 import BacklogsPage from "@/features/backlogs/BacklogsPage.vue";
+import TaskLinkPage from "@/features/backlogs/TaskLinkPage.vue";
 import ReportsPage from "@/features/reports/ReportsPage.vue";
 import ConfigurePage from "@/features/configure/ConfigurePage.vue";
 import ConfigureHomePage from "@/features/configure/ConfigureHomePage.vue";
@@ -29,6 +30,13 @@ const routes = [
 		component: BacklogsPage,
 	},
 	{
+		// Deep link: resolves a bare task id to its project, then redirects
+		// into Backlogs with that task pre-selected.
+		path: "/tasks/:taskId",
+		name: "task-link",
+		component: TaskLinkPage,
+	},
+	{
 		path: "/reports",
 		name: "reports",
 		component: ReportsPage,
@@ -39,7 +47,11 @@ const routes = [
 		component: ConfigurePage,
 		children: [
 			{
-				path: "",
+				// projectId is optional so /configure alone still resolves (the
+				// "Personal workspace" state) — present, it's the deep-linkable,
+				// copy/paste-able URL for a specific project's configure view,
+				// kept in sync with the sidebar's selected-project context.
+				path: ":projectId?",
 				name: "configure-home",
 				component: ConfigureHomePage,
 			},
