@@ -125,6 +125,9 @@
                 <SelectValue :placeholder="t('taskForm.sprintLabel')" />
               </SelectTrigger>
               <SelectContent :empty-text="t('common.noData')">
+                <SelectItem :value="NO_SPRINT_VALUE">
+                  {{ t("taskForm.noSprintOption") }}
+                </SelectItem>
                 <SelectItem
                   v-for="sprint in props.sprints"
                   :key="sprint.id"
@@ -218,6 +221,11 @@ const taskTypes = Object.values(TaskType);
 const taskStatuses = Object.values(TaskStatus);
 const taskPriorities = Object.values(TaskPriority);
 
+// reka-ui's SelectItem disallows an empty-string value (reserved for "no
+// selection" internally), so a non-empty sentinel represents "no sprint" in
+// the select and is translated back to null when the form is submitted.
+const NO_SPRINT_VALUE = "__none__";
+
 const formData = ref({
   title: "",
   description: "",
@@ -226,7 +234,7 @@ const formData = ref({
   priority: TaskPriority.MEDIUM,
   storyPoint: undefined as number | undefined,
   assigneeId: undefined as string | undefined,
-  sprintId: undefined as string | undefined,
+  sprintId: NO_SPRINT_VALUE as string,
 });
 
 const errors = ref<Record<string, string | null>>({
@@ -264,7 +272,7 @@ watch(
             ? Number(data.storyPoint)
             : undefined,
         assigneeId: data.assigneeId ?? undefined,
-        sprintId: data.sprintId ?? undefined,
+        sprintId: data.sprintId ?? NO_SPRINT_VALUE,
       };
     }
   },
@@ -303,7 +311,10 @@ function handleSubmit() {
         ? Number(formData.value.storyPoint)
         : undefined,
     assigneeId: formData.value.assigneeId ?? undefined,
-    sprintId: formData.value.sprintId ?? undefined,
+    sprintId:
+      formData.value.sprintId === NO_SPRINT_VALUE
+        ? null
+        : formData.value.sprintId,
   };
 
   if (isEditMode.value && props.initialData?.id) {
@@ -327,10 +338,10 @@ function reset() {
     priority: TaskPriority.MEDIUM,
     storyPoint: undefined,
     assigneeId: undefined,
-    sprintId: undefined,
+    sprintId: NO_SPRINT_VALUE,
   };
   errors.value = { title: null, type: null };
 }
 
-defineExpose({ reset });
+defineExpose({ reset, formData, NO_SPRINT_VALUE });
 </script>
