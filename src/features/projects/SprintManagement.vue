@@ -48,22 +48,24 @@
           >
             {{ t(`sprintStatus.${sprint.status}`) }}
           </span>
-          <Button
-            variant="ghost"
-            size="sm"
-            class="h-8 w-8 p-0"
-            @click="openEditForm(sprint)"
-          >
-            <Pencil class="w-3.5 h-3.5" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            class="h-8 w-8 p-0 text-destructive hover:text-destructive"
-            @click="confirmDelete(sprint)"
-          >
-            <Trash2 class="w-3.5 h-3.5" />
-          </Button>
+          <template v-if="props.isAdmin">
+            <Button
+              variant="ghost"
+              size="sm"
+              class="h-8 w-8 p-0"
+              @click="openEditForm(sprint)"
+            >
+              <Pencil class="w-3.5 h-3.5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              class="h-8 w-8 p-0 text-destructive hover:text-destructive"
+              @click="confirmDelete(sprint)"
+            >
+              <Trash2 class="w-3.5 h-3.5" />
+            </Button>
+          </template>
         </div>
       </li>
     </ul>
@@ -102,7 +104,10 @@ import {
 import { Button } from "@/shared/components/ui/button";
 import SprintForm from "./SprintForm.vue";
 
-const props = defineProps<{ projectId: string }>();
+const props = withDefaults(
+  defineProps<{ projectId: string; isAdmin?: boolean }>(),
+  { isAdmin: false },
+);
 
 const { getApiClient, getToastService } = useShellServices();
 const { t } = useTaskboltTranslation();

@@ -27,9 +27,9 @@ const mockSprint: Sprint = {
   updatedAt: "2024-01-01T00:00:00Z",
 };
 
-function mountComponent(projectId = "proj-1") {
+function mountComponent(projectId = "proj-1", isAdmin = false) {
   return mount(SprintManagement, {
-    props: { projectId },
+    props: { projectId, isAdmin },
     global: {
       plugins: [router],
       provide: { [SHELL_SERVICES_KEY as symbol]: mockShellServices },
@@ -99,5 +99,33 @@ describe("SprintManagement", () => {
     await wrapper.vm.$nextTick();
 
     expect(wrapper.text()).toContain("Sprint fetch error");
+  });
+
+  it("hides per-sprint edit/delete controls when isAdmin is false (the default)", async () => {
+    vi.mocked(mockApiClient.request).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ sprints: [mockSprint], total: 1 }),
+    } as Response);
+
+    const wrapper = mountComponent("proj-1", false);
+    await new Promise((r) => setTimeout(r, 0));
+    await wrapper.vm.$nextTick();
+
+    const sprintRow = wrapper.find("li");
+    expect(sprintRow.findAll("button")).toHaveLength(0);
+  });
+
+  it("shows per-sprint edit/delete controls when isAdmin is true", async () => {
+    vi.mocked(mockApiClient.request).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ sprints: [mockSprint], total: 1 }),
+    } as Response);
+
+    const wrapper = mountComponent("proj-1", true);
+    await new Promise((r) => setTimeout(r, 0));
+    await wrapper.vm.$nextTick();
+
+    const sprintRow = wrapper.find("li");
+    expect(sprintRow.findAll("button")).toHaveLength(2);
   });
 });
