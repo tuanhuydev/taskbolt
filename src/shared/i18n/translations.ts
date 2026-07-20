@@ -21,6 +21,7 @@ export const taskboltTranslations = {
     activeSprint: {
       title: "Active Sprint",
       noSprint: "No active sprint",
+      selectProjectPrompt: "Select a project from the sidebar to see its active sprint.",
       empty: "No issues in this sprint",
       addTask: "Add task",
     },
@@ -255,6 +256,7 @@ export const taskboltTranslations = {
     activeSprint: {
       title: "Sprint hiện tại",
       noSprint: "Không có sprint nào đang hoạt động",
+      selectProjectPrompt: "Chọn một dự án ở thanh bên để xem sprint hiện tại của dự án đó.",
       empty: "Không có issue nào trong sprint này",
       addTask: "Thêm công việc",
     },

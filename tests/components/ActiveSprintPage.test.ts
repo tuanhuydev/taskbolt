@@ -95,3 +95,56 @@ describe("ActiveSprintPage — CLOSED tasks are excluded from the board", () => 
     expect(wrapper.text()).toContain("of 5 points completed");
   });
 });
+
+describe("ActiveSprintPage — project scoping", () => {
+  beforeEach(() => {
+    setupShellServices();
+    getSprintsMock.mockReset().mockResolvedValue([mockSprint]);
+    getTasksMock.mockReset().mockResolvedValue([]);
+    getProjectMembersMock.mockReset().mockResolvedValue([]);
+  });
+  afterEach(() => teardownShellServices());
+
+  it("does not fetch or show any sprint when no project is selected", async () => {
+    const wrapper = mountComponent(null);
+    await new Promise((r) => setTimeout(r, 0));
+    await wrapper.vm.$nextTick();
+
+    expect(getSprintsMock).not.toHaveBeenCalled();
+    expect(wrapper.text()).toContain("activeSprint.selectProjectPrompt");
+  });
+
+  it("fetches the active sprint scoped to the selected project", async () => {
+    const wrapper = mountComponent("proj-1");
+    await new Promise((r) => setTimeout(r, 0));
+    await wrapper.vm.$nextTick();
+
+    expect(getSprintsMock).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ status: SprintStatus.ACTIVE, projectId: "proj-1" }),
+    );
+    expect(wrapper.text()).toContain("Sprint 1");
+  });
+
+  it("re-fetches scoped to the new project when the selected project changes", async () => {
+    const projectContext = {
+      selectedProjectId: ref<string | null>("proj-1"),
+      setSelectedProjectId: vi.fn(),
+    };
+    const wrapper = mount(ActiveSprintPage, {
+      global: { provide: { [ProjectContextKey as symbol]: projectContext } },
+    });
+    await new Promise((r) => setTimeout(r, 0));
+    await wrapper.vm.$nextTick();
+
+    getSprintsMock.mockClear();
+    projectContext.selectedProjectId.value = "proj-2";
+    await new Promise((r) => setTimeout(r, 0));
+    await wrapper.vm.$nextTick();
+
+    expect(getSprintsMock).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ projectId: "proj-2" }),
+    );
+  });
+});

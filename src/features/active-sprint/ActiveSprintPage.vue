@@ -153,7 +153,11 @@
           <path d="M13 2 3 14h9l-1 8 10-12h-9z" />
         </svg>
         <p class="text-muted-foreground text-sm">
-          {{ t("activeSprint.noSprint") }}
+          {{
+            selectedProjectId
+              ? t("activeSprint.noSprint")
+              : t("activeSprint.selectProjectPrompt")
+          }}
         </p>
       </div>
     </div>
@@ -552,11 +556,21 @@ async function loadData() {
   if (!apiClient) return;
   isLoading.value = true;
   try {
+    // Sprints are always project-scoped — with no project selected (the
+    // "Personal Workspace" state) there is no active sprint to show, so
+    // skip the fetch rather than falling back to an arbitrary sprint from
+    // some other project.
+    if (!selectedProjectId.value) {
+      activeSprint.value = null;
+      tasks.value = [];
+      members.value = [];
+      return;
+    }
+
     const sprintFilter: Record<string, string> = {
       status: SprintStatus.ACTIVE,
+      projectId: selectedProjectId.value,
     };
-    if (selectedProjectId.value)
-      sprintFilter.projectId = selectedProjectId.value;
 
     const sprints = await getSprints(apiClient, sprintFilter);
     activeSprint.value = sprints[0] ?? null;
