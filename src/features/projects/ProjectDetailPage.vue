@@ -26,7 +26,13 @@
             {{ project.clientName }}
           </p>
         </div>
-        <Button variant="outline" size="sm" class="gap-1.5 shrink-0" @click="openEditForm">
+        <Button
+          v-if="isAdmin"
+          variant="outline"
+          size="sm"
+          class="gap-1.5 shrink-0"
+          @click="openEditForm"
+        >
           <Pencil class="w-4 h-4" />
           {{ t('common.edit') }}
         </Button>
@@ -72,7 +78,7 @@
       </div>
 
       <!-- Sprint Management -->
-      <SprintManagement :project-id="project.id" />
+      <SprintManagement :project-id="project.id" :is-admin="isAdmin" />
 
       <!-- Member Management -->
       <ProjectMemberManagement :project-id="project.id" class="mt-6" />
@@ -89,13 +95,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { ArrowLeft, Pencil } from 'lucide-vue-next';
 import {
   useShellServices,
   useTaskboltTranslation,
 } from '@/shared/composables/useShellServices';
+import { useProjectRole } from '@/shared/composables/useProjectRole';
 import { getProjectById, updateProject } from '@/shared/services';
 import {
   formatDate,
@@ -119,6 +126,9 @@ const project = ref<Project | null>(null);
 const loading = ref(true);
 const error = ref<string | null>(null);
 const showEditForm = ref(false);
+
+const projectIdRef = computed(() => project.value?.id ?? null);
+const { isAdmin } = useProjectRole(projectIdRef);
 
 function getStatusClass(value: string): string {
   return getProjectStatusClass(value);

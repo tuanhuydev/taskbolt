@@ -4,7 +4,7 @@
       <Folder class="h-3.5 w-3.5" />
       <span class="font-mono">{{ scopeLabel }}</span>
     </template>
-    <template v-if="project" #actions>
+    <template v-if="project && isAdmin" #actions>
       <Button
         variant="outline"
         size="sm"
@@ -67,7 +67,7 @@
         </div>
       </div>
 
-      <SprintManagement :project-id="project.id" />
+      <SprintManagement :project-id="project.id" :is-admin="isAdmin" />
 
       <ProjectMemberManagement :project-id="project.id" />
 
@@ -114,6 +114,7 @@ import { ref, computed, watch, onMounted } from 'vue';
 import { Folder, Pencil, Columns3, Workflow, Bell } from 'lucide-vue-next';
 import { useShellServices, useTaskboltTranslation } from '@/shared/composables/useShellServices';
 import { useProjectContext } from '@/shared/composables/useProject';
+import { useProjectRole } from '@/shared/composables/useProjectRole';
 import { getProjectById, updateProject } from '@/shared/services';
 import {
   formatDate,
@@ -138,6 +139,9 @@ const project = ref<Project | null>(null);
 const loading = ref(true);
 const error = ref<string | null>(null);
 const showEditForm = ref(false);
+
+const projectIdRef = computed(() => project.value?.id ?? null);
+const { isAdmin } = useProjectRole(projectIdRef);
 
 const scopeLabel = computed(() => project.value?.name ?? t('sidebar.personalWorkspace'));
 
