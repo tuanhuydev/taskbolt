@@ -27,6 +27,7 @@ export const taskboltTranslations = {
     backlogs: {
       title: "Backlogs",
       empty: "No backlog items",
+      showClosed: "Show closed tasks",
     },
     reports: {
       title: "Reports",
@@ -183,6 +184,7 @@ export const taskboltTranslations = {
       IN_PROGRESS: "In Progress",
       IN_REVIEW: "In Review",
       DONE: "Done",
+      CLOSED: "Closed",
     },
     taskPriority: {
       HIGHEST: "Highest",
@@ -258,6 +260,7 @@ export const taskboltTranslations = {
     backlogs: {
       title: "Backlogs",
       empty: "Không có mục nào trong backlog",
+      showClosed: "Hiện công việc đã đóng",
     },
     reports: {
       title: "Báo cáo",
@@ -414,6 +417,7 @@ export const taskboltTranslations = {
       IN_PROGRESS: "Đang thực hiện",
       IN_REVIEW: "Đang xem xét",
       DONE: "Hoàn thành",
+      CLOSED: "Đã đóng",
     },
     taskPriority: {
       HIGHEST: "Cao nhất",
