@@ -3,7 +3,7 @@ import { mount } from "@vue/test-utils";
 import { ref } from "vue";
 import ActiveSprintPage from "@/features/active-sprint/ActiveSprintPage.vue";
 import { ProjectContextKey } from "@/shared/composables/useProject";
-import { setupShellServices, teardownShellServices } from "../mocks/shell-services";
+import { setupShellServices, teardownShellServices, mockApiClient } from "../mocks/shell-services";
 import { SprintStatus, type Sprint } from "@/shared/types/sprint";
 import {
   TaskStatus,
@@ -70,7 +70,7 @@ function mountComponent(selectedProjectId: string | null) {
   });
 }
 
-describe("ActiveSprintPage — CLOSED tasks are excluded from the board", () => {
+describe("ActiveSprintPage — CLOSED tasks fold into the Done column", () => {
   beforeEach(() => {
     setupShellServices();
     getSprintsMock.mockReset().mockResolvedValue([mockSprint]);
@@ -79,7 +79,7 @@ describe("ActiveSprintPage — CLOSED tasks are excluded from the board", () => 
   });
   afterEach(() => teardownShellServices());
 
-  it("does not render a CLOSED task in any column, and excludes its points from the sprint total", async () => {
+  it("renders a CLOSED task inside the Done column and excludes its points from the sprint total", async () => {
     getTasksMock.mockResolvedValue([
       makeTask({ id: "t-open", title: "Open task", status: TaskStatus.TODO, storyPoint: 5 }),
       makeTask({ id: "t-closed", title: "Closed task", status: TaskStatus.CLOSED, storyPoint: 8 }),
@@ -90,9 +90,68 @@ describe("ActiveSprintPage — CLOSED tasks are excluded from the board", () => 
     await wrapper.vm.$nextTick();
 
     expect(wrapper.text()).toContain("Open task");
-    expect(wrapper.text()).not.toContain("Closed task");
+    // Still visible on the board — folded into Done rather than hidden.
+    expect(wrapper.text()).toContain("Closed task");
+    expect(wrapper.text()).toContain("taskStatus.CLOSED");
     // Only the open task's 5 points should count toward the total.
     expect(wrapper.text()).toContain("of 5 points completed");
+
+    // Index 0 is the sprint progress stats block (matches the same class
+    // list incidentally); columns follow in TODO, In progress, Done order.
+    const doneColumn = wrapper.findAll(".flex-1.min-w-0.flex.flex-col")[3];
+    expect(doneColumn.text()).toContain("Closed task");
+  });
+
+  it("is a no-op drag when a CLOSED task is dropped back into Done (still folded from the same column)", async () => {
+    getTasksMock.mockResolvedValue([
+      makeTask({ id: "t-closed", title: "Closed task", status: TaskStatus.CLOSED, storyPoint: 8 }),
+    ]);
+    vi.mocked(mockApiClient.request).mockReset();
+
+    const wrapper = mountComponent("proj-1");
+    await new Promise((r) => setTimeout(r, 0));
+    await wrapper.vm.$nextTick();
+
+    const card = wrapper.find('[draggable="true"]');
+    await card.trigger("dragstart");
+    const doneColumn = wrapper.findAll(".flex-1.min-w-0.flex.flex-col")[3];
+    await doneColumn.trigger("drop");
+    await wrapper.vm.$nextTick();
+
+    // Dragged card's source column is Done (where CLOSED tasks render) and
+    // the drop target is also Done — same column, so no PATCH is sent and
+    // the task's own CLOSED status is left untouched.
+    expect(mockApiClient.request).not.toHaveBeenCalled();
+    expect(wrapper.text()).toContain("Closed task");
+  });
+});
+
+describe("ActiveSprintPage — Done column has no add-task shortcut", () => {
+  beforeEach(() => {
+    setupShellServices();
+    getSprintsMock.mockReset().mockResolvedValue([mockSprint]);
+    getTasksMock.mockReset().mockResolvedValue([]);
+    getProjectMembersMock.mockReset().mockResolvedValue([]);
+  });
+  afterEach(() => teardownShellServices());
+
+  it("offers an add-task button in To do and In progress, but not in Done", async () => {
+    const wrapper = mountComponent("proj-1");
+    await new Promise((r) => setTimeout(r, 0));
+    await wrapper.vm.$nextTick();
+
+    const columns = wrapper.findAll(".flex-1.min-w-0.flex.flex-col").slice(1);
+    expect(columns).toHaveLength(3);
+
+    const [todoCol, inProgressCol, doneCol] = columns;
+    expect(todoCol.text()).toContain("To do");
+    expect(todoCol.findAll('button[class*="border-dashed"]')).toHaveLength(1);
+
+    expect(inProgressCol.text()).toContain("In progress");
+    expect(inProgressCol.findAll('button[class*="border-dashed"]')).toHaveLength(1);
+
+    expect(doneCol.text()).toContain("Done");
+    expect(doneCol.findAll('button[class*="border-dashed"]')).toHaveLength(0);
   });
 });
 

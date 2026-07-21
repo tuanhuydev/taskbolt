@@ -194,6 +194,7 @@
           >
           <div class="flex-1"></div>
           <button
+            v-if="col.id !== TaskStatus.DONE"
             class="w-6 h-6 flex items-center justify-center bg-transparent rounded-md text-slate-400 hover:bg-slate-200 hover:text-foreground transition-colors"
             @click="openCreateTask(col.id)"
           >
@@ -222,7 +223,10 @@
             :key="task.id"
             draggable="true"
             class="bg-white border border-border rounded-md shadow-sm px-3.5 py-3.5 flex flex-col gap-2.5 cursor-grab hover:shadow-md hover:-translate-y-0.5 active:cursor-grabbing transition-all select-none"
-            :class="draggingId === task.id ? 'opacity-40' : ''"
+            :class="[
+              draggingId === task.id ? 'opacity-40' : '',
+              task.status === TaskStatus.CLOSED ? 'opacity-60' : '',
+            ]"
             @dragstart="handleDragStart(task.id, col.id)"
             @dragend="handleDragEnd"
             @click="selectTask(task)"
@@ -233,11 +237,18 @@
                 class="text-[11px] font-mono text-slate-400 tracking-wide"
                 >{{ taskTicket(task.id) }}</span
               >
-              <span
-                class="inline-flex items-center h-5 px-2 rounded-full text-[10.5px] font-bold uppercase tracking-wide"
-                :class="tagStyle(task.type).classes"
-                >{{ tagLabel(task.type) }}</span
-              >
+              <div class="flex items-center gap-1.5">
+                <span
+                  v-if="task.status === TaskStatus.CLOSED"
+                  class="inline-flex items-center h-5 px-2 rounded-full text-[10.5px] font-bold uppercase tracking-wide bg-red-50 text-red-700"
+                  >{{ t("taskStatus.CLOSED") }}</span
+                >
+                <span
+                  class="inline-flex items-center h-5 px-2 rounded-full text-[10.5px] font-bold uppercase tracking-wide"
+                  :class="tagStyle(task.type).classes"
+                  >{{ tagLabel(task.type) }}</span
+                >
+              </div>
             </div>
             <!-- Title -->
             <div
@@ -274,8 +285,10 @@
             </div>
           </div>
 
-          <!-- Inline add-task button -->
+          <!-- Inline add-task button — Done is reached by moving a task
+               through the workflow, not by creating one there directly. -->
           <button
+            v-if="col.id !== TaskStatus.DONE"
             class="flex items-center gap-1.5 w-full px-2.5 py-2.5 border border-dashed border-border bg-transparent rounded-md text-slate-400 text-xs font-semibold hover:bg-white hover:text-foreground hover:border-slate-400 transition-colors"
             @click="openCreateTask(col.id)"
           >
@@ -388,10 +401,17 @@ const COLUMNS: Array<{
   },
 ];
 
+// Closed (obsoleted) tasks don't get their own column — they're folded into
+// Done so completed-but-obsoleted work is still visible on the board instead
+// of vanishing, without adding a 4th column for what's a rare edge case.
 const columns = computed(() =>
   COLUMNS.map((col) => ({
     ...col,
-    tasks: tasks.value.filter((task) => task.status === col.id),
+    tasks: tasks.value.filter((task) =>
+      col.id === TaskStatus.DONE
+        ? task.status === TaskStatus.DONE || task.status === TaskStatus.CLOSED
+        : task.status === col.id,
+    ),
   })),
 );
 
@@ -419,8 +439,12 @@ const donePoints = computed(() =>
     .filter((t) => t.status === TaskStatus.DONE)
     .reduce((acc, t) => acc + (t.storyPoint ?? 0), 0),
 );
+// Closed tasks are obsoleted work — excluded from the points total so
+// completing/obsoleting a task doesn't skew sprint progress either way.
 const totalPoints = computed(() =>
-  tasks.value.reduce((acc, t) => acc + (t.storyPoint ?? 0), 0),
+  tasks.value
+    .filter((t) => t.status !== TaskStatus.CLOSED)
+    .reduce((acc, t) => acc + (t.storyPoint ?? 0), 0),
 );
 const progressPct = computed(() =>
   totalPoints.value
@@ -582,10 +606,10 @@ async function loadData() {
           ? getProjectMembers(apiClient, selectedProjectId.value)
           : Promise.resolve([]),
       ]);
-      // CLOSED tasks are obsoleted work — keep them out of the active sprint
-      // board (columns and points) entirely rather than giving them a 4th
-      // column; they're still reachable via Backlogs' closed-tasks filter.
-      tasks.value = sprintTasks.filter((t) => t.status !== TaskStatus.CLOSED);
+      // CLOSED tasks are obsoleted work — shown folded into the Done column
+      // (see `columns`) rather than hidden entirely, and excluded from the
+      // points total (see `totalPoints`).
+      tasks.value = sprintTasks;
       members.value = projectMembers;
     } else {
       tasks.value = [];
