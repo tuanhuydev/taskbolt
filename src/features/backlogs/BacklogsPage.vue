@@ -1,16 +1,16 @@
 <template>
   <h2 class="text-2xl font-semibold mb-3">Backlogs</h2>
-  <header class="h-14 bg-background flex items-center justify-between p-2 mb-3 rounded-md">
-    <div class="flex items-center gap-4">
+  <header class="bg-background flex flex-wrap-reverse items-center justify-between gap-3 p-2 mb-3 rounded-md">
+    <div class="flex items-center gap-4 w-full sm:w-auto">
       <Input
         type="text"
         :placeholder="t('header.searchPlaceholder')"
-        class="w-64"
+        class="w-full sm:w-64"
       />
     </div>
 
     <div class="flex items-center gap-4">
-      <label class="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer select-none">
+      <label class="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer select-none whitespace-nowrap">
         <Checkbox
           :model-value="showClosedTasks"
           @update:model-value="(v) => (showClosedTasks = !!v)"
