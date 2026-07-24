@@ -132,7 +132,7 @@
                   <div
                     v-for="comment in comments"
                     :key="comment.id"
-                    class="flex items-start gap-3"
+                    class="group flex items-start gap-3"
                   >
                     <AvatarInitials
                       :name="commentAuthorName(comment)"
@@ -148,6 +148,29 @@
                         <span class="text-xs font-mono text-muted-foreground">{{
                           formatDate(comment.createdAt)
                         }}</span>
+                        <div
+                          v-if="comment.createdById === currentUserId"
+                          class="ml-auto flex items-center gap-1 opacity-0 group-hover:opacity-100"
+                        >
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            class="h-5 w-5"
+                            :title="t('taskDetail.commentEdit')"
+                            @click="startEditComment(comment)"
+                          >
+                            <Pencil class="h-3 w-3" />
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            class="h-5 w-5"
+                            :title="t('taskDetail.commentDelete')"
+                            @click="deleteCommentHandler(comment)"
+                          >
+                            <Trash2 class="h-3 w-3" />
+                          </Button>
+                        </div>
                       </div>
                       <div
                         class="prose prose-sm max-w-none bg-muted/40 border rounded-md px-3 py-2 text-sm text-foreground wrap-break-word"
@@ -174,13 +197,26 @@
                     v-model="newCommentText"
                     :placeholder="t('taskDetail.commentPlaceholder')"
                   />
-                  <div class="flex justify-end">
+                  <div class="flex justify-end gap-2">
+                    <Button
+                      v-if="editingCommentId"
+                      size="sm"
+                      variant="outline"
+                      :disabled="submittingComment"
+                      @click="cancelEditComment"
+                    >
+                      {{ t("taskDetail.commentCancel") }}
+                    </Button>
                     <Button
                       size="sm"
                       :disabled="submittingComment || !newCommentText.trim()"
                       @click="submitComment"
                     >
-                      {{ t("taskDetail.commentSubmit") }}
+                      {{
+                        editingCommentId
+                          ? t("taskDetail.commentUpdate")
+                          : t("taskDetail.commentSubmit")
+                      }}
                     </Button>
                   </div>
                 </div>
@@ -370,7 +406,8 @@ import {
 import { formatDate } from "@/shared/lib/date";
 import { renderMarkdown } from "@/shared/lib/markdown";
 import { decodeJwtPayload } from "@/shared/lib/jwt";
-import { getComments, createComment } from "@/shared/services";
+import { getComments, createComment, updateComment, deleteComment } from "@/shared/services";
+import { Pencil, Trash2 } from "lucide-vue-next";
 import TaskFormFields from "./TaskFormFields.vue";
 import TaskDetailHeader from "./TaskDetailHeader.vue";
 import TaskItemPriority from "@/shared/components/ui/task-item/TaskItemPriority.vue";
@@ -489,6 +526,7 @@ const comments = ref<Comment[]>([]);
 const commentsLoading = ref(false);
 const newCommentText = ref("");
 const submittingComment = ref(false);
+const editingCommentId = ref<string | null>(null);
 
 // Resolves the current user id from the JWT's `sub` claim. Tasks/comments
 // created outside a project (personal workspace) have no member list to
@@ -540,6 +578,7 @@ watch(
   () => props.task?.id,
   (taskId) => {
     newCommentText.value = "";
+    editingCommentId.value = null;
     if (taskId) {
       fetchComments(taskId);
     } else {
@@ -561,17 +600,62 @@ async function submitComment() {
 
   submittingComment.value = true;
   try {
-    const comment = await createComment(apiClient, {
-      taskId: props.task.id,
-      content,
-    });
-    comments.value = [...comments.value, comment];
+    if (editingCommentId.value) {
+      const updated = await updateComment(apiClient, editingCommentId.value, {
+        content,
+      });
+      comments.value = comments.value.map((comment) =>
+        comment.id === updated.id ? updated : comment,
+      );
+      editingCommentId.value = null;
+    } else {
+      const comment = await createComment(apiClient, {
+        taskId: props.task.id,
+        content,
+      });
+      comments.value = [...comments.value, comment];
+    }
     newCommentText.value = "";
   } catch (err) {
-    console.error("Error creating comment:", err);
-    getToastService()?.error(t("toast.commentAddFailed"));
+    console.error("Error saving comment:", err);
+    getToastService()?.error(
+      editingCommentId.value
+        ? t("toast.commentUpdateFailed")
+        : t("toast.commentAddFailed"),
+    );
   } finally {
     submittingComment.value = false;
+  }
+}
+
+function startEditComment(comment: Comment) {
+  editingCommentId.value = comment.id;
+  newCommentText.value = comment.content;
+}
+
+function cancelEditComment() {
+  editingCommentId.value = null;
+  newCommentText.value = "";
+}
+
+async function deleteCommentHandler(comment: Comment) {
+  if (!window.confirm(t("taskDetail.commentDeleteConfirm"))) return;
+
+  const apiClient = getApiClient();
+  if (!apiClient) {
+    getToastService()?.error(t("toast.apiClientUnavailable"));
+    return;
+  }
+
+  try {
+    await deleteComment(apiClient, comment.id);
+    comments.value = comments.value.filter((c) => c.id !== comment.id);
+    if (editingCommentId.value === comment.id) {
+      cancelEditComment();
+    }
+  } catch (err) {
+    console.error("Error deleting comment:", err);
+    getToastService()?.error(t("toast.commentDeleteFailed"));
   }
 }
 
