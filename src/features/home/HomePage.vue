@@ -1,14 +1,14 @@
 <template>
   <div class="flex flex-col gap-4">
     <!-- Row 1: Greeting + Pomodoro + Sprint pulse -->
-    <div class="grid grid-cols-1 md:grid-cols-[1fr_260px_1fr] gap-4 items-stretch">
+    <div class="grid grid-cols-1 lg:grid-cols-[1fr_260px_1fr] gap-4 items-stretch">
       <Greeting :sprint="activeSprint" :my-task-count="myTaskCount" />
       <Pomodoro />
       <SprintPulse :sprint="activeSprint" :tasks="sprintTasks" :loading="isLoading" />
     </div>
 
     <!-- Row 2: My tasks + Activity feed -->
-    <div class="grid grid-cols-1 md:grid-cols-[1fr_320px] gap-4 items-start">
+    <div class="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4 items-start">
       <MyTasks :tasks="myTasks" :loading="isLoading" @toggle="handleTaskToggle" />
       <ActivityFeed />
     </div>

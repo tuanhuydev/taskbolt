@@ -13,6 +13,8 @@ export const taskboltTranslations = {
       backlogs: "Backlogs",
       reports: "Reports",
       configure: "Configure",
+      collapse: "Collapse sidebar",
+      expand: "Expand sidebar",
     },
     header: {
       searchPlaceholder: "Search issues...",
@@ -258,6 +260,8 @@ export const taskboltTranslations = {
       backlogs: "Backlogs",
       reports: "Báo cáo",
       configure: "Cấu hình",
+      collapse: "Thu gọn thanh bên",
+      expand: "Mở rộng thanh bên",
     },
     header: {
       searchPlaceholder: "Tìm kiếm issue...",
