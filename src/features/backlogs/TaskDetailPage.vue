@@ -1,0 +1,132 @@
+<template>
+  <div class="flex flex-col h-full">
+    <button
+      type="button"
+      class="mb-3 inline-flex w-fit items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+      @click="goBack"
+    >
+      <ArrowLeft class="h-4 w-4" />
+      {{ t("taskDetail.backToBacklogs") }}
+    </button>
+
+    <p v-if="loading" class="text-muted-foreground">{{ t("common.loading") }}</p>
+    <p v-else-if="error" class="text-destructive">{{ error }}</p>
+    <p v-else-if="!task" class="text-muted-foreground">{{ t("taskLink.notFound") }}</p>
+
+    <div
+      v-else
+      class="flex-1 min-h-0 flex flex-col border rounded-md bg-white overflow-hidden"
+    >
+      <TaskDetailContent
+        :task="task"
+        :tasks="taskList"
+        :members="members"
+        :sprints="sprints"
+        @close="goBack"
+        @update="handleUpdateTask"
+        @create="handleCreateTask"
+      />
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { computed, onMounted, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { ArrowLeft } from "lucide-vue-next";
+import {
+  useShellServices,
+  useTaskboltTranslation,
+} from "@/shared/composables/useShellServices";
+import { useProjectContext } from "@/shared/composables/useProject";
+import { useProjectRouteSync } from "@/shared/composables/useProjectRouteSync";
+import { useBacklogTasks } from "@/shared/composables/useBacklogTasks";
+import { APP_AUTH_URL } from "@/shared/lib/constants";
+import { updateTask } from "@/shared/services";
+import type { CreateTaskPayload, UpdateTaskPayload } from "@/shared/types/task";
+import TaskDetailContent from "./TaskDetailContent.vue";
+
+const { getApiClient, getToastService } = useShellServices();
+const { t } = useTaskboltTranslation();
+const route = useRoute();
+const router = useRouter();
+const { selectedProjectId } = useProjectContext();
+useProjectRouteSync();
+
+const {
+  taskList,
+  members,
+  sprints,
+  loading,
+  error,
+  fetchTasks,
+  fetchMembersAndSprints,
+} = useBacklogTasks(selectedProjectId);
+
+const taskId = computed(() => route.params.taskId as string);
+const task = computed(
+  () => taskList.value.find((candidate) => candidate.id === taskId.value) ?? null,
+);
+
+async function loadAll() {
+  await Promise.all([fetchTasks(), fetchMembersAndSprints()]);
+}
+
+onMounted(loadAll);
+watch(selectedProjectId, loadAll);
+
+function goBack() {
+  router.push({
+    name: "backlogs",
+    params: { projectId: route.params.projectId },
+  });
+}
+
+async function handleUpdateTask(data: UpdateTaskPayload) {
+  const apiClient = getApiClient();
+  const toastService = getToastService();
+
+  if (!apiClient) {
+    toastService?.error(t("toast.apiClientUnavailable"));
+    return;
+  }
+
+  try {
+    const { id, ...body } = data;
+    await updateTask(apiClient, id, body);
+    toastService?.success(t("toast.taskUpdated"));
+    await fetchTasks();
+  } catch (err: unknown) {
+    console.error("Error updating task:", err);
+    toastService?.error(t("toast.taskUpdateFailed"));
+  }
+}
+
+async function handleCreateTask(data: CreateTaskPayload) {
+  const apiClient = getApiClient();
+  const toastService = getToastService();
+
+  if (!apiClient) {
+    toastService?.error(t("toast.apiClientUnavailable"));
+    return;
+  }
+
+  try {
+    const response = await apiClient.request(`${APP_AUTH_URL}/tasks`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...data, projectId: selectedProjectId.value }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to create task (${response.status})`);
+    }
+
+    toastService?.success(t("toast.taskCreated"));
+    await fetchTasks();
+  } catch (err: unknown) {
+    console.error("Error creating task:", err);
+    toastService?.error(t("toast.taskCreateFailed"));
+  }
+}
+</script>

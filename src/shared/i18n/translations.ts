@@ -152,6 +152,7 @@ export const taskboltTranslations = {
       commentEdit: "Edit comment",
       commentDelete: "Delete comment",
       commentDeleteConfirm: "Delete this comment? This cannot be undone.",
+      backToBacklogs: "Back to Backlogs",
     },
     common: {
       save: "Save",
@@ -400,6 +401,7 @@ export const taskboltTranslations = {
       commentEdit: "Sửa bình luận",
       commentDelete: "Xóa bình luận",
       commentDeleteConfirm: "Xóa bình luận này? Không thể hoàn tác.",
+      backToBacklogs: "Quay lại Backlogs",
     },
     common: {
       save: "Lưu",
