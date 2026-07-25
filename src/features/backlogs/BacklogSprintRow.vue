@@ -1,6 +1,12 @@
 <template>
-  <li class="mb-2">
-    <h2 class="px-2 py-1 text-sm font-medium text-muted-foreground">
+  <li
+    class="mb-2"
+    :class="{ 'mt-3 border-t border-dashed border-border pt-3': !sprint }"
+  >
+    <h2
+      class="px-2 py-1 text-sm font-medium"
+      :class="sprint ? 'text-muted-foreground' : 'italic text-muted-foreground/70'"
+    >
       {{ sprint ? sprint.name : t("backlogs.backlogBucket") }}
     </h2>
     <ul class="flex flex-col gap-1">
@@ -12,6 +18,12 @@
         :active-task-id="activeTaskId"
         @click="emit('click', $event)"
       />
+      <li
+        v-if="!sprint && tasks.length === 0"
+        class="px-2 py-1 text-sm text-muted-foreground/70"
+      >
+        {{ t("backlogs.empty") }}
+      </li>
     </ul>
   </li>
 </template>
