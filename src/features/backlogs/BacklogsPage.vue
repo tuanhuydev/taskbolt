@@ -21,6 +21,12 @@
         />
         {{ t("backlogs.showClosed") }}
       </label>
+      <BacklogFilters
+        :statuses="selectedStatuses"
+        :priorities="selectedPriorities"
+        @update:statuses="selectedStatuses = $event"
+        @update:priorities="selectedPriorities = $event"
+      />
       <Button @click="openTaskForm">
         {{ t("header.newIssue") }}
       </Button>
@@ -79,6 +85,7 @@ import { APP_AUTH_URL } from "@/shared/lib/constants";
 import {
   Task,
   TaskStatus,
+  TaskPriority,
   type CreateTaskPayload,
   type UpdateTaskPayload,
 } from "@/shared/types/task";
@@ -88,6 +95,7 @@ import { Input } from "@/shared/components/ui/input";
 import { Checkbox } from "@/shared/components/ui/checkbox";
 import TaskDetail from "./TaskDetail.vue";
 import BacklogSprintRow from "./BacklogSprintRow.vue";
+import BacklogFilters from "./BacklogFilters.vue";
 import { TaskForm } from "./index";
 
 const { getApiClient, getToastService } = useShellServices();
@@ -111,6 +119,8 @@ const {
 // Closed (obsoleted) tasks aren't actionable but shouldn't be deleted —
 // hide them from the backlog list by default, toggle to reveal.
 const showClosedTasks = ref(false);
+const selectedStatuses = ref<TaskStatus[]>([]);
+const selectedPriorities = ref<TaskPriority[]>([]);
 
 const visibleTasks = computed(() =>
   showClosedTasks.value
@@ -210,6 +220,69 @@ onMounted(async () => {
 watch(selectedProjectId, async () => {
   await Promise.all([fetchTasks(), fetchMembersAndSprints()]);
 });
+
+// Refetch whenever the status/priority filter selection changes — filtering
+// happens server-side so it composes with pagination/sorting correctly.
+watch([selectedStatuses, selectedPriorities], fetchTasks);
+
+async function fetchTasks() {
+  const apiClient = getApiClient();
+
+  if (!apiClient) {
+    error.value = "API client not available from shell.";
+    loading.value = false;
+    return;
+  }
+
+  loading.value = true;
+  error.value = null;
+
+  try {
+    const filter: Record<string, string | null> = {
+      sortOrder: "desc",
+      sortBy: "createdAt",
+      projectId: selectedProjectId.value,
+    };
+
+    if (selectedStatuses.value.length) {
+      filter.status = selectedStatuses.value.join(",");
+    }
+    if (selectedPriorities.value.length) {
+      filter.priority = selectedPriorities.value.join(",");
+    }
+
+    const tasks = await getTasks(apiClient, filter);
+    taskList.value = tasks;
+  } catch (err: unknown) {
+    const message =
+      err instanceof Error ? err.message : "Failed to load tasks.";
+    error.value = message;
+  } finally {
+    loading.value = false;
+  }
+}
+
+async function fetchMembersAndSprints() {
+  const apiClient = getApiClient();
+  const projectId = selectedProjectId.value;
+
+  if (!apiClient || !projectId) {
+    members.value = [];
+    sprints.value = [];
+    return;
+  }
+
+  try {
+    const [projectMembers, projectSprints] = await Promise.all([
+      getProjectMembers(apiClient, projectId),
+      getSprints(apiClient, { projectId }),
+    ]);
+    members.value = projectMembers;
+    sprints.value = projectSprints;
+  } catch (err: unknown) {
+    console.error("Error fetching members/sprints:", err);
+  }
+}
 
 const selectTask = (task: Task) => {
   selectedTask.value = task;
