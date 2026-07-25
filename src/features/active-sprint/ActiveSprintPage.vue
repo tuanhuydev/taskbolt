@@ -340,6 +340,7 @@ import {
   useTaskboltTranslation,
 } from "@/shared/composables/useShellServices";
 import { useProjectContext } from "@/shared/composables/useProject";
+import { useProjectRouteSync } from "@/shared/composables/useProjectRouteSync";
 import { getSprints, getTasks, getProjectMembers } from "@/shared/services";
 import { type Sprint, SprintStatus } from "@/shared/types/sprint";
 import {
@@ -357,6 +358,7 @@ import { APP_AUTH_URL } from "@/shared/lib/constants";
 const { t } = useTaskboltTranslation();
 const { getApiClient, getToastService } = useShellServices();
 const { selectedProjectId } = useProjectContext();
+useProjectRouteSync();
 
 // ── State ──────────────────────────────────────────────────────────────────
 const activeSprint = ref<Sprint | null>(null);

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { mount } from "@vue/test-utils";
+import { createRouter, createMemoryHistory } from "vue-router";
 import { ref } from "vue";
 import ActiveSprintPage from "@/features/active-sprint/ActiveSprintPage.vue";
 import { ProjectContextKey } from "@/shared/composables/useProject";
@@ -58,13 +59,20 @@ function makeTask(overrides: Partial<Task>): Task {
   };
 }
 
-function mountComponent(selectedProjectId: string | null) {
+const router = createRouter({
+  history: createMemoryHistory(),
+  routes: [{ path: "/:projectId?/active-sprint", name: "active-sprint", component: ActiveSprintPage }],
+});
+
+async function mountComponent(selectedProjectId: string | null) {
   const projectContext = {
     selectedProjectId: ref<string | null>(selectedProjectId),
     setSelectedProjectId: vi.fn(),
   };
+  await router.push({ name: "active-sprint" });
   return mount(ActiveSprintPage, {
     global: {
+      plugins: [router],
       provide: { [ProjectContextKey as symbol]: projectContext },
     },
   });
@@ -85,7 +93,7 @@ describe("ActiveSprintPage — CLOSED tasks fold into the Done column", () => {
       makeTask({ id: "t-closed", title: "Closed task", status: TaskStatus.CLOSED, storyPoint: 8 }),
     ]);
 
-    const wrapper = mountComponent("proj-1");
+    const wrapper = await mountComponent("proj-1");
     await new Promise((r) => setTimeout(r, 0));
     await wrapper.vm.$nextTick();
 
@@ -108,7 +116,7 @@ describe("ActiveSprintPage — CLOSED tasks fold into the Done column", () => {
     ]);
     vi.mocked(mockApiClient.request).mockReset();
 
-    const wrapper = mountComponent("proj-1");
+    const wrapper = await mountComponent("proj-1");
     await new Promise((r) => setTimeout(r, 0));
     await wrapper.vm.$nextTick();
 
@@ -136,7 +144,7 @@ describe("ActiveSprintPage — Done column has no add-task shortcut", () => {
   afterEach(() => teardownShellServices());
 
   it("offers an add-task button in To do and In progress, but not in Done", async () => {
-    const wrapper = mountComponent("proj-1");
+    const wrapper = await mountComponent("proj-1");
     await new Promise((r) => setTimeout(r, 0));
     await wrapper.vm.$nextTick();
 
@@ -165,7 +173,7 @@ describe("ActiveSprintPage — project scoping", () => {
   afterEach(() => teardownShellServices());
 
   it("does not fetch or show any sprint when no project is selected", async () => {
-    const wrapper = mountComponent(null);
+    const wrapper = await mountComponent(null);
     await new Promise((r) => setTimeout(r, 0));
     await wrapper.vm.$nextTick();
 
@@ -174,7 +182,7 @@ describe("ActiveSprintPage — project scoping", () => {
   });
 
   it("fetches the active sprint scoped to the selected project", async () => {
-    const wrapper = mountComponent("proj-1");
+    const wrapper = await mountComponent("proj-1");
     await new Promise((r) => setTimeout(r, 0));
     await wrapper.vm.$nextTick();
 
@@ -190,8 +198,12 @@ describe("ActiveSprintPage — project scoping", () => {
       selectedProjectId: ref<string | null>("proj-1"),
       setSelectedProjectId: vi.fn(),
     };
+    await router.push({ name: "active-sprint" });
     const wrapper = mount(ActiveSprintPage, {
-      global: { provide: { [ProjectContextKey as symbol]: projectContext } },
+      global: {
+        plugins: [router],
+        provide: { [ProjectContextKey as symbol]: projectContext },
+      },
     });
     await new Promise((r) => setTimeout(r, 0));
     await wrapper.vm.$nextTick();

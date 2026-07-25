@@ -19,7 +19,7 @@
     </Transition>
 
     <AppSidebar
-      :current-path="currentPath"
+      :current-route-name="currentRouteName"
       :open="sidebarOpen"
       @navigate="handleNavigate"
       @close="sidebarOpen = false"
@@ -73,11 +73,18 @@ const sidebarOpen = ref(false);
 
 const { selectedProjectId } = provideProjectContext();
 
-const currentPath = computed(() => route?.path ?? "/");
+const currentRouteName = computed(() => (route?.name as string) ?? undefined);
 
-function handleNavigate(path: string): void {
+// Configure has its own :projectId semantics (see ConfigureHomePage) and
+// isn't part of the shared project-scoped URL prefix, so it's excluded here.
+const PROJECT_SCOPED_ROUTES = new Set(["home", "active-sprint", "backlogs", "reports"]);
+
+function handleNavigate(routeName: string): void {
   sidebarOpen.value = false;
-  router.push(path);
+  const params = PROJECT_SCOPED_ROUTES.has(routeName)
+    ? { projectId: selectedProjectId.value ?? undefined }
+    : undefined;
+  router.push({ name: routeName, params });
 }
 
 const getUserDetails = async () => {

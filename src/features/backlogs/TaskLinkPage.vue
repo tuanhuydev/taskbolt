@@ -39,7 +39,11 @@ onMounted(async () => {
   try {
     const task = await getTaskById(apiClient, taskId);
     setSelectedProjectId(task.projectId ?? null);
-    router.replace({ name: "backlogs", query: { task: task.id } });
+    router.replace({
+      name: "backlogs",
+      params: { projectId: task.projectId ?? undefined },
+      query: { task: task.id },
+    });
   } catch {
     error.value = t("taskLink.notFound");
   }

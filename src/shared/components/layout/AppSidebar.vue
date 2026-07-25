@@ -69,16 +69,16 @@
 
       <a
         v-for="item in menuItems"
-        :key="item.path"
+        :key="item.name"
         class="flex items-center gap-2 px-3 py-2 text-sm rounded-sm transition-colors hover:bg-accent hover:text-accent-foreground cursor-pointer"
         :class="[
-          isActive(item.path)
+          isActive(item.name)
             ? 'bg-primary text-primary-foreground font-medium'
             : 'text-muted-foreground',
           collapsed ? 'md:justify-center md:px-0' : '',
         ]"
         :title="t(item.labelKey)"
-        @click.prevent="navigate(item.path)"
+        @click.prevent="navigate(item.name)"
       >
         <component :is="item.icon" class="h-4 w-4 shrink-0" />
         <span v-if="!collapsed">{{ t(item.labelKey) }}</span>
@@ -118,12 +118,12 @@ import type { Project } from "@/shared/types/project";
 import { getProjects } from "@/shared/services";
 
 const props = defineProps<{
-  currentPath?: string;
+  currentRouteName?: string;
   open?: boolean;
 }>();
 
 const emit = defineEmits<{
-  navigate: [path: string];
+  navigate: [routeName: string];
   close: [];
 }>();
 
@@ -168,18 +168,18 @@ onMounted(() => {
 });
 
 const menuItems = [
-  { label: "Home",          labelKey: "sidebar.home",         path: "/home",          icon: House },
-  { label: "Active Sprint", labelKey: "sidebar.activeSprint", path: "/active-sprint", icon: Zap },
-  { label: "Backlogs",      labelKey: "sidebar.backlogs",     path: "/backlogs",      icon: ListTodo },
-  { label: "Reports",       labelKey: "sidebar.reports",      path: "/reports",       icon: BarChart2 },
-  { label: "Configure",     labelKey: "sidebar.configure",    path: "/configure",     icon: Settings },
+  { label: "Home",          labelKey: "sidebar.home",         name: "home",          icon: House },
+  { label: "Active Sprint", labelKey: "sidebar.activeSprint", name: "active-sprint", icon: Zap },
+  { label: "Backlogs",      labelKey: "sidebar.backlogs",     name: "backlogs",      icon: ListTodo },
+  { label: "Reports",       labelKey: "sidebar.reports",      name: "reports",       icon: BarChart2 },
+  { label: "Configure",     labelKey: "sidebar.configure",    name: "configure-home", icon: Settings },
 ];
 
-function isActive(path: string): boolean {
-  return props.currentPath === path;
+function isActive(routeName: string): boolean {
+  return props.currentRouteName === routeName;
 }
 
-function navigate(path: string): void {
-  emit("navigate", path);
+function navigate(routeName: string): void {
+  emit("navigate", routeName);
 }
 </script>
