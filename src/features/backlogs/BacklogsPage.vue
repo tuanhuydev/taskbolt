@@ -26,11 +26,12 @@
   <p v-else-if="error" class="text-destructive">{{ error }}</p>
 
   <ul v-else class="list-none overflow-auto max-h-4/5 p-2 bg-white rounded-md flex-1">
-    <TaskGroup
-      v-for="task in parentTasks"
-      :key="task.id"
-      :task="task"
-      :sub-tasks="subTaskMap.get(task.id) ?? []"
+    <BacklogSprintRow
+      v-for="group in sprintGroups"
+      :key="group.sprint?.id ?? 'backlog'"
+      :sprint="group.sprint"
+      :tasks="group.tasks"
+      :sub-task-map="subTaskMap"
       :active-task-id="selectedTask?.id ?? null"
       @click="selectTask"
     />
@@ -78,8 +79,8 @@ import type { Sprint } from "@/shared/types/sprint";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Checkbox } from "@/shared/components/ui/checkbox";
-import { TaskGroup } from "@/shared/components/ui/task-item";
 import TaskDetail from "./TaskDetail.vue";
+import BacklogSprintRow from "./BacklogSprintRow.vue";
 import { TaskForm } from "./index";
 import { getTasks, getProjectMembers, getSprints } from "@/shared/services";
 
@@ -131,6 +132,42 @@ const taskGroups = computed(() => {
 
 const subTaskMap = computed(() => taskGroups.value.childTaskMap);
 const parentTasks = computed(() => taskGroups.value.parentTaskList);
+
+interface SprintGroup {
+  sprint: Sprint | null;
+  tasks: Task[];
+}
+
+// Buckets parent tasks by sprintId so the backlog can be rendered as one
+// row per sprint. Tasks whose sprintId doesn't resolve to a fetched sprint
+// (e.g. it was deleted) fall back into the "no sprint" bucket.
+const sprintGroups = computed<SprintGroup[]>(() => {
+  const knownSprintIds = new Set(sprints.value.map((sprint) => sprint.id));
+  const tasksBySprintId = new Map<string, Task[]>();
+  const noSprintTasks: Task[] = [];
+
+  for (const task of parentTasks.value) {
+    if (task.sprintId && knownSprintIds.has(task.sprintId)) {
+      const existing = tasksBySprintId.get(task.sprintId) ?? [];
+      existing.push(task);
+      tasksBySprintId.set(task.sprintId, existing);
+    } else {
+      noSprintTasks.push(task);
+    }
+  }
+
+  const groups: SprintGroup[] = sprints.value
+    .filter((sprint) => tasksBySprintId.has(sprint.id))
+    .map((sprint) => ({
+      sprint,
+      tasks: tasksBySprintId.get(sprint.id) ?? [],
+    }));
+
+  groups.push({ sprint: null, tasks: noSprintTasks });
+
+  return groups;
+});
+
 const loading = ref(true);
 const error = ref<string | null>(null);
 
