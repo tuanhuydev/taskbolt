@@ -99,9 +99,9 @@
           </div>
         </div>
 
-        <DrawerTitle v-if="!isEditing" class="mb-2 px-3 text-xl line-clamp-3">
+        <h1 v-if="!isEditing" class="mb-2 px-3 text-xl font-semibold line-clamp-3">
           {{ task?.title }}
-        </DrawerTitle>
+        </h1>
       </div>
     </div>
   </DrawerHeader>
@@ -110,7 +110,7 @@
 <script setup lang="ts">
 import { ref, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
-import { DrawerHeader, DrawerTitle } from "@/shared/components/ui/drawer";
+import { DrawerHeader } from "@/shared/components/ui/drawer";
 import { Button } from "@/shared/components/ui/button";
 import type { Task } from "@/shared/types/task";
 import { useTaskboltTranslation } from "@/shared/composables/useShellServices";
