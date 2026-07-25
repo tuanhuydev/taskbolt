@@ -23,16 +23,35 @@
               {{ t(`taskType.${task.type}`) }}
             </Badge>
 
-            <Tooltip :open="copiedOpen" :disable-hoverable-content="true">
+            <Tooltip :open="copiedIdOpen" :disable-hoverable-content="true">
               <TooltipTrigger as-child>
                 <span
                   class="cursor-pointer truncate text-xs font-medium text-primary hover:underline"
-                  @click="copyTaskId(task?.id)"
+                  @click="copyTicketNumber(task?.id)"
                 >
                   {{
                     task?.id ? formatId(task.id) : t("taskDetailHeader.taskId")
                   }}
                 </span>
+              </TooltipTrigger>
+              <TooltipContent class="z-1150">
+                {{ t("taskDetailHeader.copied") }}
+              </TooltipContent>
+            </Tooltip>
+
+            <Tooltip :open="copiedLinkOpen" :disable-hoverable-content="true">
+              <TooltipTrigger as-child>
+                <Button
+                  v-if="task"
+                  data-testid="copy-task-detail-link"
+                  size="icon"
+                  variant="ghost"
+                  class="shrink-0 h-5 w-5 text-muted-foreground"
+                  :title="t('taskDetailHeader.copyLink')"
+                  @click="copyTaskDetailLink(task)"
+                >
+                  <Link class="h-3.5 w-3.5" />
+                </Button>
               </TooltipTrigger>
               <TooltipContent class="z-1150">
                 {{ t("taskDetailHeader.copied") }}
@@ -124,6 +143,7 @@ import {
   CopyPlus,
   CopySlash,
   Copy,
+  Link,
 } from "lucide-vue-next";
 import {
   DropdownMenu,
@@ -153,8 +173,10 @@ const emit = defineEmits<{
 
 const { t } = useTaskboltTranslation();
 const router = useRouter();
-const copiedOpen = ref(false);
-let copiedTimer: number | undefined;
+const copiedIdOpen = ref(false);
+const copiedLinkOpen = ref(false);
+let copiedIdTimer: number | undefined;
+let copiedLinkTimer: number | undefined;
 
 const formatId = (taskId: string) => {
   const expectedIdLength = 12;
@@ -164,35 +186,49 @@ const formatId = (taskId: string) => {
   return taskId;
 };
 
-const copyTaskId = async (taskId?: string) => {
+// Copies the ticket number only (the id shown in the header), not a link —
+// for pasting into places that just want the reference, e.g. commit messages.
+const copyTicketNumber = async (taskId?: string) => {
   if (!taskId) return;
 
-  // Copy a deep link (resolves to this task's own project + task list)
-  // rather than the bare id, so pasting it elsewhere is directly clickable.
-  const deepLink = `${window.location.origin}${
-    router.resolve({ name: "task-link", params: { taskId } }).href
+  try {
+    await navigator.clipboard.writeText(formatId(taskId));
+    copiedIdOpen.value = true;
+    if (copiedIdTimer) clearTimeout(copiedIdTimer);
+    copiedIdTimer = window.setTimeout(() => {
+      copiedIdOpen.value = false;
+    }, 1200);
+  } catch (error) {
+    copiedIdOpen.value = false;
+    console.error("Failed to copy ticket number to clipboard", error);
+  }
+};
+
+// Copies a shareable link to this task's dedicated detail page (as opposed
+// to the ticket-number-only copy above).
+const copyTaskDetailLink = async (task: Task) => {
+  const link = `${window.location.origin}${
+    router.resolve({
+      name: "task-detail",
+      params: { projectId: task.projectId ?? undefined, taskId: task.id },
+    }).href
   }`;
 
   try {
-    await navigator.clipboard.writeText(deepLink);
-    copiedOpen.value = true;
-
-    if (copiedTimer) {
-      clearTimeout(copiedTimer);
-    }
-
-    copiedTimer = window.setTimeout(() => {
-      copiedOpen.value = false;
+    await navigator.clipboard.writeText(link);
+    copiedLinkOpen.value = true;
+    if (copiedLinkTimer) clearTimeout(copiedLinkTimer);
+    copiedLinkTimer = window.setTimeout(() => {
+      copiedLinkOpen.value = false;
     }, 1200);
   } catch (error) {
-    copiedOpen.value = false;
-    console.error("Failed to copy task ID to clipboard", error);
+    copiedLinkOpen.value = false;
+    console.error("Failed to copy task link to clipboard", error);
   }
 };
 
 onBeforeUnmount(() => {
-  if (copiedTimer) {
-    clearTimeout(copiedTimer);
-  }
+  if (copiedIdTimer) clearTimeout(copiedIdTimer);
+  if (copiedLinkTimer) clearTimeout(copiedLinkTimer);
 });
 </script>
