@@ -65,6 +65,7 @@ import {
   useTaskboltTranslation,
 } from "@/shared/composables/useShellServices";
 import { useProjectContext } from "@/shared/composables/useProject";
+import { useProjectRouteSync } from "@/shared/composables/useProjectRouteSync";
 import { APP_AUTH_URL } from "@/shared/lib/constants";
 import {
   Task,
@@ -86,6 +87,7 @@ const { getApiClient, getToastService } = useShellServices();
 const { t } = useTaskboltTranslation();
 const { selectedProjectId } = useProjectContext();
 const route = useRoute();
+useProjectRouteSync();
 const selectedTask = ref<Task | null>(null);
 const shouldShowTaskDetail = ref<boolean>(false);
 const showTaskForm = ref<boolean>(false);

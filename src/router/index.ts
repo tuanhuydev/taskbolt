@@ -15,17 +15,21 @@ const routes = [
 		redirect: "/home",
 	},
 	{
-		path: "/home",
+		// :projectId is optional so the personal-workspace URL (/home) still
+		// resolves — present, it's the deep-linkable URL for that project's
+		// view, kept in sync with the sidebar's selected-project context via
+		// useProjectRouteSync().
+		path: "/:projectId?/home",
 		name: "home",
 		component: HomePage,
 	},
 	{
-		path: "/active-sprint",
+		path: "/:projectId?/active-sprint",
 		name: "active-sprint",
 		component: ActiveSprintPage,
 	},
 	{
-		path: "/backlogs",
+		path: "/:projectId?/backlogs",
 		name: "backlogs",
 		component: BacklogsPage,
 	},
@@ -37,7 +41,7 @@ const routes = [
 		component: TaskLinkPage,
 	},
 	{
-		path: "/reports",
+		path: "/:projectId?/reports",
 		name: "reports",
 		component: ReportsPage,
 	},

@@ -73,13 +73,16 @@ features/
 
 | Name | Path | Notes |
 |---|---|---|
-| `home` | `/home` | Default redirect from `/` |
-| `active-sprint` | `/active-sprint` | |
-| `backlogs` | `/backlogs` | |
-| `reports` | `/reports` | |
-| `configure-home` | `/configure` | Parent layout |
+| `home` | `/:projectId?/home` | Default redirect from `/` |
+| `active-sprint` | `/:projectId?/active-sprint` | |
+| `backlogs` | `/:projectId?/backlogs` | `?task=<id>` pre-selects a task |
+| `task-link` | `/tasks/:taskId` | Resolves a bare task id, redirects into `backlogs` |
+| `reports` | `/:projectId?/reports` | |
+| `configure-home` | `/configure/:projectId?` | Parent layout; own `:projectId` semantics, not part of the shared prefix below |
 | `project-list` | `/configure/projects` | |
 | `project-detail` | `/configure/projects/:projectId` | |
+
+`home`, `active-sprint`, `backlogs`, and `reports` share an optional `:projectId` URL prefix kept in sync with the sidebar's selected-project context via `useProjectRouteSync()` (`src/shared/composables/useProjectRouteSync.ts`) — call it once per page. No prefix means the personal workspace; selecting a project rewrites the URL to include it, and opening a project-scoped URL directly selects that project.
 
 **Always use named routes** — base path changes in shell (`/dashboard/taskbolt`):
 ```typescript

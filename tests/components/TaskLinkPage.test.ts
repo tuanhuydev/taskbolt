@@ -11,7 +11,7 @@ const router = createRouter({
   history: createMemoryHistory(),
   routes: [
     { path: "/tasks/:taskId", name: "task-link", component: TaskLinkPage },
-    { path: "/backlogs", name: "backlogs", component: { template: "<div />" } },
+    { path: "/:projectId?/backlogs", name: "backlogs", component: { template: "<div />" } },
   ],
 });
 
@@ -49,6 +49,7 @@ describe("TaskLinkPage", () => {
 
     expect(setSelectedProjectId).toHaveBeenCalledWith("proj-1");
     expect(router.currentRoute.value.name).toBe("backlogs");
+    expect(router.currentRoute.value.params.projectId).toBe("proj-1");
     expect(router.currentRoute.value.query.task).toBe("task-1");
   });
 

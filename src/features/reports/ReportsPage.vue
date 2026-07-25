@@ -6,5 +6,7 @@
 </template>
 
 <script setup lang="ts">
-// Reports page
+import { useProjectRouteSync } from '@/shared/composables/useProjectRouteSync';
+
+useProjectRouteSync();
 </script>

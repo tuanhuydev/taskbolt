@@ -18,6 +18,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useApiClient } from '@/shared/composables/useShellServices';
+import { useProjectRouteSync } from '@/shared/composables/useProjectRouteSync';
 import { useUserStore } from '@/configs/store';
 import { getSprints } from '@/shared/services/sprint.service';
 import { getTasks, updateTask } from '@/shared/services/task.service';
@@ -32,6 +33,8 @@ import ActivityFeed from './ActivityFeed.vue';
 
 const apiClient = useApiClient();
 const { user } = useUserStore();
+
+useProjectRouteSync();
 
 const activeSprint = ref<Sprint | null>(null);
 const sprintTasks = ref<Task[]>([]);
