@@ -75,7 +75,7 @@ import {
   type UpdateTaskPayload,
 } from "@/shared/types/task";
 import type { ProjectMember } from "@/shared/types/member";
-import type { Sprint } from "@/shared/types/sprint";
+import { SprintStatus, type Sprint } from "@/shared/types/sprint";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Checkbox } from "@/shared/components/ui/checkbox";
@@ -138,6 +138,15 @@ interface SprintGroup {
   tasks: Task[];
 }
 
+// Active sprints surface first (what you're working on now), then planned,
+// then completed last — the "no sprint" bucket is appended after sorting
+// so it always stays at the very bottom regardless of sprint statuses.
+const SPRINT_STATUS_ORDER: Record<SprintStatus, number> = {
+  [SprintStatus.ACTIVE]: 0,
+  [SprintStatus.PLANNED]: 1,
+  [SprintStatus.COMPLETED]: 2,
+};
+
 // Buckets parent tasks by sprintId so the backlog can be rendered as one
 // row per sprint. Tasks whose sprintId doesn't resolve to a fetched sprint
 // (e.g. it was deleted) fall back into the "no sprint" bucket.
@@ -161,7 +170,12 @@ const sprintGroups = computed<SprintGroup[]>(() => {
     .map((sprint) => ({
       sprint,
       tasks: tasksBySprintId.get(sprint.id) ?? [],
-    }));
+    }))
+    .sort(
+      (a, b) =>
+        SPRINT_STATUS_ORDER[a.sprint!.status] -
+        SPRINT_STATUS_ORDER[b.sprint!.status],
+    );
 
   groups.push({ sprint: null, tasks: noSprintTasks });
 
