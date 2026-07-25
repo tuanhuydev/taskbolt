@@ -8,7 +8,7 @@ import { cn } from "@/shared/lib/utils"
 
 const props = withDefaults(
   defineProps<SelectContentProps & { class?: HTMLAttributes["class"]; emptyText?: string }>(),
-  { position: "popper", emptyText: "No data available" },
+  { position: "popper", emptyText: "No data available", class: undefined },
 )
 const emits = defineEmits<SelectContentEmits>()
 

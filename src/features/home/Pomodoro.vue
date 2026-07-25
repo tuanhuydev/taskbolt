@@ -4,9 +4,9 @@
       <span class="font-bold text-[12.5px] text-foreground">Pomodoro</span>
       <div class="flex gap-1.5">
         <button
-          @click="startTimer"
           class="w-7 h-7 flex items-center justify-center border border-border rounded-lg cursor-pointer transition-colors"
           :class="isRunning ? 'bg-foreground text-background' : 'bg-white text-foreground'"
+          @click="startTimer"
         >
           <svg v-if="isRunning" width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
             <rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/>
@@ -16,8 +16,8 @@
           </svg>
         </button>
         <button
-          @click="resetTimer"
           class="w-7 h-7 flex items-center justify-center border border-border bg-white text-foreground rounded-lg cursor-pointer"
+          @click="resetTimer"
         >
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>
@@ -55,11 +55,11 @@
       <button
         v-for="mode in MODES"
         :key="mode.key"
-        @click="setMode(mode.key)"
         class="h-6 px-2.5 rounded-full border text-[10.5px] font-semibold cursor-pointer transition-colors"
         :class="currentMode === mode.key
           ? 'border-foreground bg-foreground text-background'
           : 'border-border bg-transparent text-muted-foreground'"
+        @click="setMode(mode.key)"
       >
         {{ mode.label }}
       </button>

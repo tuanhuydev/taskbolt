@@ -16,18 +16,20 @@ export const shellServicesPlugin = {
 			// Provide the registry globally
 			app.provide(SHELL_SERVICES_KEY, registry);
 
-			console.log(
-				"[Shell Services] Successfully connected to shell service registry",
-			);
-
-			// Debug: Log available services
-			if (registry.list) {
-				const availableServices = registry.list();
-				console.log("[Shell Services] Available services:", availableServices);
+			if (import.meta.env.DEV) {
 				console.log(
-					"[Shell Services] Registry info:",
-					registry.getRegistryInfo?.(),
+					"[Shell Services] Successfully connected to shell service registry",
 				);
+
+				// Debug: Log available services
+				if (registry.list) {
+					const availableServices = registry.list();
+					console.log("[Shell Services] Available services:", availableServices);
+					console.log(
+						"[Shell Services] Registry info:",
+						registry.getRegistryInfo?.(),
+					);
+				}
 			}
 		} else {
 			console.warn(

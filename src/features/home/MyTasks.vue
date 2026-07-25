@@ -28,9 +28,9 @@
         class="flex items-center gap-3 px-5 py-3.5 border-b border-border last:border-b-0 hover:bg-slate-50 transition-colors"
       >
         <button
-          @click="toggleTask(task)"
           class="w-5 h-5 flex-none rounded-[6px] border-2 flex items-center justify-center transition-colors cursor-pointer"
           :class="isDone(task) ? 'border-primary bg-primary' : 'border-slate-400 bg-transparent'"
+          @click="toggleTask(task)"
         >
           <svg v-if="isDone(task)" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="20 6 9 17 4 12"/>

@@ -15,6 +15,8 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   size: "md",
+  colorKey: undefined,
+  class: undefined,
 });
 
 const initials = computed(() => getInitials(props.name));

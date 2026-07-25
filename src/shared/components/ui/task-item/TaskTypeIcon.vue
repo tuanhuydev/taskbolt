@@ -9,7 +9,7 @@ import issueSrc from "@/assets/icons/issue.svg";
 import bugSrc from "@/assets/icons/bug.svg";
 import { TaskType } from "@/shared/types/task";
 
-const props = defineProps<{ type: TaskType }>();
+defineProps<{ type: TaskType }>();
 
 function getIcon(type: TaskType) {
   switch (type) {
