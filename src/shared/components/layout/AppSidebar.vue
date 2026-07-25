@@ -75,7 +75,7 @@
           isActive(item.name)
             ? 'bg-primary text-primary-foreground font-medium'
             : 'text-muted-foreground',
-          collapsed ? 'md:justify-center md:px-0' : '',
+          collapsed ? 'md:w-8 md:h-8 md:mx-auto md:justify-center md:px-0 md:py-0' : '',
         ]"
         :title="t(item.labelKey)"
         @click.prevent="navigate(item.name)"
