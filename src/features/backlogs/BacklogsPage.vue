@@ -106,6 +106,8 @@ useProjectRouteSync();
 const selectedTask = ref<Task | null>(null);
 const shouldShowTaskDetail = ref<boolean>(false);
 const showTaskForm = ref<boolean>(false);
+const selectedStatuses = ref<TaskStatus[]>([]);
+const selectedPriorities = ref<TaskPriority[]>([]);
 
 const {
   taskList,
@@ -115,12 +117,13 @@ const {
   error,
   fetchTasks,
   fetchMembersAndSprints,
-} = useBacklogTasks(selectedProjectId);
+} = useBacklogTasks(selectedProjectId, {
+  statuses: selectedStatuses,
+  priorities: selectedPriorities,
+});
 // Closed (obsoleted) tasks aren't actionable but shouldn't be deleted —
 // hide them from the backlog list by default, toggle to reveal.
 const showClosedTasks = ref(false);
-const selectedStatuses = ref<TaskStatus[]>([]);
-const selectedPriorities = ref<TaskPriority[]>([]);
 
 const visibleTasks = computed(() =>
   showClosedTasks.value
@@ -224,65 +227,6 @@ watch(selectedProjectId, async () => {
 // Refetch whenever the status/priority filter selection changes — filtering
 // happens server-side so it composes with pagination/sorting correctly.
 watch([selectedStatuses, selectedPriorities], fetchTasks);
-
-async function fetchTasks() {
-  const apiClient = getApiClient();
-
-  if (!apiClient) {
-    error.value = "API client not available from shell.";
-    loading.value = false;
-    return;
-  }
-
-  loading.value = true;
-  error.value = null;
-
-  try {
-    const filter: Record<string, string | null> = {
-      sortOrder: "desc",
-      sortBy: "createdAt",
-      projectId: selectedProjectId.value,
-    };
-
-    if (selectedStatuses.value.length) {
-      filter.status = selectedStatuses.value.join(",");
-    }
-    if (selectedPriorities.value.length) {
-      filter.priority = selectedPriorities.value.join(",");
-    }
-
-    const tasks = await getTasks(apiClient, filter);
-    taskList.value = tasks;
-  } catch (err: unknown) {
-    const message =
-      err instanceof Error ? err.message : "Failed to load tasks.";
-    error.value = message;
-  } finally {
-    loading.value = false;
-  }
-}
-
-async function fetchMembersAndSprints() {
-  const apiClient = getApiClient();
-  const projectId = selectedProjectId.value;
-
-  if (!apiClient || !projectId) {
-    members.value = [];
-    sprints.value = [];
-    return;
-  }
-
-  try {
-    const [projectMembers, projectSprints] = await Promise.all([
-      getProjectMembers(apiClient, projectId),
-      getSprints(apiClient, { projectId }),
-    ]);
-    members.value = projectMembers;
-    sprints.value = projectSprints;
-  } catch (err: unknown) {
-    console.error("Error fetching members/sprints:", err);
-  }
-}
 
 const selectTask = (task: Task) => {
   selectedTask.value = task;

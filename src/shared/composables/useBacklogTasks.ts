@@ -1,16 +1,24 @@
 import { ref, type Ref } from "vue";
 import { useShellServices } from "@/shared/composables/useShellServices";
 import { getTasks, getProjectMembers, getSprints } from "@/shared/services";
-import type { Task } from "@/shared/types/task";
+import type { Task, TaskStatus, TaskPriority } from "@/shared/types/task";
 import type { ProjectMember } from "@/shared/types/member";
 import type { Sprint } from "@/shared/types/sprint";
+
+export interface BacklogTaskFilters {
+  statuses?: Ref<TaskStatus[]>;
+  priorities?: Ref<TaskPriority[]>;
+}
 
 /**
  * Fetches the task list, project members and sprints for a project — shared
  * between BacklogsPage (drawer entry point) and TaskDetailPage (dedicated
  * page entry point) so both resolve tasks/sprints/members the same way.
  */
-export function useBacklogTasks(selectedProjectId: Ref<string | null>) {
+export function useBacklogTasks(
+  selectedProjectId: Ref<string | null>,
+  filters: BacklogTaskFilters = {},
+) {
   const { getApiClient } = useShellServices();
 
   const taskList = ref<Task[]>([]);
@@ -37,6 +45,13 @@ export function useBacklogTasks(selectedProjectId: Ref<string | null>) {
         sortBy: "createdAt",
         projectId: selectedProjectId.value,
       };
+
+      if (filters.statuses?.value.length) {
+        filter.status = filters.statuses.value.join(",");
+      }
+      if (filters.priorities?.value.length) {
+        filter.priority = filters.priorities.value.join(",");
+      }
 
       taskList.value = await getTasks(apiClient, filter);
     } catch (err: unknown) {
