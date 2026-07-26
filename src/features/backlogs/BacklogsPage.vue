@@ -1,6 +1,8 @@
 <template>
   <h2 class="text-2xl font-semibold mb-3">Backlogs</h2>
-  <header class="bg-background flex flex-wrap-reverse items-center justify-between gap-3 p-2 mb-3 rounded-md">
+  <header
+    class="bg-background flex flex-wrap-reverse items-center justify-between gap-3 p-2 mb-3 rounded-md"
+  >
     <div class="flex items-center gap-4 w-full sm:w-auto">
       <Input
         type="text"
@@ -10,7 +12,9 @@
     </div>
 
     <div class="flex items-center gap-4">
-      <label class="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer select-none whitespace-nowrap">
+      <label
+        class="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer select-none whitespace-nowrap"
+      >
         <Checkbox
           :model-value="showClosedTasks"
           @update:model-value="(v) => (showClosedTasks = !!v)"
@@ -25,7 +29,10 @@
   <p v-if="loading" class="text-muted-foreground">Loading tasks…</p>
   <p v-else-if="error" class="text-destructive">{{ error }}</p>
 
-  <ul v-else class="list-none overflow-auto max-h-4/5 p-2 bg-white rounded-md flex-1">
+  <ul
+    v-else
+    class="list-none overflow-auto max-h-4/5 p-2 bg-white rounded-md flex-1"
+  >
     <BacklogSprintRow
       v-for="group in sprintGroups"
       :key="group.sprint?.id ?? 'backlog'"
@@ -67,6 +74,7 @@ import {
 } from "@/shared/composables/useShellServices";
 import { useProjectContext } from "@/shared/composables/useProject";
 import { useProjectRouteSync } from "@/shared/composables/useProjectRouteSync";
+import { useBacklogTasks } from "@/shared/composables/useBacklogTasks";
 import { APP_AUTH_URL } from "@/shared/lib/constants";
 import {
   Task,
@@ -74,7 +82,6 @@ import {
   type CreateTaskPayload,
   type UpdateTaskPayload,
 } from "@/shared/types/task";
-import type { ProjectMember } from "@/shared/types/member";
 import { SprintStatus, type Sprint } from "@/shared/types/sprint";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
@@ -82,7 +89,6 @@ import { Checkbox } from "@/shared/components/ui/checkbox";
 import TaskDetail from "./TaskDetail.vue";
 import BacklogSprintRow from "./BacklogSprintRow.vue";
 import { TaskForm } from "./index";
-import { getTasks, getProjectMembers, getSprints } from "@/shared/services";
 
 const { getApiClient, getToastService } = useShellServices();
 const { t } = useTaskboltTranslation();
@@ -93,9 +99,15 @@ const selectedTask = ref<Task | null>(null);
 const shouldShowTaskDetail = ref<boolean>(false);
 const showTaskForm = ref<boolean>(false);
 
-const taskList = ref<Task[]>([]);
-const members = ref<ProjectMember[]>([]);
-const sprints = ref<Sprint[]>([]);
+const {
+  taskList,
+  members,
+  sprints,
+  loading,
+  error,
+  fetchTasks,
+  fetchMembersAndSprints,
+} = useBacklogTasks(selectedProjectId);
 // Closed (obsoleted) tasks aren't actionable but shouldn't be deleted —
 // hide them from the backlog list by default, toggle to reveal.
 const showClosedTasks = ref(false);
@@ -182,9 +194,6 @@ const sprintGroups = computed<SprintGroup[]>(() => {
   return groups;
 });
 
-const loading = ref(true);
-const error = ref<string | null>(null);
-
 onMounted(async () => {
   await Promise.all([fetchTasks(), fetchMembersAndSprints()]);
 
@@ -201,58 +210,6 @@ onMounted(async () => {
 watch(selectedProjectId, async () => {
   await Promise.all([fetchTasks(), fetchMembersAndSprints()]);
 });
-
-async function fetchTasks() {
-  const apiClient = getApiClient();
-
-  if (!apiClient) {
-    error.value = "API client not available from shell.";
-    loading.value = false;
-    return;
-  }
-
-  loading.value = true;
-  error.value = null;
-
-  try {
-    const filter: Record<string, string | null> = {
-      sortOrder: "desc",
-      sortBy: "createdAt",
-      projectId: selectedProjectId.value,
-    };
-
-    const tasks = await getTasks(apiClient, filter);
-    taskList.value = tasks;
-  } catch (err: unknown) {
-    const message =
-      err instanceof Error ? err.message : "Failed to load tasks.";
-    error.value = message;
-  } finally {
-    loading.value = false;
-  }
-}
-
-async function fetchMembersAndSprints() {
-  const apiClient = getApiClient();
-  const projectId = selectedProjectId.value;
-
-  if (!apiClient || !projectId) {
-    members.value = [];
-    sprints.value = [];
-    return;
-  }
-
-  try {
-    const [projectMembers, projectSprints] = await Promise.all([
-      getProjectMembers(apiClient, projectId),
-      getSprints(apiClient, { projectId }),
-    ]);
-    members.value = projectMembers;
-    sprints.value = projectSprints;
-  } catch (err: unknown) {
-    console.error("Error fetching members/sprints:", err);
-  }
-}
 
 const selectTask = (task: Task) => {
   selectedTask.value = task;

@@ -9,10 +9,15 @@ const router = createRouter({
   routes: [
     { path: "/", component: { template: "<div />" } },
     { path: "/tasks/:taskId", name: "task-link", component: { template: "<div />" } },
+    {
+      path: "/:projectId?/backlogs/:taskId",
+      name: "task-detail",
+      component: { template: "<div />" },
+    },
   ],
 });
 
-const task = { id: "task-abc123def456", type: TaskType.ISSUE } as Task;
+const task = { id: "task-abc123def456", type: TaskType.ISSUE, projectId: null } as Task;
 
 function mountComponent() {
   return mount(TaskDetailHeader, {
@@ -25,13 +30,12 @@ function mountComponent() {
         TooltipContent: true,
         DropdownMenu: true,
         DrawerHeader: { template: "<div><slot /></div>" },
-        DrawerTitle: { template: "<div><slot /></div>" },
       },
     },
   });
 }
 
-describe("TaskDetailHeader — copy deep link", () => {
+describe("TaskDetailHeader — copy actions", () => {
   beforeEach(() => {
     Object.defineProperty(navigator, "clipboard", {
       value: { writeText: vi.fn().mockResolvedValue(undefined) },
@@ -39,7 +43,7 @@ describe("TaskDetailHeader — copy deep link", () => {
     });
   });
 
-  it("copies a /tasks/:taskId deep link (not the bare id) to the clipboard", async () => {
+  it("copies the ticket number only (not a link) when clicking the task id", async () => {
     await router.push("/");
     const wrapper = mountComponent();
 
@@ -48,7 +52,20 @@ describe("TaskDetailHeader — copy deep link", () => {
     await wrapper.vm.$nextTick();
 
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
-      expect.stringContaining(`/tasks/${task.id}`),
+      expect.not.stringContaining("/"),
+    );
+  });
+
+  it("copies a full link to the dedicated task detail page from the Link button", async () => {
+    await router.push("/");
+    const wrapper = mountComponent();
+
+    const linkButton = wrapper.find('[data-testid="copy-task-detail-link"]');
+    await linkButton.trigger("click");
+    await wrapper.vm.$nextTick();
+
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+      expect.stringContaining(`/backlogs/${task.id}`),
     );
   });
 });

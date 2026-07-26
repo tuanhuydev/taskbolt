@@ -125,6 +125,7 @@ export const taskboltTranslations = {
     taskDetailHeader: {
       taskId: "Task ID",
       copied: "Copied",
+      copyLink: "Copy link to task page",
       createSubTask: "Create sub-task",
       convertToSubTask: "Convert to sub-task",
       convertToTask: "Convert to task",
@@ -152,6 +153,7 @@ export const taskboltTranslations = {
       commentEdit: "Edit comment",
       commentDelete: "Delete comment",
       commentDeleteConfirm: "Delete this comment? This cannot be undone.",
+      backToBacklogs: "Back to Backlogs",
     },
     common: {
       save: "Save",
@@ -373,6 +375,7 @@ export const taskboltTranslations = {
     taskDetailHeader: {
       taskId: "Mã công việc",
       copied: "Đã sao chép",
+      copyLink: "Sao chép liên kết đến trang công việc",
       createSubTask: "Tạo sub-task",
       convertToSubTask: "Chuyển thành sub-task",
       convertToTask: "Chuyển thành công việc",
@@ -400,6 +403,7 @@ export const taskboltTranslations = {
       commentEdit: "Sửa bình luận",
       commentDelete: "Xóa bình luận",
       commentDeleteConfirm: "Xóa bình luận này? Không thể hoàn tác.",
+      backToBacklogs: "Quay lại Backlogs",
     },
     common: {
       save: "Lưu",

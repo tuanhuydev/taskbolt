@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import ActiveSprintPage from "@/features/active-sprint/ActiveSprintPage.vue";
 import BacklogsPage from "@/features/backlogs/BacklogsPage.vue";
+import TaskDetailPage from "@/features/backlogs/TaskDetailPage.vue";
 import TaskLinkPage from "@/features/backlogs/TaskLinkPage.vue";
 import ReportsPage from "@/features/reports/ReportsPage.vue";
 import ConfigurePage from "@/features/configure/ConfigurePage.vue";
@@ -32,6 +33,13 @@ const routes = [
 		path: "/:projectId?/backlogs",
 		name: "backlogs",
 		component: BacklogsPage,
+	},
+	{
+		// Dedicated, shareable task detail page — separate from the
+		// `backlogs?task=<id>` drawer used for quick access from the list.
+		path: "/:projectId?/backlogs/:taskId",
+		name: "task-detail",
+		component: TaskDetailPage,
 	},
 	{
 		// Deep link: resolves a bare task id to its project, then redirects
