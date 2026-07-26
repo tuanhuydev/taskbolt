@@ -31,6 +31,7 @@ export const taskboltTranslations = {
       title: "Backlogs",
       empty: "No backlog items",
       showClosed: "Show closed tasks",
+      backlogBucket: "Backlog",
     },
     reports: {
       title: "Reports",
@@ -278,6 +279,7 @@ export const taskboltTranslations = {
       title: "Backlogs",
       empty: "Không có mục nào trong backlog",
       showClosed: "Hiện công việc đã đóng",
+      backlogBucket: "Backlog",
     },
     reports: {
       title: "Báo cáo",
