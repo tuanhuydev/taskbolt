@@ -21,6 +21,12 @@
         />
         {{ t("backlogs.showClosed") }}
       </label>
+      <BacklogFilters
+        :statuses="selectedStatuses"
+        :priorities="selectedPriorities"
+        @update:statuses="selectedStatuses = $event"
+        @update:priorities="selectedPriorities = $event"
+      />
       <Button @click="openTaskForm">
         {{ t("header.newIssue") }}
       </Button>
@@ -79,6 +85,7 @@ import { APP_AUTH_URL } from "@/shared/lib/constants";
 import {
   Task,
   TaskStatus,
+  TaskPriority,
   type CreateTaskPayload,
   type UpdateTaskPayload,
 } from "@/shared/types/task";
@@ -88,6 +95,7 @@ import { Input } from "@/shared/components/ui/input";
 import { Checkbox } from "@/shared/components/ui/checkbox";
 import TaskDetail from "./TaskDetail.vue";
 import BacklogSprintRow from "./BacklogSprintRow.vue";
+import BacklogFilters from "./BacklogFilters.vue";
 import { TaskForm } from "./index";
 
 const { getApiClient, getToastService } = useShellServices();
@@ -98,6 +106,8 @@ useProjectRouteSync();
 const selectedTask = ref<Task | null>(null);
 const shouldShowTaskDetail = ref<boolean>(false);
 const showTaskForm = ref<boolean>(false);
+const selectedStatuses = ref<TaskStatus[]>([]);
+const selectedPriorities = ref<TaskPriority[]>([]);
 
 const {
   taskList,
@@ -107,7 +117,10 @@ const {
   error,
   fetchTasks,
   fetchMembersAndSprints,
-} = useBacklogTasks(selectedProjectId);
+} = useBacklogTasks(selectedProjectId, {
+  statuses: selectedStatuses,
+  priorities: selectedPriorities,
+});
 // Closed (obsoleted) tasks aren't actionable but shouldn't be deleted —
 // hide them from the backlog list by default, toggle to reveal.
 const showClosedTasks = ref(false);
@@ -210,6 +223,10 @@ onMounted(async () => {
 watch(selectedProjectId, async () => {
   await Promise.all([fetchTasks(), fetchMembersAndSprints()]);
 });
+
+// Refetch whenever the status/priority filter selection changes — filtering
+// happens server-side so it composes with pagination/sorting correctly.
+watch([selectedStatuses, selectedPriorities], fetchTasks);
 
 const selectTask = (task: Task) => {
   selectedTask.value = task;

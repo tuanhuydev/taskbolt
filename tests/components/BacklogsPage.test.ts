@@ -77,14 +77,21 @@ function mountComponent() {
   });
 }
 
+// Task titles render inside the task list's <h1> per TaskGroup.vue — scoping
+// assertions to those avoids false substring matches against unrelated page
+// text (e.g. untranslated i18n keys rendered raw in this test environment).
+function taskTitles(wrapper: ReturnType<typeof mountComponent>): string[] {
+  return wrapper.findAll("h1").map((el) => el.text());
+}
+
 describe("BacklogsPage — closed tasks filter", () => {
   it("hides closed tasks by default", async () => {
     const wrapper = mountComponent();
     await new Promise((r) => setTimeout(r, 0));
     await wrapper.vm.$nextTick();
 
-    expect(wrapper.text()).toContain("Open task");
-    expect(wrapper.text()).not.toContain("Closed task");
+    expect(taskTitles(wrapper)).toContain("Open task");
+    expect(taskTitles(wrapper)).not.toContain("Closed task");
   });
 
   it("reveals closed tasks once the show-closed checkbox is checked", async () => {
@@ -96,8 +103,8 @@ describe("BacklogsPage — closed tasks filter", () => {
     await checkbox.vm.$emit("update:modelValue", true);
     await wrapper.vm.$nextTick();
 
-    expect(wrapper.text()).toContain("Open task");
-    expect(wrapper.text()).toContain("Closed task");
+    expect(taskTitles(wrapper)).toContain("Open task");
+    expect(taskTitles(wrapper)).toContain("Closed task");
   });
 });
 
