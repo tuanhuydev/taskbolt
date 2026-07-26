@@ -47,7 +47,9 @@ export function useShellServices() {
 			for (const name of possibleNames) {
 				const service = registry.get<ToastService>(name);
 				if (service) {
-					console.log(`[useShellServices] Found ToastService as "${name}"`);
+					if (import.meta.env.DEV) {
+						console.log(`[useShellServices] Found ToastService as "${name}"`);
+					}
 					return service;
 				}
 			}
@@ -70,7 +72,9 @@ export function useShellServices() {
 			for (const name of possibleNames) {
 				const service = registry.get<ApiClient>(name);
 				if (service) {
-					console.log(`[useShellServices] Found ApiClient as "${name}"`);
+					if (import.meta.env.DEV) {
+						console.log(`[useShellServices] Found ApiClient as "${name}"`);
+					}
 					return service;
 				}
 			}

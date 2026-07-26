@@ -2,7 +2,7 @@
   <div class="bg-white border border-border rounded-xl shadow-sm p-5 flex flex-col gap-3.5">
     <div class="flex items-center justify-between">
       <span class="font-bold text-[13px] text-foreground">{{ sprint ? sprint.name + ' pulse' : 'Sprint pulse' }}</span>
-      <button @click="goToSprint" class="text-[12px] font-semibold text-primary hover:opacity-70 transition-opacity">
+      <button class="text-[12px] font-semibold text-primary hover:opacity-70 transition-opacity" @click="goToSprint">
         View board →
       </button>
     </div>

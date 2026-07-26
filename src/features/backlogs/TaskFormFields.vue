@@ -205,6 +205,7 @@ const props = withDefaults(
     sprints?: Sprint[];
   }>(),
   {
+    initialData: () => ({}),
     members: () => [],
     sprints: () => [],
   },

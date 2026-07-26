@@ -11,7 +11,7 @@
 <script setup lang="ts">
 import { TaskStatus } from "@/shared/types/task";
 
-const props = defineProps<{ status: TaskStatus }>();
+defineProps<{ status: TaskStatus }>();
 
 function getStatusColor(status: TaskStatus): string {
   switch (status) {

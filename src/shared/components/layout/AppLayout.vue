@@ -60,10 +60,6 @@ import { useApiClient } from "@/shared/composables/useShellServices";
 import { APP_AUTH_URL } from "@/shared/lib/constants";
 import { useUserStore } from "@/configs/store";
 
-const emit = defineEmits<{
-  newIssue: [];
-}>();
-
 const route = useRoute();
 const router = useRouter();
 const apiClient = useApiClient();
