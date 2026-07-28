@@ -43,7 +43,7 @@ import { useProjectRouteSync } from "@/shared/composables/useProjectRouteSync";
 import { useBacklogTasks } from "@/shared/composables/useBacklogTasks";
 import { createTask, updateTask } from "@/shared/services";
 import type { CreateTaskPayload, UpdateTaskPayload } from "@/shared/types/task";
-import TaskDetailContent from "./TaskDetailContent.vue";
+import TaskDetailContent from "@/shared/domain-ui/task/TaskDetailContent.vue";
 
 const { getApiClient, getToastService } = useShellServices();
 const { t } = useTaskboltTranslation();

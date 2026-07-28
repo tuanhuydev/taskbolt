@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { mount } from "@vue/test-utils";
-import TaskFormFields from "@/features/backlogs/TaskFormFields.vue";
+import TaskFormFields from "@/shared/domain-ui/task/TaskFormFields.vue";
 import { setupShellServices, teardownShellServices } from "../mocks/shell-services";
 import { TaskType, TaskPriority, type Task } from "@/shared/types/task";
 

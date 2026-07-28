@@ -94,10 +94,9 @@ import { SPRINT_STATUS_ORDER } from "@/shared/lib/sprint-display";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Checkbox } from "@/shared/components/ui/checkbox";
-import TaskDetail from "./TaskDetail.vue";
+import { TaskForm, TaskDetail } from "@/shared/domain-ui/task";
 import BacklogSprintRow from "./BacklogSprintRow.vue";
 import BacklogFilters from "./BacklogFilters.vue";
-import { TaskForm } from "./index";
 
 const { getApiClient, getToastService } = useShellServices();
 const { t } = useTaskboltTranslation();
