@@ -659,9 +659,9 @@ async function handleDrop(targetColId: TaskStatus) {
   if (taskIdx === -1) return;
 
   const originalStatus = tasks.value[taskIdx].status;
-  tasks.value = tasks.value.map((t) =>
-    t.id === taskId ? { ...t, status: targetColId } : t,
-  );
+  // Mutate the moved task in place rather than mapping the whole array —
+  // avoids recomputing every derived stat/column for the n-1 unrelated tasks.
+  tasks.value[taskIdx] = { ...tasks.value[taskIdx], status: targetColId };
 
   try {
     const response = await apiClient.request(
@@ -675,9 +675,13 @@ async function handleDrop(targetColId: TaskStatus) {
     if (!response.ok) throw new Error(`Status ${response.status}`);
   } catch (err) {
     console.error("Failed to move task:", err);
-    tasks.value = tasks.value.map((t) =>
-      t.id === taskId ? { ...t, status: originalStatus } : t,
-    );
+    const rollbackIdx = tasks.value.findIndex((t) => t.id === taskId);
+    if (rollbackIdx !== -1) {
+      tasks.value[rollbackIdx] = {
+        ...tasks.value[rollbackIdx],
+        status: originalStatus,
+      };
+    }
     toastService?.error(t("toast.taskUpdateFailed"));
   }
 }
