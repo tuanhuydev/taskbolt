@@ -402,17 +402,42 @@ const COLUMNS: Array<{
   },
 ];
 
-// Closed (obsoleted) tasks don't get their own column — they're folded into
-// Done so completed-but-obsoleted work is still visible on the board instead
-// of vanishing, without adding a 4th column for what's a rare edge case.
+// Single pass over tasks.value backing columns + points stats below, instead
+// of a separate filter/reduce per derived value — keeps board recompute at
+// O(n) per task mutation rather than O(n * derivedValues).
+const boardStats = computed(() => {
+  const tasksByColumn = new Map<TaskStatus, Task[]>(
+    COLUMNS.map((col) => [col.id, []]),
+  );
+  let donePointsSum = 0;
+  let totalPointsSum = 0;
+
+  for (const task of tasks.value) {
+    // Closed (obsoleted) tasks don't get their own column — they're folded
+    // into Done so completed-but-obsoleted work is still visible on the
+    // board instead of vanishing, without adding a 4th column for what's a
+    // rare edge case.
+    const columnId =
+      task.status === TaskStatus.CLOSED ? TaskStatus.DONE : task.status;
+    tasksByColumn.get(columnId)?.push(task);
+
+    if (task.status === TaskStatus.DONE) {
+      donePointsSum += task.storyPoint ?? 0;
+    }
+    // Closed tasks are obsoleted work — excluded from the points total so
+    // completing/obsoleting a task doesn't skew sprint progress either way.
+    if (task.status !== TaskStatus.CLOSED) {
+      totalPointsSum += task.storyPoint ?? 0;
+    }
+  }
+
+  return { tasksByColumn, donePoints: donePointsSum, totalPoints: totalPointsSum };
+});
+
 const columns = computed(() =>
   COLUMNS.map((col) => ({
     ...col,
-    tasks: tasks.value.filter((task) =>
-      col.id === TaskStatus.DONE
-        ? task.status === TaskStatus.DONE || task.status === TaskStatus.CLOSED
-        : task.status === col.id,
-    ),
+    tasks: boardStats.value.tasksByColumn.get(col.id) ?? [],
   })),
 );
 
@@ -435,18 +460,8 @@ const daysLeft = computed(() => {
 });
 
 // ── Progress stats ─────────────────────────────────────────────────────────
-const donePoints = computed(() =>
-  tasks.value
-    .filter((t) => t.status === TaskStatus.DONE)
-    .reduce((acc, t) => acc + (t.storyPoint ?? 0), 0),
-);
-// Closed tasks are obsoleted work — excluded from the points total so
-// completing/obsoleting a task doesn't skew sprint progress either way.
-const totalPoints = computed(() =>
-  tasks.value
-    .filter((t) => t.status !== TaskStatus.CLOSED)
-    .reduce((acc, t) => acc + (t.storyPoint ?? 0), 0),
-);
+const donePoints = computed(() => boardStats.value.donePoints);
+const totalPoints = computed(() => boardStats.value.totalPoints);
 const progressPct = computed(() =>
   totalPoints.value
     ? Math.round((donePoints.value / totalPoints.value) * 100)
