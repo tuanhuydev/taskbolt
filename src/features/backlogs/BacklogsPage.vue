@@ -80,8 +80,7 @@ import {
 } from "@/shared/composables/useShellServices";
 import { useProjectContext } from "@/shared/composables/useProject";
 import { useProjectRouteSync } from "@/shared/composables/useProjectRouteSync";
-import { useBacklogTasks } from "@/shared/composables/useBacklogTasks";
-import { createTask, updateTask } from "@/shared/services/task.service";
+import { useProjectTasks } from "@/shared/composables/useProjectTasks";
 import {
   Task,
   TaskStatus,
@@ -98,7 +97,7 @@ import { TaskForm, TaskDetail } from "@/shared/domain-ui/task";
 import BacklogSprintRow from "./BacklogSprintRow.vue";
 import BacklogFilters from "./BacklogFilters.vue";
 
-const { getApiClient, getToastService } = useShellServices();
+const { getToastService } = useShellServices();
 const { t } = useTaskboltTranslation();
 const { selectedProjectId } = useProjectContext();
 const route = useRoute();
@@ -119,7 +118,9 @@ const {
   sprintsError,
   fetchTasks,
   fetchMembersAndSprints,
-} = useBacklogTasks(selectedProjectId, {
+  createTask,
+  updateTask,
+} = useProjectTasks(selectedProjectId, {
   statuses: selectedStatuses,
   priorities: selectedPriorities,
 });
@@ -260,35 +261,24 @@ async function handleTaskSubmit(
   data: CreateTaskPayload | UpdateTaskPayload,
   isEdit: boolean,
 ) {
-  const apiClient = getApiClient();
   const toastService = getToastService();
-
-  if (!apiClient) {
-    console.error("API client not available");
-    toastService?.error(t("toast.apiClientUnavailable"));
-    return;
-  }
 
   try {
     if (isEdit) {
-      // Update existing task
       const { id: taskId, ...body } = data as UpdateTaskPayload;
-      await updateTask(apiClient, taskId, body);
+      await updateTask(taskId, body);
     } else {
-      // Create new task - always include projectId (null for personal workspace)
-      await createTask(apiClient, {
+      // Always include projectId (null for personal workspace)
+      await createTask({
         ...(data as CreateTaskPayload),
         projectId: selectedProjectId.value,
       });
     }
 
-    // Success
     toastService?.success(
       isEdit ? t("toast.taskUpdated") : t("toast.taskCreated"),
     );
     closeTaskForm();
-
-    // Refresh task list
     await fetchTasks();
   } catch (err: unknown) {
     const message =

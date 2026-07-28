@@ -13,16 +13,21 @@ import {
   type Task,
 } from "@/shared/types/task";
 
-const { getSprintsMock, getTasksMock, getProjectMembersMock } = vi.hoisted(() => ({
-  getSprintsMock: vi.fn(),
-  getTasksMock: vi.fn(),
-  getProjectMembersMock: vi.fn(),
-}));
+const { getSprintsMock, getTasksMock, getProjectMembersMock, createTaskMock, updateTaskMock } =
+  vi.hoisted(() => ({
+    getSprintsMock: vi.fn(),
+    getTasksMock: vi.fn(),
+    getProjectMembersMock: vi.fn(),
+    createTaskMock: vi.fn(),
+    updateTaskMock: vi.fn(),
+  }));
 
 vi.mock("@/shared/services", () => ({
   getSprints: getSprintsMock,
   getTasks: getTasksMock,
   getProjectMembers: getProjectMembersMock,
+  createTask: createTaskMock,
+  updateTask: updateTaskMock,
 }));
 
 const mockSprint: Sprint = {
@@ -217,5 +222,69 @@ describe("ActiveSprintPage — project scoping", () => {
       expect.anything(),
       expect.objectContaining({ projectId: "proj-2" }),
     );
+  });
+});
+
+describe("ActiveSprintPage — drag-and-drop task move", () => {
+  beforeEach(() => {
+    setupShellServices();
+    getSprintsMock.mockReset().mockResolvedValue([mockSprint]);
+    getTasksMock.mockReset();
+    getProjectMembersMock.mockReset().mockResolvedValue([]);
+    updateTaskMock.mockReset();
+  });
+  afterEach(() => teardownShellServices());
+
+  it("optimistically moves the task and does not refetch the task list on success", async () => {
+    getTasksMock.mockResolvedValue([
+      makeTask({ id: "t-1", title: "Movable task", status: TaskStatus.TODO }),
+    ]);
+    updateTaskMock.mockResolvedValue(
+      makeTask({ id: "t-1", title: "Movable task", status: TaskStatus.IN_PROGRESS }),
+    );
+
+    const wrapper = await mountComponent("proj-1");
+    await new Promise((r) => setTimeout(r, 0));
+    await wrapper.vm.$nextTick();
+
+    expect(getTasksMock).toHaveBeenCalledTimes(1);
+
+    const card = wrapper.find('[draggable="true"]');
+    await card.trigger("dragstart");
+    const inProgressColumn = wrapper.findAll(".flex-1.min-w-0.flex.flex-col")[2];
+    await inProgressColumn.trigger("drop");
+    await wrapper.vm.$nextTick();
+    await new Promise((r) => setTimeout(r, 0));
+
+    expect(updateTaskMock).toHaveBeenCalledWith(expect.anything(), "t-1", {
+      status: TaskStatus.IN_PROGRESS,
+    });
+    // No refetch after a successful drag — the composable's write methods
+    // don't auto-refresh, so the optimistic in-place update stands alone.
+    expect(getTasksMock).toHaveBeenCalledTimes(1);
+    expect(inProgressColumn.text()).toContain("Movable task");
+  });
+
+  it("rolls back the optimistic move if the update request fails", async () => {
+    getTasksMock.mockResolvedValue([
+      makeTask({ id: "t-1", title: "Movable task", status: TaskStatus.TODO }),
+    ]);
+    updateTaskMock.mockRejectedValue(new Error("boom"));
+
+    const wrapper = await mountComponent("proj-1");
+    await new Promise((r) => setTimeout(r, 0));
+    await wrapper.vm.$nextTick();
+
+    const card = wrapper.find('[draggable="true"]');
+    await card.trigger("dragstart");
+    const inProgressColumn = wrapper.findAll(".flex-1.min-w-0.flex.flex-col")[2];
+    await inProgressColumn.trigger("drop");
+    await wrapper.vm.$nextTick();
+    await new Promise((r) => setTimeout(r, 0));
+    await wrapper.vm.$nextTick();
+
+    const todoColumn = wrapper.findAll(".flex-1.min-w-0.flex.flex-col")[1];
+    expect(todoColumn.text()).toContain("Movable task");
+    expect(inProgressColumn.text()).not.toContain("Movable task");
   });
 });
