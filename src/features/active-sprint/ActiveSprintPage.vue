@@ -235,7 +235,7 @@
             <div class="flex items-center justify-between gap-2">
               <span
                 class="text-[11px] font-mono text-slate-400 tracking-wide"
-                >{{ taskTicket(task.id) }}</span
+                >{{ formatTicketId(task.id) }}</span
               >
               <div class="flex items-center gap-1.5">
                 <span
@@ -354,6 +354,7 @@ import {
 import { type ProjectMember } from "@/shared/types/member";
 import { TaskForm, TaskDetail } from "@/features/backlogs";
 import { AVATAR_COLORS, getInitials, colorForKey } from "@/shared/lib/avatar";
+import { formatTicketId } from "@/shared/lib/task-display";
 
 const { t } = useTaskboltTranslation();
 const { getApiClient, getToastService } = useShellServices();
@@ -566,10 +567,6 @@ function priorityStyle(priority: TaskPriority): PriorityEntry {
 }
 function priorityLabel(priority: TaskPriority) {
   return (PRIORITY_MAP[priority] ?? PRIORITY_MAP[TaskPriority.LOW]).label;
-}
-
-function taskTicket(id: string) {
-  return `TSK-${id.slice(0, 6).toUpperCase()}`;
 }
 
 // ── Data fetching ──────────────────────────────────────────────────────────
