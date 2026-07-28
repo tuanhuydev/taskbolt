@@ -354,7 +354,12 @@ import {
 import { type ProjectMember } from "@/shared/types/member";
 import { TaskForm, TaskDetail } from "@/features/backlogs";
 import { AVATAR_COLORS, getInitials, colorForKey } from "@/shared/lib/avatar";
-import { formatTicketId } from "@/shared/lib/task-display";
+import {
+  taskTypeClasses,
+  taskPriorityStyle,
+  type TaskPriorityStyle,
+  formatTicketId
+} from "@/shared/lib/task-display";
 
 const { t } = useTaskboltTranslation();
 const { getApiClient, getToastService } = useShellServices();
@@ -502,71 +507,21 @@ function assigneeColor(userId: string) {
 }
 
 // ── Tag / priority helpers ─────────────────────────────────────────────────
-interface StyleEntry {
-  classes: string;
-  label: string;
-}
-const TAG_MAP: Record<TaskType, StyleEntry> = {
-  [TaskType.STORY]: {
-    classes: "bg-blue-50 text-blue-700",
-    label: t("taskType.STORY"),
-  },
-  [TaskType.EPIC]: {
-    classes: "bg-violet-50 text-violet-700",
-    label: t("taskType.EPIC"),
-  },
-  [TaskType.ISSUE]: {
-    classes: "bg-sky-50 text-sky-700",
-    label: t("taskType.ISSUE"),
-  },
-  [TaskType.BUG]: {
-    classes: "bg-red-50 text-red-700",
-    label: t("taskType.BUG"),
-  },
-};
-
-function tagStyle(type: TaskType): StyleEntry {
-  return (
-    TAG_MAP[type] ?? { classes: "bg-slate-100 text-slate-700", label: type }
-  );
+// Style (colors) come from the shared task-display module so Active Sprint
+// and My Tasks can't drift apart on what "high priority" or "bug" look like;
+// labels stay local since they need this component's own t().
+function tagStyle(type: TaskType): { classes: string } {
+  return { classes: taskTypeClasses(type) };
 }
 function tagLabel(type: TaskType) {
-  return (TAG_MAP[type] ?? { label: type }).label;
+  return t(`taskType.${type}`);
 }
 
-interface PriorityEntry {
-  dotClass: string;
-  textClass: string;
-  label: string;
-}
-const PRIORITY_MAP: Record<TaskPriority, PriorityEntry> = {
-  [TaskPriority.HIGHEST]: {
-    dotClass: "bg-red-500",
-    textClass: "text-red-700",
-    label: t("taskPriority.HIGHEST"),
-  },
-  [TaskPriority.HIGH]: {
-    dotClass: "bg-red-500",
-    textClass: "text-red-700",
-    label: t("taskPriority.HIGH"),
-  },
-  [TaskPriority.MEDIUM]: {
-    dotClass: "bg-amber-500",
-    textClass: "text-amber-700",
-    label: t("taskPriority.MEDIUM"),
-  },
-  [TaskPriority.LOW]: {
-    dotClass: "bg-slate-400",
-    textClass: "text-slate-400",
-    label: t("taskPriority.LOW"),
-  },
-};
-
-function priorityStyle(priority: TaskPriority): PriorityEntry {
-  return PRIORITY_MAP[priority] ?? PRIORITY_MAP[TaskPriority.LOW];
+function priorityStyle(priority: TaskPriority): TaskPriorityStyle {
+  return taskPriorityStyle(priority);
 }
 function priorityLabel(priority: TaskPriority) {
-  return (PRIORITY_MAP[priority] ?? PRIORITY_MAP[TaskPriority.LOW]).label;
+  return t(`taskPriority.${priority}`);
 }
 
 // ── Data fetching ──────────────────────────────────────────────────────────
