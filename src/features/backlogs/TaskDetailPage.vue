@@ -41,8 +41,7 @@ import {
 import { useProjectContext } from "@/shared/composables/useProject";
 import { useProjectRouteSync } from "@/shared/composables/useProjectRouteSync";
 import { useBacklogTasks } from "@/shared/composables/useBacklogTasks";
-import { APP_AUTH_URL } from "@/shared/lib/constants";
-import { updateTask } from "@/shared/services";
+import { createTask, updateTask } from "@/shared/services";
 import type { CreateTaskPayload, UpdateTaskPayload } from "@/shared/types/task";
 import TaskDetailContent from "./TaskDetailContent.vue";
 
@@ -112,15 +111,7 @@ async function handleCreateTask(data: CreateTaskPayload) {
   }
 
   try {
-    const response = await apiClient.request(`${APP_AUTH_URL}/tasks`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...data, projectId: selectedProjectId.value }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to create task (${response.status})`);
-    }
+    await createTask(apiClient, { ...data, projectId: selectedProjectId.value });
 
     toastService?.success(t("toast.taskCreated"));
     await fetchTasks();

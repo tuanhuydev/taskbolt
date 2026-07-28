@@ -1,6 +1,6 @@
 import { APP_AUTH_URL } from "@/shared/lib/constants";
 import { ApiClient } from "@/shared/types/shell-services";
-import { Task, UpdateTaskPayload } from "@/shared/types/task";
+import { Task, CreateTaskPayload, UpdateTaskPayload } from "@/shared/types/task";
 
 interface TaskResponse {
   tasks: Array<Task>;
@@ -39,6 +39,21 @@ export const getTaskById = async (apiClient: ApiClient, taskId: string): Promise
     return await response.json();
   } catch (error) {
     console.error("Error fetching task:", error);
+    throw error;
+  }
+};
+
+export const createTask = async (apiClient: ApiClient, data: CreateTaskPayload): Promise<Task> => {
+  try {
+    const response = await apiClient.request(`${APP_AUTH_URL}/tasks`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) throw new Error(`Failed to create task (${response.status})`);
+    return await response.json();
+  } catch (error) {
+    console.error("Error creating task:", error);
     throw error;
   }
 };
