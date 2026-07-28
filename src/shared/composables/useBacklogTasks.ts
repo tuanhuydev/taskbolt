@@ -27,12 +27,20 @@ export function useBacklogTasks(
   const loading = ref(true);
   const error = ref<string | null>(null);
 
+  // Guards against out-of-order responses: rapid filter/project changes can
+  // fire overlapping requests whose responses resolve out of order, and a
+  // slower older response landing after a newer one must not clobber it.
+  let latestRequestId = 0;
+
   async function fetchTasks() {
     const apiClient = getApiClient();
+    const requestId = ++latestRequestId;
 
     if (!apiClient) {
-      error.value = "API client not available from shell.";
-      loading.value = false;
+      if (requestId === latestRequestId) {
+        error.value = "API client not available from shell.";
+        loading.value = false;
+      }
       return;
     }
 
@@ -53,13 +61,16 @@ export function useBacklogTasks(
         filter.priority = filters.priorities.value.join(",");
       }
 
-      taskList.value = await getTasks(apiClient, filter);
+      const result = await getTasks(apiClient, filter);
+      if (requestId !== latestRequestId) return;
+      taskList.value = result;
     } catch (err: unknown) {
+      if (requestId !== latestRequestId) return;
       const message =
         err instanceof Error ? err.message : "Failed to load tasks.";
       error.value = message;
     } finally {
-      loading.value = false;
+      if (requestId === latestRequestId) loading.value = false;
     }
   }
 
