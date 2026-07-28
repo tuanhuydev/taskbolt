@@ -5,6 +5,19 @@ import { useBacklogTasks } from "@/shared/composables/useBacklogTasks";
 import { mockApiClient, mockShellServices } from "../mocks/shell-services";
 import { SHELL_SERVICES_KEY } from "@/shared/composables/useShellServices";
 import { TaskStatus, TaskType, TaskPriority, type Task } from "@/shared/types/task";
+import * as services from "@/shared/services";
+
+// Only members/sprints are mocked at the services layer here — getTasks is
+// left as the real implementation (calling through to apiClient.request) so
+// the stale-response race test below can control response timing directly.
+vi.mock("@/shared/services", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/shared/services")>();
+  return {
+    ...actual,
+    getProjectMembers: vi.fn(async () => []),
+    getSprints: vi.fn(async () => []),
+  };
+});
 
 function makeTask(id: string, title: string): Task {
   return {
@@ -31,7 +44,7 @@ function mountHost() {
   let result!: ReturnType<typeof useBacklogTasks>;
   const Host = defineComponent({
     setup() {
-      result = useBacklogTasks(ref<string | null>(null));
+      result = useBacklogTasks(ref<string | null>("project-1"));
       return () => null;
     },
   });
@@ -72,5 +85,42 @@ describe("useBacklogTasks — stale response race", () => {
     await firstCall;
 
     expect(taskList.value).toEqual(newTasks);
+  });
+});
+
+describe("useBacklogTasks — secondary fetch failures", () => {
+  it("exposes membersError without clobbering a successful sprints fetch", async () => {
+    vi.mocked(services.getProjectMembers).mockRejectedValueOnce(new Error("members boom"));
+    vi.mocked(services.getSprints).mockResolvedValueOnce([]);
+
+    const { fetchMembersAndSprints, membersError, sprintsError } = mountHost();
+    await fetchMembersAndSprints();
+
+    expect(membersError.value).toBe("members boom");
+    expect(sprintsError.value).toBeNull();
+  });
+
+  it("exposes sprintsError without clobbering a successful members fetch", async () => {
+    vi.mocked(services.getProjectMembers).mockResolvedValueOnce([]);
+    vi.mocked(services.getSprints).mockRejectedValueOnce(new Error("sprints boom"));
+
+    const { fetchMembersAndSprints, membersError, sprintsError } = mountHost();
+    await fetchMembersAndSprints();
+
+    expect(sprintsError.value).toBe("sprints boom");
+    expect(membersError.value).toBeNull();
+  });
+
+  it("clears previous errors on a subsequent successful fetch", async () => {
+    vi.mocked(services.getProjectMembers).mockRejectedValueOnce(new Error("members boom"));
+    vi.mocked(services.getSprints).mockResolvedValueOnce([]);
+
+    const { fetchMembersAndSprints, membersError } = mountHost();
+    await fetchMembersAndSprints();
+    expect(membersError.value).toBe("members boom");
+
+    vi.mocked(services.getProjectMembers).mockResolvedValueOnce([]);
+    await fetchMembersAndSprints();
+    expect(membersError.value).toBeNull();
   });
 });

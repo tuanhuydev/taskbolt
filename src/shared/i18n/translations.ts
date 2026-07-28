@@ -241,6 +241,8 @@ export const taskboltTranslations = {
       sprintDeleteFailed: "Failed to delete sprint",
       apiClientUnavailable: "API client not available",
       genericError: "Something went wrong",
+      membersLoadFailed: "Failed to load project members",
+      sprintsLoadFailed: "Failed to load sprints",
     },
     widgets: {
       pomodoro: {
@@ -495,6 +497,8 @@ export const taskboltTranslations = {
       sprintDeleteFailed: "Xóa sprint thất bại",
       apiClientUnavailable: "Không thể kết nối dịch vụ",
       genericError: "Đã xảy ra lỗi",
+      membersLoadFailed: "Không thể tải thành viên dự án",
+      sprintsLoadFailed: "Không thể tải sprint",
     },
     widgets: {
       pomodoro: {
