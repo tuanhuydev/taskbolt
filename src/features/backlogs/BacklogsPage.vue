@@ -81,6 +81,7 @@ import {
 import { useProjectContext } from "@/shared/composables/useProject";
 import { useProjectRouteSync } from "@/shared/composables/useProjectRouteSync";
 import { useBacklogTasks } from "@/shared/composables/useBacklogTasks";
+import { createTask } from "@/shared/services/task.service";
 import { APP_AUTH_URL } from "@/shared/lib/constants";
 import {
   Task,
@@ -259,40 +260,28 @@ async function handleTaskSubmit(
   }
 
   try {
-    let response;
-
     if (isEdit) {
       // Update existing task
       const { id: taskId, ...body } = data as UpdateTaskPayload;
 
-      response = await apiClient.request(`${APP_AUTH_URL}/tasks/${taskId}`, {
+      const response = await apiClient.request(`${APP_AUTH_URL}/tasks/${taskId}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(body),
       });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Failed to update task");
+      }
     } else {
       // Create new task - always include projectId (null for personal workspace)
-      const taskData = {
-        ...data,
+      await createTask(apiClient, {
+        ...(data as CreateTaskPayload),
         projectId: selectedProjectId.value,
-      };
-
-      response = await apiClient.request(`${APP_AUTH_URL}/tasks`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(taskData),
       });
-    }
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(
-        errorData.message || `Failed to ${isEdit ? "update" : "create"} task`,
-      );
     }
 
     // Success

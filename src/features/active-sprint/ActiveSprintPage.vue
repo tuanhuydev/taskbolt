@@ -341,7 +341,7 @@ import {
 } from "@/shared/composables/useShellServices";
 import { useProjectContext } from "@/shared/composables/useProject";
 import { useProjectRouteSync } from "@/shared/composables/useProjectRouteSync";
-import { getSprints, getTasks, getProjectMembers } from "@/shared/services";
+import { getSprints, getTasks, getProjectMembers, createTask } from "@/shared/services";
 import { type Sprint, SprintStatus } from "@/shared/types/sprint";
 import {
   TaskStatus,
@@ -715,35 +715,26 @@ async function handleTaskFormSubmit(
   }
 
   try {
-    let response: Response;
-
     if (isEdit) {
       const { id: taskId, ...body } = data as UpdateTaskPayload;
-      response = await apiClient.request(`${APP_AUTH_URL}/tasks/${taskId}`, {
+      const response = await apiClient.request(`${APP_AUTH_URL}/tasks/${taskId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
+
+      if (!response.ok) {
+        const err = (await response.json().catch(() => ({}))) as {
+          message?: string;
+        };
+        throw new Error(err.message ?? "Failed to update task");
+      }
     } else {
-      const taskData = {
-        ...data,
+      await createTask(apiClient, {
+        ...(data as CreateTaskPayload),
         projectId: selectedProjectId.value,
         sprintId: activeSprint.value?.id ?? null,
-      };
-      response = await apiClient.request(`${APP_AUTH_URL}/tasks`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(taskData),
       });
-    }
-
-    if (!response.ok) {
-      const err = (await response.json().catch(() => ({}))) as {
-        message?: string;
-      };
-      throw new Error(
-        err.message ?? `Failed to ${isEdit ? "update" : "create"} task`,
-      );
     }
 
     toastService?.success(
