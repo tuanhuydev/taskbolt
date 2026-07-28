@@ -341,7 +341,7 @@ import {
 } from "@/shared/composables/useShellServices";
 import { useProjectContext } from "@/shared/composables/useProject";
 import { useProjectRouteSync } from "@/shared/composables/useProjectRouteSync";
-import { getSprints, getTasks, getProjectMembers, createTask } from "@/shared/services";
+import { getSprints, getTasks, getProjectMembers, createTask, updateTask } from "@/shared/services";
 import { type Sprint, SprintStatus } from "@/shared/types/sprint";
 import {
   TaskStatus,
@@ -353,7 +353,6 @@ import {
 } from "@/shared/types/task";
 import { type ProjectMember } from "@/shared/types/member";
 import { TaskForm, TaskDetail } from "@/features/backlogs";
-import { APP_AUTH_URL } from "@/shared/lib/constants";
 
 const { t } = useTaskboltTranslation();
 const { getApiClient, getToastService } = useShellServices();
@@ -664,15 +663,7 @@ async function handleDrop(targetColId: TaskStatus) {
   );
 
   try {
-    const response = await apiClient.request(
-      `${APP_AUTH_URL}/tasks/${taskId}`,
-      {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: targetColId }),
-      },
-    );
-    if (!response.ok) throw new Error(`Status ${response.status}`);
+    await updateTask(apiClient, taskId, { status: targetColId });
   } catch (err) {
     console.error("Failed to move task:", err);
     tasks.value = tasks.value.map((t) =>
@@ -717,18 +708,7 @@ async function handleTaskFormSubmit(
   try {
     if (isEdit) {
       const { id: taskId, ...body } = data as UpdateTaskPayload;
-      const response = await apiClient.request(`${APP_AUTH_URL}/tasks/${taskId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-
-      if (!response.ok) {
-        const err = (await response.json().catch(() => ({}))) as {
-          message?: string;
-        };
-        throw new Error(err.message ?? "Failed to update task");
-      }
+      await updateTask(apiClient, taskId, body);
     } else {
       await createTask(apiClient, {
         ...(data as CreateTaskPayload),

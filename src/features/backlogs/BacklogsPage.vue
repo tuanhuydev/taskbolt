@@ -81,8 +81,7 @@ import {
 import { useProjectContext } from "@/shared/composables/useProject";
 import { useProjectRouteSync } from "@/shared/composables/useProjectRouteSync";
 import { useBacklogTasks } from "@/shared/composables/useBacklogTasks";
-import { createTask } from "@/shared/services/task.service";
-import { APP_AUTH_URL } from "@/shared/lib/constants";
+import { createTask, updateTask } from "@/shared/services/task.service";
 import {
   Task,
   TaskStatus,
@@ -263,19 +262,7 @@ async function handleTaskSubmit(
     if (isEdit) {
       // Update existing task
       const { id: taskId, ...body } = data as UpdateTaskPayload;
-
-      const response = await apiClient.request(`${APP_AUTH_URL}/tasks/${taskId}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(body),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || "Failed to update task");
-      }
+      await updateTask(apiClient, taskId, body);
     } else {
       // Create new task - always include projectId (null for personal workspace)
       await createTask(apiClient, {
