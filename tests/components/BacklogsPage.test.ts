@@ -163,4 +163,21 @@ describe("BacklogsPage — deep-linked task", () => {
     const taskDetail = wrapper.findComponent({ name: "TaskDetail" });
     expect(taskDetail.props("open")).toBe(false);
   });
+
+  it("re-opens the drawer for a new ?task=<id> without remounting the page", async () => {
+    mockScopedApi();
+    const wrapper = await mountAt("/backlogs?task=task-a");
+    await new Promise((r) => setTimeout(r, 0));
+    await wrapper.vm.$nextTick();
+
+    let taskDetail = wrapper.findComponent({ name: "TaskDetail" });
+    expect(taskDetail.props("task")).toMatchObject({ id: "task-a" });
+
+    await router.push("/backlogs?task=task-b");
+    await wrapper.vm.$nextTick();
+
+    taskDetail = wrapper.findComponent({ name: "TaskDetail" });
+    expect(taskDetail.props("open")).toBe(true);
+    expect(taskDetail.props("task")).toMatchObject({ id: "task-b" });
+  });
 });

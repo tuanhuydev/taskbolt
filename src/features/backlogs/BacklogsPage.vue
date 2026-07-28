@@ -208,17 +208,25 @@ const sprintGroups = computed<SprintGroup[]>(() => {
   return groups;
 });
 
+// Arriving via a /tasks/:taskId deep link (TaskLinkPage) — open that task's
+// detail once the list it belongs to has loaded.
+function selectDeepLinkedTask(taskId: string | undefined) {
+  if (!taskId) return;
+  const task = taskList.value.find((t) => t.id === taskId);
+  if (task) selectTask(task);
+}
+
 onMounted(async () => {
   await Promise.all([fetchTasks(), fetchMembersAndSprints()]);
-
-  // Arriving via a /tasks/:taskId deep link (TaskLinkPage) — open that
-  // task's detail once the list it belongs to has loaded.
-  const deepLinkedTaskId = route.query.task as string | undefined;
-  if (deepLinkedTaskId) {
-    const task = taskList.value.find((t) => t.id === deepLinkedTaskId);
-    if (task) selectTask(task);
-  }
+  selectDeepLinkedTask(route.query.task as string | undefined);
 });
+
+// Re-open the target task if ?task= changes while staying on this page
+// (e.g. another deep link is followed without a route remount).
+watch(
+  () => route.query.task,
+  (taskId) => selectDeepLinkedTask(taskId as string | undefined),
+);
 
 // Watch for project changes and refetch tasks
 watch(selectedProjectId, async () => {
