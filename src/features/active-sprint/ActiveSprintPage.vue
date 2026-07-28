@@ -360,6 +360,7 @@ import {
   type TaskPriorityStyle,
   formatTicketId
 } from "@/shared/lib/task-display";
+import { BOARD_COLUMNS, boardColumnIdFor } from "@/shared/lib/board-columns";
 
 const { t } = useTaskboltTranslation();
 const { getApiClient, getToastService } = useShellServices();
@@ -383,50 +384,18 @@ const sprints = computed(() =>
 );
 
 // ── Column definitions ─────────────────────────────────────────────────────
-const COLUMNS: Array<{
-  id: TaskStatus;
-  name: string;
-  accentClass: string;
-  countClass: string;
-}> = [
-  {
-    id: TaskStatus.TODO,
-    name: "To do",
-    accentClass: "bg-slate-400",
-    countClass: "bg-slate-200 text-slate-700",
-  },
-  {
-    id: TaskStatus.IN_PROGRESS,
-    name: "In progress",
-    accentClass: "bg-primary",
-    countClass: "bg-slate-200 text-slate-700",
-  },
-  {
-    id: TaskStatus.DONE,
-    name: "Done",
-    accentClass: "bg-green-600",
-    countClass: "bg-green-100 text-green-700",
-  },
-];
-
 // Single pass over tasks.value backing columns + points stats below, instead
 // of a separate filter/reduce per derived value — keeps board recompute at
 // O(n) per task mutation rather than O(n * derivedValues).
 const boardStats = computed(() => {
   const tasksByColumn = new Map<TaskStatus, Task[]>(
-    COLUMNS.map((col) => [col.id, []]),
+    BOARD_COLUMNS.map((col) => [col.id, []]),
   );
   let donePointsSum = 0;
   let totalPointsSum = 0;
 
   for (const task of tasks.value) {
-    // Closed (obsoleted) tasks don't get their own column — they're folded
-    // into Done so completed-but-obsoleted work is still visible on the
-    // board instead of vanishing, without adding a 4th column for what's a
-    // rare edge case.
-    const columnId =
-      task.status === TaskStatus.CLOSED ? TaskStatus.DONE : task.status;
-    tasksByColumn.get(columnId)?.push(task);
+    tasksByColumn.get(boardColumnIdFor(task.status))?.push(task);
 
     if (task.status === TaskStatus.DONE) {
       donePointsSum += task.storyPoint ?? 0;
@@ -442,7 +411,7 @@ const boardStats = computed(() => {
 });
 
 const columns = computed(() =>
-  COLUMNS.map((col) => ({
+  BOARD_COLUMNS.map((col) => ({
     ...col,
     tasks: boardStats.value.tasksByColumn.get(col.id) ?? [],
   })),
