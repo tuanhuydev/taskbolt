@@ -352,7 +352,6 @@ import {
   type UpdateTaskPayload,
 } from "@/shared/types/task";
 import { type ProjectMember } from "@/shared/types/member";
-import { TaskForm, TaskDetail } from "@/features/backlogs";
 import { AVATAR_COLORS, getInitials, colorForKey } from "@/shared/lib/avatar";
 import {
   taskTypeClasses,
@@ -361,6 +360,7 @@ import {
   formatTicketId
 } from "@/shared/lib/task-display";
 import { BOARD_COLUMNS, boardColumnIdFor } from "@/shared/lib/board-columns";
+import { TaskForm, TaskDetail } from "@/shared/domain-ui/task";
 
 const { t } = useTaskboltTranslation();
 const { getApiClient, getToastService } = useShellServices();

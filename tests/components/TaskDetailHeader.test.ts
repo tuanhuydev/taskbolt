@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { mount } from "@vue/test-utils";
 import { createRouter, createMemoryHistory } from "vue-router";
-import TaskDetailHeader from "@/features/backlogs/TaskDetailHeader.vue";
+import TaskDetailHeader from "@/shared/domain-ui/task/TaskDetailHeader.vue";
 import { TaskType, type Task } from "@/shared/types/task";
 
 const router = createRouter({
