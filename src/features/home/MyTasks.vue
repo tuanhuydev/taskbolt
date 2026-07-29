@@ -43,7 +43,7 @@
             :class="isDone(task) ? 'text-muted-foreground line-through' : 'text-foreground'"
           >{{ task.title }}</span>
           <div class="flex items-center gap-2">
-            <span class="text-[11px] font-mono text-muted-foreground">{{ ticketId(task.id) }}</span>
+            <span class="text-[11px] font-mono text-muted-foreground">{{ formatTicketId(task.id) }}</span>
             <span
               class="inline-flex items-center h-[18px] px-1.5 rounded-full text-[10px] font-bold uppercase tracking-[.03em]"
               :class="typeStyle(task.type).classes"
@@ -68,6 +68,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { type Task, TaskStatus, TaskType, TaskPriority } from '@/shared/types/task';
+import { formatTicketId } from '@/shared/lib/task-display';
 
 const props = defineProps<{
   tasks: Task[];
@@ -86,10 +87,6 @@ function isDone(task: Task) {
 
 function toggleTask(task: Task) {
   emit('toggle', task);
-}
-
-function ticketId(id: string) {
-  return id.slice(0, 8).toUpperCase();
 }
 
 function typeStyle(type: TaskType) {
