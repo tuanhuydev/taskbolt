@@ -1,7 +1,14 @@
 <template>
   <li
-    class="mb-2 rounded-md"
-    :class="{ 'mt-3 border-t border-dashed border-border pt-3': !sprint }"
+    class="mb-2 rounded-md transition-colors"
+    :class="{
+      'mt-3 border-t border-dashed border-border pt-3': !sprint,
+      'ring-2 ring-primary bg-primary/5': isDragOver,
+    }"
+    @dragover.prevent
+    @dragenter.prevent="isDragOver = true"
+    @dragleave="handleDragLeave"
+    @drop.prevent="handleDrop"
   >
     <div
       class="flex items-start justify-between gap-3 px-2 py-1.5 rounded-sm cursor-pointer hover:bg-accent transition-colors"
@@ -99,9 +106,24 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: "click", task: Task): void;
+  (e: "move-to-sprint", taskId: string): void;
 }>();
 
 const { t } = useTaskboltTranslation();
+
+const isDragOver = ref(false);
+
+function handleDragLeave(event: DragEvent) {
+  const el = event.currentTarget as HTMLElement;
+  if (el.contains(event.relatedTarget as Node | null)) return;
+  isDragOver.value = false;
+}
+
+function handleDrop(event: DragEvent) {
+  isDragOver.value = false;
+  const taskId = event.dataTransfer?.getData("text/plain");
+  if (taskId) emit("move-to-sprint", taskId);
+}
 
 const sprintStatusClasses: Record<SprintStatus, string> = {
   [SprintStatus.PLANNED]: "bg-gray-100 text-gray-600",
