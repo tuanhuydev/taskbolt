@@ -47,6 +47,7 @@
       :sub-task-map="subTaskMap"
       :active-task-id="selectedTask?.id ?? null"
       @click="selectTask"
+      @move-to-sprint="(taskId) => handleMoveTaskToSprint(taskId, group.sprint?.id ?? null)"
     />
     <li v-if="parentTasks.length === 0" class="text-muted-foreground">
       No tasks found.
@@ -196,8 +197,10 @@ const sprintGroups = computed<SprintGroup[]>(() => {
     }
   }
 
+  // Every sprint gets a row — including ones with no tasks yet — so an
+  // empty sprint still has a drop target for drag-and-drop assignment
+  // instead of only appearing once it already contains a task.
   const groups: SprintGroup[] = sprints.value
-    .filter((sprint) => tasksBySprintId.has(sprint.id))
     .map((sprint) => ({
       sprint,
       tasks: tasksBySprintId.get(sprint.id) ?? [],
@@ -313,6 +316,30 @@ async function handleDeleteTask(taskId: string) {
   } catch (err: unknown) {
     console.error("Error deleting task:", err);
     toastService?.error(t("toast.taskDeleteFailed"));
+  }
+}
+
+// Dropping a task onto a sprint row (or the "no sprint" backlog bucket)
+// re-assigns its sprintId — and its sub-tasks', since a story's sub-tasks
+// belong to the same sprint as their parent rather than being scheduled
+// independently.
+async function handleMoveTaskToSprint(taskId: string, sprintId: string | null) {
+  const task = taskList.value.find((t) => t.id === taskId);
+  if (!task || task.sprintId === sprintId) return;
+
+  const toastService = getToastService();
+  const subTasks = subTaskMap.value.get(taskId) ?? [];
+
+  try {
+    await Promise.all([
+      updateTask(taskId, { sprintId }),
+      ...subTasks.map((sub) => updateTask(sub.id, { sprintId })),
+    ]);
+    toastService?.success(t("toast.taskUpdated"));
+    await fetchTasks();
+  } catch (err: unknown) {
+    console.error("Error moving task to sprint:", err);
+    toastService?.error(t("toast.taskUpdateFailed"));
   }
 }
 </script>

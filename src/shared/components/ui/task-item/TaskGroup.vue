@@ -4,7 +4,11 @@
     class="rounded-sm"
     :class="{
       'opacity-50': task.status === TaskStatus.DONE || task.status === TaskStatus.CLOSED,
+      'opacity-40': isDragging,
     }"
+    draggable="true"
+    @dragstart="handleDragStart"
+    @dragend="isDragging = false"
   >
     <div
       class="flex justify-between transition-colors hover:bg-accent hover:text-accent-foreground cursor-pointer text-muted-foreground p-2 rounded-sm"
@@ -85,6 +89,17 @@ const emit = defineEmits<{
 }>();
 
 const open = ref(false);
+const isDragging = ref(false);
+
+// Only the parent task card is draggable (dropping it onto a different
+// sprint row cascades to its sub-tasks, if any — see BacklogsPage's
+// handleMoveTaskToSprint) — sub-tasks always follow their parent's sprint
+// rather than being moved independently.
+function handleDragStart(event: DragEvent) {
+  isDragging.value = true;
+  event.dataTransfer?.setData("text/plain", task.id);
+  if (event.dataTransfer) event.dataTransfer.effectAllowed = "move";
+}
 
 const shouldOpenForActiveTask = computed(() => {
   if (!activeTaskId) return false;
