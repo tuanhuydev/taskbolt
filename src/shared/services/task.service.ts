@@ -76,3 +76,16 @@ export const updateTask = async (
     throw error;
   }
 };
+
+export const deleteTask = async (apiClient: ApiClient, taskId: string): Promise<void> => {
+  try {
+    const response = await apiClient.request(`${APP_AUTH_URL}/tasks/${taskId}`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+    });
+    if (!response.ok) throw new Error(`Failed to delete task (${response.status})`);
+  } catch (error) {
+    console.error("Error deleting task:", error);
+    throw error;
+  }
+};

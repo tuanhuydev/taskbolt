@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { getTasks, getTaskById, createTask, updateTask } from '@/shared/services/task.service';
+import { getTasks, getTaskById, createTask, updateTask, deleteTask } from '@/shared/services/task.service';
 import { mockApiClient } from '../mocks/shell-services';
 import { TaskType, TaskStatus, TaskPriority, type Task } from '@/shared/types/task';
 
@@ -147,6 +147,32 @@ describe('task.service', () => {
       await expect(
         updateTask(mockApiClient, 'task-1', { title: '' }),
       ).rejects.toThrow('Failed to update task (400)');
+    });
+  });
+
+  describe('deleteTask', () => {
+    it('sends DELETE request', async () => {
+      vi.mocked(mockApiClient.request).mockResolvedValueOnce({
+        ok: true,
+      } as Response);
+
+      await deleteTask(mockApiClient, 'task-1');
+
+      expect(mockApiClient.request).toHaveBeenCalledWith(
+        expect.stringContaining('/tasks/task-1'),
+        expect.objectContaining({ method: 'DELETE' }),
+      );
+    });
+
+    it('throws on non-ok response', async () => {
+      vi.mocked(mockApiClient.request).mockResolvedValueOnce({
+        ok: false,
+        status: 404,
+      } as Response);
+
+      await expect(deleteTask(mockApiClient, 'task-999')).rejects.toThrow(
+        'Failed to delete task (404)',
+      );
     });
   });
 });

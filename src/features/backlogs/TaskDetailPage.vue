@@ -25,6 +25,7 @@
         @close="goBack"
         @update="handleUpdateTask"
         @create="handleCreateTask"
+        @delete="handleDeleteTask"
       />
     </div>
   </div>
@@ -63,6 +64,7 @@ const {
   fetchMembersAndSprints,
   createTask,
   updateTask,
+  deleteTask,
 } = useProjectTasks(selectedProjectId);
 
 // Members/sprints are secondary data — surface failures as a toast rather
@@ -117,6 +119,21 @@ async function handleCreateTask(data: CreateTaskPayload) {
   } catch (err: unknown) {
     console.error("Error creating task:", err);
     toastService?.error(t("toast.taskCreateFailed"));
+  }
+}
+
+async function handleDeleteTask(taskId: string) {
+  const toastService = getToastService();
+
+  try {
+    await deleteTask(taskId);
+    toastService?.success(t("toast.taskDeleted"));
+    // The task this page was showing no longer exists — nothing left to
+    // render here, so go back to the list instead of a "not found" state.
+    goBack();
+  } catch (err: unknown) {
+    console.error("Error deleting task:", err);
+    toastService?.error(t("toast.taskDeleteFailed"));
   }
 }
 </script>

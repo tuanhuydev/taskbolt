@@ -6,6 +6,7 @@ import {
   getSprints,
   createTask as createTaskRequest,
   updateTask as updateTaskRequest,
+  deleteTask as deleteTaskRequest,
 } from "@/shared/services";
 import type {
   Task,
@@ -165,6 +166,12 @@ export function useProjectTasks(
     return await updateTaskRequest(apiClient, taskId, payload);
   }
 
+  async function deleteTask(taskId: string): Promise<void> {
+    const apiClient = getApiClient();
+    if (!apiClient) throw new Error("API client not available from shell.");
+    await deleteTaskRequest(apiClient, taskId);
+  }
+
   return {
     taskList,
     members,
@@ -177,5 +184,6 @@ export function useProjectTasks(
     fetchMembersAndSprints,
     createTask,
     updateTask,
+    deleteTask,
   };
 }

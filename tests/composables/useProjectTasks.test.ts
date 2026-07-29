@@ -156,4 +156,30 @@ describe("useProjectTasks — write orchestration", () => {
     await expect(createTask({ title: "", type: TaskType.ISSUE })).rejects.toThrow();
     expect(mockApiClient.request).toHaveBeenCalledTimes(1);
   });
+
+  it("deleteTask calls the API without refetching", async () => {
+    vi.mocked(mockApiClient.request).mockResolvedValueOnce({
+      ok: true,
+    } as Response);
+
+    const { deleteTask, taskList } = mountHost();
+    await deleteTask("task-1");
+
+    expect(taskList.value).toEqual([]);
+    expect(mockApiClient.request).toHaveBeenCalledTimes(1);
+    expect(mockApiClient.request).toHaveBeenCalledWith(
+      expect.stringContaining("/tasks/task-1"),
+      expect.objectContaining({ method: "DELETE" }),
+    );
+  });
+
+  it("deleteTask rejects when the delete request fails", async () => {
+    vi.mocked(mockApiClient.request).mockResolvedValueOnce({
+      ok: false,
+      status: 404,
+    } as Response);
+
+    const { deleteTask } = mountHost();
+    await expect(deleteTask("task-999")).rejects.toThrow();
+  });
 });

@@ -93,6 +93,14 @@
                   <Copy class="mr-2 h-4 w-4" />
                   {{ t("taskDetailHeader.convertToTask") }}
                 </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  class="text-destructive focus:text-destructive"
+                  @click="emit('delete')"
+                >
+                  <Trash2 class="mr-2 h-4 w-4" />
+                  {{ t("taskDetailHeader.deleteTask") }}
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
 
@@ -144,12 +152,14 @@ import {
   CopySlash,
   Copy,
   Link,
+  Trash2,
 } from "lucide-vue-next";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
 } from "@/shared/components/ui/dropdown-menu";
 import {
   Tooltip,
@@ -169,6 +179,7 @@ const emit = defineEmits<{
   (e: "create-sub-task"): void;
   (e: "convert-to-sub-task"): void;
   (e: "convert-to-task"): void;
+  (e: "delete"): void;
 }>();
 
 const { t } = useTaskboltTranslation();
