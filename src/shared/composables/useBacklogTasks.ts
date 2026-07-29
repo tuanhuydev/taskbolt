@@ -26,6 +26,8 @@ export function useBacklogTasks(
   const sprints = ref<Sprint[]>([]);
   const loading = ref(true);
   const error = ref<string | null>(null);
+  const membersError = ref<string | null>(null);
+  const sprintsError = ref<string | null>(null);
 
   // Guards against out-of-order responses: rapid filter/project changes can
   // fire overlapping requests whose responses resolve out of order, and a
@@ -78,21 +80,40 @@ export function useBacklogTasks(
     const apiClient = getApiClient();
     const projectId = selectedProjectId.value;
 
+    membersError.value = null;
+    sprintsError.value = null;
+
     if (!apiClient || !projectId) {
       members.value = [];
       sprints.value = [];
       return;
     }
 
-    try {
-      const [projectMembers, projectSprints] = await Promise.all([
-        getProjectMembers(apiClient, projectId),
-        getSprints(apiClient, { projectId }),
-      ]);
-      members.value = projectMembers;
-      sprints.value = projectSprints;
-    } catch (err: unknown) {
-      console.error("Error fetching members/sprints:", err);
+    // Resolved independently (not Promise.all) so one failing doesn't hide
+    // the other's success or its own specific error from the UI.
+    const [membersResult, sprintsResult] = await Promise.allSettled([
+      getProjectMembers(apiClient, projectId),
+      getSprints(apiClient, { projectId }),
+    ]);
+
+    if (membersResult.status === "fulfilled") {
+      members.value = membersResult.value;
+    } else {
+      console.error("Error fetching project members:", membersResult.reason);
+      membersError.value =
+        membersResult.reason instanceof Error
+          ? membersResult.reason.message
+          : "Failed to load project members.";
+    }
+
+    if (sprintsResult.status === "fulfilled") {
+      sprints.value = sprintsResult.value;
+    } else {
+      console.error("Error fetching sprints:", sprintsResult.reason);
+      sprintsError.value =
+        sprintsResult.reason instanceof Error
+          ? sprintsResult.reason.message
+          : "Failed to load sprints.";
     }
   }
 
@@ -102,6 +123,8 @@ export function useBacklogTasks(
     sprints,
     loading,
     error,
+    membersError,
+    sprintsError,
     fetchTasks,
     fetchMembersAndSprints,
   };

@@ -58,9 +58,20 @@ const {
   sprints,
   loading,
   error,
+  membersError,
+  sprintsError,
   fetchTasks,
   fetchMembersAndSprints,
 } = useBacklogTasks(selectedProjectId);
+
+// Members/sprints are secondary data — surface failures as a toast rather
+// than blocking the page like the primary task-fetch `error`.
+watch(membersError, (message) => {
+  if (message) getToastService()?.error(t("toast.membersLoadFailed"));
+});
+watch(sprintsError, (message) => {
+  if (message) getToastService()?.error(t("toast.sprintsLoadFailed"));
+});
 
 const taskId = computed(() => route.params.taskId as string);
 const task = computed(

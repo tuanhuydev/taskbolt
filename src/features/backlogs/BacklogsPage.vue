@@ -115,11 +115,23 @@ const {
   sprints,
   loading,
   error,
+  membersError,
+  sprintsError,
   fetchTasks,
   fetchMembersAndSprints,
 } = useBacklogTasks(selectedProjectId, {
   statuses: selectedStatuses,
   priorities: selectedPriorities,
+});
+
+// Members/sprints are secondary data (the task list itself still loads
+// fine without them) — surface failures as a toast rather than blocking
+// the whole page like the primary task-fetch `error`.
+watch(membersError, (message) => {
+  if (message) getToastService()?.error(t("toast.membersLoadFailed"));
+});
+watch(sprintsError, (message) => {
+  if (message) getToastService()?.error(t("toast.sprintsLoadFailed"));
 });
 // Closed (obsoleted) tasks aren't actionable but shouldn't be deleted —
 // hide them from the backlog list by default, toggle to reveal.
