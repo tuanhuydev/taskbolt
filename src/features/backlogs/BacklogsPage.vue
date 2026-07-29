@@ -89,7 +89,8 @@ import {
   type CreateTaskPayload,
   type UpdateTaskPayload,
 } from "@/shared/types/task";
-import { SprintStatus, type Sprint } from "@/shared/types/sprint";
+import { type Sprint } from "@/shared/types/sprint";
+import { SPRINT_STATUS_ORDER } from "@/shared/lib/sprint-display";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Checkbox } from "@/shared/components/ui/checkbox";
@@ -174,15 +175,6 @@ interface SprintGroup {
   sprint: Sprint | null;
   tasks: Task[];
 }
-
-// Active sprints surface first (what you're working on now), then planned,
-// then completed last — the "no sprint" bucket is appended after sorting
-// so it always stays at the very bottom regardless of sprint statuses.
-const SPRINT_STATUS_ORDER: Record<SprintStatus, number> = {
-  [SprintStatus.ACTIVE]: 0,
-  [SprintStatus.PLANNED]: 1,
-  [SprintStatus.COMPLETED]: 2,
-};
 
 // Buckets parent tasks by sprintId so the backlog can be rendered as one
 // row per sprint. Tasks whose sprintId doesn't resolve to a fetched sprint
