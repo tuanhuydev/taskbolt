@@ -1,23 +1,41 @@
 import { ref, type Ref } from "vue";
 import { useShellServices } from "@/shared/composables/useShellServices";
-import { getTasks, getProjectMembers, getSprints } from "@/shared/services";
-import type { Task, TaskStatus, TaskPriority } from "@/shared/types/task";
+import {
+  getTasks,
+  getProjectMembers,
+  getSprints,
+  createTask as createTaskRequest,
+  updateTask as updateTaskRequest,
+} from "@/shared/services";
+import type {
+  Task,
+  TaskStatus,
+  TaskPriority,
+  CreateTaskPayload,
+  UpdateTaskPayload,
+} from "@/shared/types/task";
 import type { ProjectMember } from "@/shared/types/member";
 import type { Sprint } from "@/shared/types/sprint";
 
-export interface BacklogTaskFilters {
+export interface ProjectTaskFilters {
   statuses?: Ref<TaskStatus[]>;
   priorities?: Ref<TaskPriority[]>;
+  // Scopes fetchTasks to a single sprint (Active Sprint board) instead of
+  // the whole project (Backlog). When provided, fetchTasks clears the list
+  // rather than falling back to unscoped project tasks while no sprint has
+  // resolved yet (e.g. before the active sprint lookup completes).
+  sprintId?: Ref<string | null>;
 }
 
 /**
- * Fetches the task list, project members and sprints for a project — shared
- * between BacklogsPage (drawer entry point) and TaskDetailPage (dedicated
- * page entry point) so both resolve tasks/sprints/members the same way.
+ * Fetches the task list, project members and sprints for a project, and
+ * orchestrates task create/update (service call + list refresh) — shared
+ * between BacklogsPage, TaskDetailPage, and ActiveSprintPage so all three
+ * read and write tasks the same way instead of each re-implementing it.
  */
-export function useBacklogTasks(
+export function useProjectTasks(
   selectedProjectId: Ref<string | null>,
-  filters: BacklogTaskFilters = {},
+  filters: ProjectTaskFilters = {},
 ) {
   const { getApiClient } = useShellServices();
 
@@ -35,6 +53,13 @@ export function useBacklogTasks(
   let latestRequestId = 0;
 
   async function fetchTasks() {
+    if (filters.sprintId && !filters.sprintId.value) {
+      taskList.value = [];
+      loading.value = false;
+      error.value = null;
+      return;
+    }
+
     const apiClient = getApiClient();
     const requestId = ++latestRequestId;
 
@@ -61,6 +86,9 @@ export function useBacklogTasks(
       }
       if (filters.priorities?.value.length) {
         filter.priority = filters.priorities.value.join(",");
+      }
+      if (filters.sprintId?.value) {
+        filter.sprintId = filters.sprintId.value;
       }
 
       const result = await getTasks(apiClient, filter);
@@ -117,6 +145,26 @@ export function useBacklogTasks(
     }
   }
 
+  // Same apiClient-guard for every consumer instead of re-deriving it
+  // inline. Deliberately does NOT refetch on success — callers that want a
+  // full-list refresh call fetchTasks() themselves; callers doing a
+  // targeted optimistic update (e.g. drag-drop) apply the result directly
+  // and skip the round-trip a refetch would force.
+  async function createTask(payload: CreateTaskPayload): Promise<Task> {
+    const apiClient = getApiClient();
+    if (!apiClient) throw new Error("API client not available from shell.");
+    return await createTaskRequest(apiClient, payload);
+  }
+
+  async function updateTask(
+    taskId: string,
+    payload: Omit<UpdateTaskPayload, "id">,
+  ): Promise<Task> {
+    const apiClient = getApiClient();
+    if (!apiClient) throw new Error("API client not available from shell.");
+    return await updateTaskRequest(apiClient, taskId, payload);
+  }
+
   return {
     taskList,
     members,
@@ -127,5 +175,7 @@ export function useBacklogTasks(
     sprintsError,
     fetchTasks,
     fetchMembersAndSprints,
+    createTask,
+    updateTask,
   };
 }

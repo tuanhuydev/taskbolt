@@ -341,7 +341,8 @@ import {
 } from "@/shared/composables/useShellServices";
 import { useProjectContext } from "@/shared/composables/useProject";
 import { useProjectRouteSync } from "@/shared/composables/useProjectRouteSync";
-import { getSprints, getTasks, getProjectMembers, createTask, updateTask } from "@/shared/services";
+import { getSprints, getProjectMembers } from "@/shared/services";
+import { useProjectTasks } from "@/shared/composables/useProjectTasks";
 import { type Sprint, SprintStatus } from "@/shared/types/sprint";
 import {
   TaskStatus,
@@ -369,7 +370,6 @@ useProjectRouteSync();
 
 // ── State ──────────────────────────────────────────────────────────────────
 const activeSprint = ref<Sprint | null>(null);
-const tasks = ref<Task[]>([]);
 const members = ref<ProjectMember[]>([]);
 const isLoading = ref(false);
 const draggingId = ref<string | null>(null);
@@ -379,6 +379,16 @@ const showTaskForm = ref(false);
 const taskFormInitialData = ref<Partial<Task>>({});
 const selectedTask = ref<Task | null>(null);
 const shouldShowTaskDetail = ref(false);
+
+// Board tasks are scoped to the active sprint (resolved below), not the
+// whole project — the composable clears the list rather than falling back
+// to unscoped project tasks while no active sprint has resolved yet.
+const activeSprintId = computed(() => activeSprint.value?.id ?? null);
+const { taskList: tasks, fetchTasks, createTask, updateTask } = useProjectTasks(
+  selectedProjectId,
+  { sprintId: activeSprintId },
+);
+
 const sprints = computed(() =>
   activeSprint.value ? [activeSprint.value] : [],
 );
@@ -506,8 +516,8 @@ async function loadData() {
     // some other project.
     if (!selectedProjectId.value) {
       activeSprint.value = null;
-      tasks.value = [];
       members.value = [];
+      await fetchTasks();
       return;
     }
 
@@ -516,24 +526,20 @@ async function loadData() {
       projectId: selectedProjectId.value,
     };
 
-    const sprints = await getSprints(apiClient, sprintFilter);
-    activeSprint.value = sprints[0] ?? null;
+    const resolvedSprints = await getSprints(apiClient, sprintFilter);
+    // Setting activeSprint here updates activeSprintId, which fetchTasks()
+    // below reads to scope the board to this sprint (or clear it if none).
+    activeSprint.value = resolvedSprints[0] ?? null;
 
     if (activeSprint.value) {
-      const [sprintTasks, projectMembers] = await Promise.all([
-        getTasks(apiClient, { sprintId: activeSprint.value.id }),
-        selectedProjectId.value
-          ? getProjectMembers(apiClient, selectedProjectId.value)
-          : Promise.resolve([]),
+      const [, projectMembers] = await Promise.all([
+        fetchTasks(),
+        getProjectMembers(apiClient, selectedProjectId.value),
       ]);
-      // CLOSED tasks are obsoleted work — shown folded into the Done column
-      // (see `columns`) rather than hidden entirely, and excluded from the
-      // points total (see `totalPoints`).
-      tasks.value = sprintTasks;
       members.value = projectMembers;
     } else {
-      tasks.value = [];
       members.value = [];
+      await fetchTasks();
     }
   } catch (err) {
     console.error("Failed to load sprint data:", err);
@@ -569,9 +575,7 @@ async function handleDrop(targetColId: TaskStatus) {
 
   if (!taskId || fromCol === targetColId) return;
 
-  const apiClient = getApiClient();
   const toastService = getToastService();
-  if (!apiClient) return;
 
   const taskIdx = tasks.value.findIndex((t) => t.id === taskId);
   if (taskIdx === -1) return;
@@ -582,7 +586,7 @@ async function handleDrop(targetColId: TaskStatus) {
   tasks.value[taskIdx] = { ...tasks.value[taskIdx], status: targetColId };
 
   try {
-    await updateTask(apiClient, taskId, { status: targetColId });
+    await updateTask(taskId, { status: targetColId });
   } catch (err) {
     console.error("Failed to move task:", err);
     const rollbackIdx = tasks.value.findIndex((t) => t.id === taskId);
@@ -620,20 +624,14 @@ async function handleTaskFormSubmit(
   data: CreateTaskPayload | UpdateTaskPayload,
   isEdit: boolean,
 ) {
-  const apiClient = getApiClient();
   const toastService = getToastService();
-
-  if (!apiClient) {
-    toastService?.error(t("toast.apiClientUnavailable"));
-    return;
-  }
 
   try {
     if (isEdit) {
       const { id: taskId, ...body } = data as UpdateTaskPayload;
-      await updateTask(apiClient, taskId, body);
+      await updateTask(taskId, body);
     } else {
-      await createTask(apiClient, {
+      await createTask({
         ...(data as CreateTaskPayload),
         projectId: selectedProjectId.value,
         sprintId: activeSprint.value?.id ?? null,

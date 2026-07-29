@@ -40,12 +40,11 @@ import {
 } from "@/shared/composables/useShellServices";
 import { useProjectContext } from "@/shared/composables/useProject";
 import { useProjectRouteSync } from "@/shared/composables/useProjectRouteSync";
-import { useBacklogTasks } from "@/shared/composables/useBacklogTasks";
-import { createTask, updateTask } from "@/shared/services";
+import { useProjectTasks } from "@/shared/composables/useProjectTasks";
 import type { CreateTaskPayload, UpdateTaskPayload } from "@/shared/types/task";
 import TaskDetailContent from "@/shared/domain-ui/task/TaskDetailContent.vue";
 
-const { getApiClient, getToastService } = useShellServices();
+const { getToastService } = useShellServices();
 const { t } = useTaskboltTranslation();
 const route = useRoute();
 const router = useRouter();
@@ -62,7 +61,9 @@ const {
   sprintsError,
   fetchTasks,
   fetchMembersAndSprints,
-} = useBacklogTasks(selectedProjectId);
+  createTask,
+  updateTask,
+} = useProjectTasks(selectedProjectId);
 
 // Members/sprints are secondary data — surface failures as a toast rather
 // than blocking the page like the primary task-fetch `error`.
@@ -93,17 +94,11 @@ function goBack() {
 }
 
 async function handleUpdateTask(data: UpdateTaskPayload) {
-  const apiClient = getApiClient();
   const toastService = getToastService();
-
-  if (!apiClient) {
-    toastService?.error(t("toast.apiClientUnavailable"));
-    return;
-  }
 
   try {
     const { id, ...body } = data;
-    await updateTask(apiClient, id, body);
+    await updateTask(id, body);
     toastService?.success(t("toast.taskUpdated"));
     await fetchTasks();
   } catch (err: unknown) {
@@ -113,17 +108,10 @@ async function handleUpdateTask(data: UpdateTaskPayload) {
 }
 
 async function handleCreateTask(data: CreateTaskPayload) {
-  const apiClient = getApiClient();
   const toastService = getToastService();
 
-  if (!apiClient) {
-    toastService?.error(t("toast.apiClientUnavailable"));
-    return;
-  }
-
   try {
-    await createTask(apiClient, { ...data, projectId: selectedProjectId.value });
-
+    await createTask({ ...data, projectId: selectedProjectId.value });
     toastService?.success(t("toast.taskCreated"));
     await fetchTasks();
   } catch (err: unknown) {
