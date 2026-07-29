@@ -19,6 +19,7 @@
         @close="emits('close')"
         @update="(data) => emits('update', data)"
         @create="(data) => emits('create', data)"
+        @delete="(taskId) => emits('delete', taskId)"
       />
     </DrawerContent>
   </Drawer>
@@ -48,5 +49,6 @@ const emits = defineEmits<{
   (e: "close"): void;
   (e: "update", data: UpdateTaskPayload): void;
   (e: "create", data: CreateTaskPayload): void;
+  (e: "delete", taskId: string): void;
 }>();
 </script>

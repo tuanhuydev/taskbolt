@@ -329,6 +329,7 @@
       @close="closeTaskDetail"
       @update="(data) => handleTaskFormSubmit(data, true)"
       @create="(data) => handleTaskFormSubmit(data, false)"
+      @delete="handleDeleteTask"
     />
   </div>
 </template>
@@ -384,7 +385,7 @@ const shouldShowTaskDetail = ref(false);
 // whole project — the composable clears the list rather than falling back
 // to unscoped project tasks while no active sprint has resolved yet.
 const activeSprintId = computed(() => activeSprint.value?.id ?? null);
-const { taskList: tasks, fetchTasks, createTask, updateTask } = useProjectTasks(
+const { taskList: tasks, fetchTasks, createTask, updateTask, deleteTask } = useProjectTasks(
   selectedProjectId,
   { sprintId: activeSprintId },
 );
@@ -608,6 +609,20 @@ function selectTask(task: Task) {
 
 function closeTaskDetail() {
   shouldShowTaskDetail.value = false;
+}
+
+async function handleDeleteTask(taskId: string) {
+  const toastService = getToastService();
+
+  try {
+    await deleteTask(taskId);
+    toastService?.success(t("toast.taskDeleted"));
+    closeTaskDetail();
+    await fetchTasks();
+  } catch (err) {
+    console.error("Error deleting task:", err);
+    toastService?.error(t("toast.taskDeleteFailed"));
+  }
 }
 
 // ── Task form ──────────────────────────────────────────────────────────────

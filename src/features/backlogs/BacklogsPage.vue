@@ -61,6 +61,7 @@
     @close="closeTaskDetail"
     @update="handleUpdateTask"
     @create="handleCreateTask"
+    @delete="handleDeleteTask"
   />
   <TaskForm
     :open="showTaskForm"
@@ -120,6 +121,7 @@ const {
   fetchMembersAndSprints,
   createTask,
   updateTask,
+  deleteTask,
 } = useProjectTasks(selectedProjectId, {
   statuses: selectedStatuses,
   priorities: selectedPriorities,
@@ -298,5 +300,19 @@ async function handleUpdateTask(data: UpdateTaskPayload) {
 
 async function handleCreateTask(data: CreateTaskPayload) {
   await handleTaskSubmit(data, false);
+}
+
+async function handleDeleteTask(taskId: string) {
+  const toastService = getToastService();
+
+  try {
+    await deleteTask(taskId);
+    toastService?.success(t("toast.taskDeleted"));
+    closeTaskDetail();
+    await fetchTasks();
+  } catch (err: unknown) {
+    console.error("Error deleting task:", err);
+    toastService?.error(t("toast.taskDeleteFailed"));
+  }
 }
 </script>

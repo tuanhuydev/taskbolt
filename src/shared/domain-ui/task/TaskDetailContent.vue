@@ -8,6 +8,7 @@
     @create-sub-task="openCreateSubTaskModal"
     @convert-to-sub-task="convertToSubTask"
     @convert-to-task="convertToTask"
+    @delete="handleDeleteTask"
   />
   <!-- Show form fields when editing -->
   <template v-if="isEditing && task">
@@ -420,6 +421,7 @@ const emits = defineEmits<{
   (e: "close"): void;
   (e: "update", data: UpdateTaskPayload): void;
   (e: "create", data: CreateTaskPayload): void;
+  (e: "delete", taskId: string): void;
 }>();
 
 const isSubTask = computed(() => !!props.task?.parentId);
@@ -725,6 +727,12 @@ const convertToTask = () => {
     parentId: null,
   });
 };
+
+function handleDeleteTask() {
+  if (!props.task) return;
+  if (!window.confirm(t("taskDetail.taskDeleteConfirm"))) return;
+  emits("delete", props.task.id);
+}
 
 const convertToSubTask = () => {
   if (!props.task) return;

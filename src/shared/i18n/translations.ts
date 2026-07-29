@@ -133,6 +133,7 @@ export const taskboltTranslations = {
       createSubTask: "Create sub-task",
       convertToSubTask: "Convert to sub-task",
       convertToTask: "Convert to task",
+      deleteTask: "Delete task",
     },
     taskDetail: {
       detailsLabel: "Details",
@@ -157,6 +158,7 @@ export const taskboltTranslations = {
       commentEdit: "Edit comment",
       commentDelete: "Delete comment",
       commentDeleteConfirm: "Delete this comment? This cannot be undone.",
+      taskDeleteConfirm: "Delete this task? This cannot be undone.",
       backToBacklogs: "Back to Backlogs",
     },
     common: {
@@ -389,6 +391,7 @@ export const taskboltTranslations = {
       createSubTask: "Tạo sub-task",
       convertToSubTask: "Chuyển thành sub-task",
       convertToTask: "Chuyển thành công việc",
+      deleteTask: "Xóa công việc",
     },
     taskDetail: {
       detailsLabel: "Chi tiết",
@@ -413,6 +416,7 @@ export const taskboltTranslations = {
       commentEdit: "Sửa bình luận",
       commentDelete: "Xóa bình luận",
       commentDeleteConfirm: "Xóa bình luận này? Không thể hoàn tác.",
+      taskDeleteConfirm: "Xóa công việc này? Không thể hoàn tác.",
       backToBacklogs: "Quay lại Backlogs",
     },
     common: {
