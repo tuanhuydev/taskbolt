@@ -20,6 +20,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src/**/*.ts", "src/**/*.vue", "rsbuild.config.ts"],
+  "include": ["src/**/*.ts", "src/**/*.vue", "rsbuild.config.ts", "tests/**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }

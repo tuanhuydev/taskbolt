@@ -5,7 +5,7 @@
         <span class="font-bold text-[14px] text-foreground">My tasks</span>
         <span class="text-[12px] text-muted-foreground">Assigned to you in active sprint</span>
       </div>
-      <span class="inline-flex items-center justify-center min-w-[22px] h-[22px] px-1.5 rounded-full bg-slate-100 font-bold text-[11px] font-mono text-foreground">
+      <span class="inline-flex items-center justify-center min-w-5.5 h-5.5 px-1.5 rounded-full bg-slate-100 font-bold text-[11px] font-mono text-foreground">
         {{ pendingCount }}
       </span>
     </div>
@@ -45,7 +45,7 @@
           <div class="flex items-center gap-2">
             <span class="text-[11px] font-mono text-muted-foreground">{{ formatTicketId(task.id) }}</span>
             <span
-              class="inline-flex items-center h-[18px] px-1.5 rounded-full text-[10px] font-bold uppercase tracking-[.03em]"
+              class="inline-flex items-center h-4.5 px-1.5 rounded-full text-[10px] font-bold uppercase tracking-[.03em]"
               :class="typeStyle(task.type).classes"
             >{{ task.type }}</span>
           </div>
@@ -56,7 +56,7 @@
             <span class="w-1.5 h-1.5 rounded-full" :class="priorityStyle(task.priority).dot"></span>
             {{ task.priority }}
           </span>
-          <span class="inline-flex items-center justify-center w-[22px] h-[22px] rounded-md bg-slate-100 font-bold text-[11px] font-mono text-foreground">
+          <span class="inline-flex items-center justify-center w-5.5 h-5.5 rounded-md bg-slate-100 font-bold text-[11px] font-mono text-foreground">
             {{ task.storyPoint }}
           </span>
         </div>
@@ -68,7 +68,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { type Task, TaskStatus, TaskType, TaskPriority } from '@/shared/types/task';
-import { formatTicketId } from '@/shared/lib/task-display';
+import { taskTypeClasses, taskPriorityStyle, formatTicketId } from '@/shared/lib/task-display';
 
 const props = defineProps<{
   tasks: Task[];
@@ -90,22 +90,11 @@ function toggleTask(task: Task) {
 }
 
 function typeStyle(type: TaskType) {
-  const map: Record<TaskType, { classes: string }> = {
-    [TaskType.STORY]:  { classes: 'bg-blue-50 text-blue-700' },
-    [TaskType.BUG]:    { classes: 'bg-red-50 text-red-700' },
-    [TaskType.EPIC]:   { classes: 'bg-purple-50 text-purple-700' },
-    [TaskType.ISSUE]:  { classes: 'bg-amber-50 text-amber-700' },
-  };
-  return map[type] ?? { classes: 'bg-slate-100 text-slate-600' };
+  return { classes: taskTypeClasses(type) };
 }
 
 function priorityStyle(priority: TaskPriority) {
-  const map: Record<TaskPriority, { dot: string; fg: string }> = {
-    [TaskPriority.HIGHEST]: { dot: 'bg-red-500',   fg: 'text-red-700' },
-    [TaskPriority.HIGH]:    { dot: 'bg-red-500',   fg: 'text-red-700' },
-    [TaskPriority.MEDIUM]:  { dot: 'bg-amber-500', fg: 'text-amber-700' },
-    [TaskPriority.LOW]:     { dot: 'bg-slate-400', fg: 'text-muted-foreground' },
-  };
-  return map[priority] ?? { dot: 'bg-slate-400', fg: 'text-muted-foreground' };
+  const { dotClass, textClass } = taskPriorityStyle(priority);
+  return { dot: dotClass, fg: textClass };
 }
 </script>
