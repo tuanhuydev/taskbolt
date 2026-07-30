@@ -45,6 +45,8 @@
       <ReportVelocityChart />
       <ReportBurndownChart />
     </div>
+
+    <ReportTaskBreakdownTable />
   </div>
 </template>
 
@@ -61,6 +63,7 @@ import {
 } from "@/shared/components/ui/select";
 import ReportVelocityChart from "./ReportVelocityChart.vue";
 import ReportBurndownChart from "./ReportBurndownChart.vue";
+import ReportTaskBreakdownTable from "./ReportTaskBreakdownTable.vue";
 
 useProjectRouteSync();
 

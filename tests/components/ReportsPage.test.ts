@@ -45,5 +45,11 @@ describe("ReportsPage", () => {
     expect(wrapper.text()).toContain("reports.velocityTitle");
     expect(wrapper.text()).toContain("reports.burndownTitle");
     expect(wrapper.findAll("svg")).toHaveLength(2);
+    expect(wrapper.text()).toContain("reports.breakdownByStatus");
+    expect(wrapper.text()).toContain("reports.breakdownByType");
+    expect(wrapper.text()).toContain("reports.breakdownByPriority");
+    expect(wrapper.text()).toContain("taskStatus.TODO");
+    expect(wrapper.text()).toContain("taskType.BUG");
+    expect(wrapper.text()).toContain("taskPriority.HIGH");
   });
 });

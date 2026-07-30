@@ -46,6 +46,10 @@ export const taskboltTranslations = {
       burndownTitle: "Burndown",
       burndownActual: "Actual",
       burndownIdeal: "Ideal",
+      breakdownTitle: "Task breakdown",
+      breakdownByStatus: "By status",
+      breakdownByType: "By type",
+      breakdownByPriority: "By priority",
     },
     configure: {
       title: "Configure",
@@ -311,6 +315,10 @@ export const taskboltTranslations = {
       burndownTitle: "Burndown",
       burndownActual: "Thực tế",
       burndownIdeal: "Lý tưởng",
+      breakdownTitle: "Phân loại công việc",
+      breakdownByStatus: "Theo trạng thái",
+      breakdownByType: "Theo loại",
+      breakdownByPriority: "Theo mức ưu tiên",
     },
     configure: {
       title: "Cấu hình",
