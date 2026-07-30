@@ -14,7 +14,16 @@ import { cn } from "@/shared/lib/utils";
 
 const props = withDefaults(
   defineProps<DropdownMenuContentProps & { class?: HTMLAttributes["class"] }>(),
-  { sideOffset: 4, class: undefined },
+  {
+    sideOffset: 4,
+    class: undefined,
+    // Trigger buttons that live inside an animating container (e.g. the
+    // task detail Drawer's slide-in transform) keep moving after the menu
+    // opens. The default 'optimized' strategy only repositions on
+    // resize/scroll, so it misses pure-transform animation and the menu
+    // ends up detached from its trigger. 'always' re-measures every frame.
+    updatePositionStrategy: "always",
+  },
 );
 const emits = defineEmits<DropdownMenuContentEmits>();
 
