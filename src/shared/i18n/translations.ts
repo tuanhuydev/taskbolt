@@ -39,6 +39,12 @@ export const taskboltTranslations = {
     },
     reports: {
       title: "Reports",
+      subtitle: "Track sprint velocity, completion, and task breakdown.",
+      filterProject: "Project",
+      filterProjectAll: "All projects",
+      filterSprint: "Sprint",
+      filterSprintAll: "All sprints",
+      filterDateRange: "Date range",
     },
     configure: {
       title: "Configure",
@@ -297,6 +303,12 @@ export const taskboltTranslations = {
     },
     reports: {
       title: "Báo cáo",
+      subtitle: "Theo dõi tốc độ, tỷ lệ hoàn thành và phân loại công việc theo sprint.",
+      filterProject: "Dự án",
+      filterProjectAll: "Tất cả dự án",
+      filterSprint: "Sprint",
+      filterSprintAll: "Tất cả sprint",
+      filterDateRange: "Khoảng thời gian",
     },
     configure: {
       title: "Cấu hình",
