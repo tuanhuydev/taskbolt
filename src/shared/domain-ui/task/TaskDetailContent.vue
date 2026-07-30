@@ -75,8 +75,10 @@
                 :model-value="sub.status === TaskStatus.DONE"
                 @update:model-value="() => toggleSubtask(sub)"
               />
-              <span
-                class="flex-1 text-sm font-medium"
+              <RouterLink
+                :to="{ name: 'task-link', params: { taskId: sub.id } }"
+                target="_blank"
+                class="flex-1 text-sm font-medium hover:underline"
                 :class="
                   sub.status === TaskStatus.DONE
                     ? 'line-through text-muted-foreground'
@@ -84,7 +86,7 @@
                 "
               >
                 {{ sub.title }}
-              </span>
+              </RouterLink>
               <span class="text-xs font-mono text-muted-foreground">{{
                 formatId(sub.id)
               }}</span>
