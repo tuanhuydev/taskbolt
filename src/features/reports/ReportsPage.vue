@@ -10,23 +10,6 @@
     >
       <div class="min-w-40">
         <label class="text-xs font-medium text-muted-foreground block mb-1.5">
-          {{ t("reports.filterProject") }}
-        </label>
-        <Select v-model="filters.projectId">
-          <SelectTrigger>
-            <SelectValue :placeholder="t('reports.filterProjectAll')" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">{{ t("reports.filterProjectAll") }}</SelectItem>
-            <SelectItem v-for="project in mockProjects" :key="project" :value="project">
-              {{ project }}
-            </SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div class="min-w-40">
-        <label class="text-xs font-medium text-muted-foreground block mb-1.5">
           {{ t("reports.filterSprint") }}
         </label>
         <Select v-model="filters.sprintId">
@@ -40,17 +23,6 @@
             </SelectItem>
           </SelectContent>
         </Select>
-      </div>
-
-      <div>
-        <label class="text-xs font-medium text-muted-foreground block mb-1.5">
-          {{ t("reports.filterDateRange") }}
-        </label>
-        <div class="flex items-center gap-2">
-          <Input v-model="filters.startDate" type="date" class="w-38" />
-          <span class="text-muted-foreground text-sm">→</span>
-          <Input v-model="filters.endDate" type="date" class="w-38" />
-        </div>
       </div>
     </div>
 
@@ -75,7 +47,6 @@
 import { reactive } from "vue";
 import { useProjectRouteSync } from "@/shared/composables/useProjectRouteSync";
 import { useTaskboltTranslation } from "@/shared/composables/useShellServices";
-import { Input } from "@/shared/components/ui/input";
 import {
   Select,
   SelectTrigger,
@@ -88,17 +59,15 @@ useProjectRouteSync();
 
 const { t } = useTaskboltTranslation();
 
-// Static placeholders — the filter row is a non-functional mock shell for
-// now (see TASKBOLT-6a5522a58afd1debb24aa01b); wiring to real project/
-// sprint/date data is out of scope for this pass.
-const mockProjects = ["Taskbolt", "Budtr", "Flowrk"];
+// Report data is already scoped to the currently selected project (see
+// useProjectRouteSync above) — no project filter here. Sprint is the only
+// filter; still a non-functional mock for now (see
+// TASKBOLT-6a5522a58afd1debb24aa01b), wiring it to real sprint data is out
+// of scope for this pass.
 const mockSprints = ["Sprint 01", "Sprint 02", "QA Sprint"];
 
 const filters = reactive({
-  projectId: "all",
   sprintId: "all",
-  startDate: "",
-  endDate: "",
 });
 
 const statCards = [

@@ -35,9 +35,9 @@ describe("ReportsPage", () => {
     const wrapper = mountComponent();
 
     expect(wrapper.text()).toContain("reports.title");
-    expect(wrapper.text()).toContain("reports.filterProject");
     expect(wrapper.text()).toContain("reports.filterSprint");
-    expect(wrapper.text()).toContain("reports.filterDateRange");
+    expect(wrapper.text()).not.toContain("reports.filterProject");
+    expect(wrapper.text()).not.toContain("reports.filterDateRange");
     expect(wrapper.text()).toContain("Total Tasks");
     expect(wrapper.text()).toContain("Completed");
     expect(wrapper.text()).toContain("In Progress");
