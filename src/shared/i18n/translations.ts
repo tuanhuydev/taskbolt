@@ -42,6 +42,10 @@ export const taskboltTranslations = {
       subtitle: "Track sprint velocity, completion, and task breakdown.",
       filterSprint: "Sprint",
       filterSprintAll: "All sprints",
+      velocityTitle: "Velocity",
+      burndownTitle: "Burndown",
+      burndownActual: "Actual",
+      burndownIdeal: "Ideal",
     },
     configure: {
       title: "Configure",
@@ -303,6 +307,10 @@ export const taskboltTranslations = {
       subtitle: "Theo dõi tốc độ, tỷ lệ hoàn thành và phân loại công việc theo sprint.",
       filterSprint: "Sprint",
       filterSprintAll: "Tất cả sprint",
+      velocityTitle: "Tốc độ",
+      burndownTitle: "Burndown",
+      burndownActual: "Thực tế",
+      burndownIdeal: "Lý tưởng",
     },
     configure: {
       title: "Cấu hình",
