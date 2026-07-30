@@ -120,6 +120,7 @@ export const taskboltTranslations = {
       statusLabel: "Status",
       noSprints: "No sprints yet",
       addSprint: "Add Sprint",
+      activeSprintLocked: "An active sprint can't be edited or deleted",
     },
     sprintStatus: {
       planned: "Planning",
@@ -378,6 +379,7 @@ export const taskboltTranslations = {
       statusLabel: "Trạng thái",
       noSprints: "Chưa có sprint nào",
       addSprint: "Thêm Sprint",
+      activeSprintLocked: "Không thể sửa hoặc xóa sprint đang hoạt động",
     },
     sprintStatus: {
       planned: "Lập kế hoạch",

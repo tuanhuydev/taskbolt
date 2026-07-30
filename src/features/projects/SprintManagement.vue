@@ -53,6 +53,12 @@
               variant="ghost"
               size="sm"
               class="h-8 w-8 p-0"
+              :disabled="sprint.status === SprintStatus.ACTIVE"
+              :title="
+                sprint.status === SprintStatus.ACTIVE
+                  ? t('sprint.activeSprintLocked')
+                  : undefined
+              "
               @click="openEditForm(sprint)"
             >
               <Pencil class="w-3.5 h-3.5" />
@@ -61,6 +67,12 @@
               variant="ghost"
               size="sm"
               class="h-8 w-8 p-0 text-destructive hover:text-destructive"
+              :disabled="sprint.status === SprintStatus.ACTIVE"
+              :title="
+                sprint.status === SprintStatus.ACTIVE
+                  ? t('sprint.activeSprintLocked')
+                  : undefined
+              "
               @click="confirmDelete(sprint)"
             >
               <Trash2 class="w-3.5 h-3.5" />

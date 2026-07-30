@@ -128,4 +128,38 @@ describe("SprintManagement", () => {
     const sprintRow = wrapper.find("li");
     expect(sprintRow.findAll("button")).toHaveLength(2);
   });
+
+  it("disables edit/delete controls for an active sprint", async () => {
+    const activeSprint: Sprint = { ...mockSprint, status: SprintStatus.ACTIVE };
+    vi.mocked(mockApiClient.request).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ sprints: [activeSprint], total: 1 }),
+    } as Response);
+
+    const wrapper = mountComponent("proj-1", true);
+    await new Promise((r) => setTimeout(r, 0));
+    await wrapper.vm.$nextTick();
+
+    const buttons = wrapper.find("li").findAll("button");
+    expect(buttons).toHaveLength(2);
+    buttons.forEach((button) => {
+      expect(button.attributes("disabled")).toBeDefined();
+    });
+  });
+
+  it("leaves edit/delete controls enabled for a non-active sprint", async () => {
+    vi.mocked(mockApiClient.request).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ sprints: [mockSprint], total: 1 }),
+    } as Response);
+
+    const wrapper = mountComponent("proj-1", true);
+    await new Promise((r) => setTimeout(r, 0));
+    await wrapper.vm.$nextTick();
+
+    const buttons = wrapper.find("li").findAll("button");
+    buttons.forEach((button) => {
+      expect(button.attributes("disabled")).toBeUndefined();
+    });
+  });
 });
