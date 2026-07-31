@@ -20,11 +20,11 @@
     <p v-else-if="members.length === 0" class="text-muted-foreground text-sm">
       {{ t('member.noMembers') }}
     </p>
-    <div v-else class="overflow-hidden rounded-2xl border bg-card shadow-sm">
+    <div v-else class="overflow-hidden rounded-2xl border bg-white">
       <div
         v-for="member in members"
         :key="member.id"
-        class="mrow flex flex-col items-start gap-3 border-t p-4 transition-colors first:border-t-0 sm:flex-row sm:items-center sm:justify-between"
+        class="mrow flex flex-col items-start gap-3 border-t p-4 transition-colors first:border-t-0 sm:flex-row sm:items-center sm:justify-between bg-white"
       >
         <div class="flex min-w-0 flex-1 items-center gap-3">
           <AvatarInitials :name="member.userName" size="sm" />

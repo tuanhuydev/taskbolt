@@ -6,7 +6,7 @@
     </template>
     <template v-if="project && isAdmin" #actions>
       <Button
-        variant="outline"
+        variant="ghost"
         size="sm"
         class="h-9 w-9 p-0"
         :aria-label="t('common.edit')"
@@ -28,8 +28,7 @@
     </div>
 
     <template v-else-if="project">
-      <!-- Project details (merged from Project Detail) -->
-      <div class="space-y-4 rounded-2xl border bg-card p-6">
+      <div class="space-y-4 rounded-2xl border bg-white p-6">
         <div class="flex flex-wrap items-center gap-2">
           <span
             :class="cn('text-xs px-2.5 py-1 rounded-full font-medium', getStatusClass(project.status))"
@@ -272,9 +271,3 @@ const comingSoonCards = [
   },
 ];
 </script>
-
-<style scoped>
-.soon-card:hover {
-  box-shadow: 0 4px 12px rgba(16, 24, 32, 0.08);
-}
-</style>
