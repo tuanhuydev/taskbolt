@@ -40,6 +40,11 @@
         </span>
       </div>
     </div>
+
+    <div class="grid grid-cols-1 gap-3 lg:grid-cols-2">
+      <ReportVelocityChart />
+      <ReportBurndownChart />
+    </div>
   </div>
 </template>
 
@@ -54,6 +59,8 @@ import {
   SelectContent,
   SelectItem,
 } from "@/shared/components/ui/select";
+import ReportVelocityChart from "./ReportVelocityChart.vue";
+import ReportBurndownChart from "./ReportBurndownChart.vue";
 
 useProjectRouteSync();
 

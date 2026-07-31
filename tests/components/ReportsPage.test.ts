@@ -42,5 +42,8 @@ describe("ReportsPage", () => {
     expect(wrapper.text()).toContain("Completed");
     expect(wrapper.text()).toContain("In Progress");
     expect(wrapper.text()).toContain("Story Points");
+    expect(wrapper.text()).toContain("reports.velocityTitle");
+    expect(wrapper.text()).toContain("reports.burndownTitle");
+    expect(wrapper.findAll("svg")).toHaveLength(2);
   });
 });
