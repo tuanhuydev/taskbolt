@@ -20,7 +20,7 @@
       <li
         v-for="sprint in sprints"
         :key="sprint.id"
-        class="flex flex-col items-start gap-3 rounded-lg border bg-card p-4 sm:flex-row sm:items-center sm:justify-between"
+        class="flex flex-col items-start gap-3 rounded-lg border bg-white p-4 sm:flex-row sm:items-center sm:justify-between"
       >
         <div class="flex-1 min-w-0">
           <p class="font-medium truncate">{{ sprint.name }}</p>
@@ -53,9 +53,9 @@
               variant="ghost"
               size="sm"
               class="h-8 w-8 p-0"
-              :disabled="sprint.status === SprintStatus.ACTIVE"
+              :disabled="isActiveSprint(sprint)"
               :title="
-                sprint.status === SprintStatus.ACTIVE
+                isActiveSprint(sprint)
                   ? t('sprint.activeSprintLocked')
                   : undefined
               "
@@ -67,9 +67,9 @@
               variant="ghost"
               size="sm"
               class="h-8 w-8 p-0 text-destructive hover:text-destructive"
-              :disabled="sprint.status === SprintStatus.ACTIVE"
+              :disabled="isActiveSprint(sprint)"
               :title="
-                sprint.status === SprintStatus.ACTIVE
+                isActiveSprint(sprint)
                   ? t('sprint.activeSprintLocked')
                   : undefined
               "
@@ -129,6 +129,7 @@ const loading = ref(true);
 const error = ref<string | null>(null);
 const showSprintForm = ref(false);
 const selectedSprint = ref<Sprint | null>(null);
+const isActiveSprint = (sprint: Sprint) => sprint.status === SprintStatus.ACTIVE;
 
 const statusClasses: Record<SprintStatus, string> = {
   [SprintStatus.PLANNED]: "bg-gray-100 text-gray-600",
