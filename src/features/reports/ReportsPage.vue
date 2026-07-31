@@ -26,27 +26,36 @@
       </div>
     </div>
 
-    <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+    <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
       <div
-        v-for="card in statCards"
+        v-for="card in kpiCards"
         :key="card.label"
-        class="rounded-lg border bg-card p-4 flex flex-col gap-1"
+        class="rounded-lg border bg-card shadow-sm p-4"
       >
-        <span class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        <span class="text-xs font-semibold text-muted-foreground block mb-2">
           {{ card.label }}
         </span>
-        <span class="text-2xl font-bold font-mono" :class="card.colorClass">
-          {{ card.value }}
-        </span>
+        <div class="flex items-baseline gap-1 font-mono">
+          <span class="text-2xl font-bold" :class="card.colorClass ?? 'text-foreground'">
+            {{ card.value }}
+          </span>
+          <span v-if="card.suffix" class="text-base text-muted-foreground">
+            {{ card.suffix }}
+          </span>
+        </div>
+        <div v-if="card.showBar" class="h-1.5 rounded-full bg-slate-100 overflow-hidden mt-3">
+          <div class="h-full rounded-full bg-teal-600" :style="{ width: card.value + '%' }" />
+        </div>
+        <p v-else class="text-xs text-muted-foreground mt-2.5">{{ card.sub }}</p>
       </div>
     </div>
 
-    <div class="grid grid-cols-1 gap-3 lg:grid-cols-2">
-      <ReportVelocityChart />
+    <div class="grid grid-cols-1 gap-3 lg:grid-cols-[1.5fr_1fr]">
       <ReportBurndownChart />
+      <ReportTaskBreakdown />
     </div>
 
-    <ReportTaskBreakdownTable />
+    <ReportTaskList />
   </div>
 </template>
 
@@ -61,9 +70,9 @@ import {
   SelectContent,
   SelectItem,
 } from "@/shared/components/ui/select";
-import ReportVelocityChart from "./ReportVelocityChart.vue";
 import ReportBurndownChart from "./ReportBurndownChart.vue";
-import ReportTaskBreakdownTable from "./ReportTaskBreakdownTable.vue";
+import ReportTaskBreakdown from "./ReportTaskBreakdown.vue";
+import ReportTaskList from "./ReportTaskList.vue";
 
 useProjectRouteSync();
 
@@ -80,10 +89,30 @@ const filters = reactive({
   sprintId: "all",
 });
 
-const statCards = [
-  { label: "Total Tasks", value: "128", colorClass: "text-foreground" },
-  { label: "Completed", value: "76", colorClass: "text-green-600" },
-  { label: "In Progress", value: "31", colorClass: "text-amber-500" },
-  { label: "Story Points", value: "214", colorClass: "text-primary" },
+const kpiCards = [
+  {
+    label: t("reports.kpiProgress"),
+    value: "75",
+    showBar: true,
+  },
+  {
+    label: t("reports.kpiTasksDone"),
+    value: "18",
+    suffix: "/24",
+    sub: t("reports.kpiTasksDoneSub").replace("{{count}}", "6"),
+  },
+  {
+    label: t("reports.kpiStoryPoints"),
+    value: "42",
+    suffix: "/56",
+    sub: t("reports.kpiStoryPointsSub").replace("{{count}}", "14"),
+  },
+  {
+    label: t("reports.kpiTimeLeft"),
+    value: "3",
+    suffix: t("reports.kpiTimeLeftSuffix"),
+    colorClass: "text-amber-600",
+    sub: t("reports.kpiTimeLeftSub"),
+  },
 ];
 </script>

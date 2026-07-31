@@ -1,9 +1,21 @@
 <template>
-  <div class="rounded-lg border bg-card p-4">
-    <h3 class="text-sm font-semibold mb-3">{{ t("reports.burndownTitle") }}</h3>
+  <div class="rounded-lg border bg-card shadow-sm p-5">
+    <div class="flex items-center justify-between mb-1.5">
+      <h3 class="text-sm font-bold text-foreground">{{ t("reports.burndownTitle") }}</h3>
+      <div class="flex items-center gap-4 text-xs text-muted-foreground">
+        <span class="flex items-center gap-1.5">
+          <span class="inline-block w-3.5 h-0.5 border-t border-dashed border-slate-300" />
+          {{ t("reports.burndownIdeal") }}
+        </span>
+        <span class="flex items-center gap-1.5">
+          <span class="inline-block w-3.5 h-[3px] rounded-sm bg-teal-600" />
+          {{ t("reports.burndownActual") }}
+        </span>
+      </div>
+    </div>
     <svg
-      :viewBox="`0 0 ${width} ${height}`"
-      class="w-full h-40"
+      :viewBox="`0 0 ${width} ${totalHeight}`"
+      class="w-full h-48"
       preserveAspectRatio="none"
       role="img"
       :aria-label="t('reports.burndownTitle')"
@@ -15,41 +27,45 @@
         :x2="width"
         :y1="scaleY(tick)"
         :y2="scaleY(tick)"
-        class="stroke-border"
+        class="stroke-slate-100"
         stroke-width="1"
       />
       <polyline
         :points="idealPoints"
         fill="none"
-        class="stroke-muted-foreground"
-        stroke-width="1.5"
-        stroke-dasharray="4 3"
+        class="stroke-slate-300"
+        stroke-width="2"
+        stroke-dasharray="5 5"
       />
       <polyline
         :points="actualPoints"
         fill="none"
-        class="stroke-primary"
-        stroke-width="2"
+        class="stroke-teal-600"
+        stroke-width="3"
+        stroke-linecap="round"
+        stroke-linejoin="round"
       />
       <circle
         v-for="(point, index) in actual"
-        :key="point.day"
+        :key="point.week"
         :cx="scaleX(index)"
         :cy="scaleY(point.remaining)"
-        r="2.5"
-        class="fill-primary"
+        r="4"
+        fill="white"
+        class="stroke-teal-600"
+        stroke-width="3"
       />
+      <text
+        v-for="(point, index) in actual"
+        :key="`label-${point.week}`"
+        :x="scaleX(index)"
+        :y="chartHeight + 16"
+        text-anchor="middle"
+        class="fill-muted-foreground text-[10px] font-mono"
+      >
+        {{ point.week }}
+      </text>
     </svg>
-    <div class="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
-      <span class="flex items-center gap-1.5">
-        <span class="inline-block w-3 h-0.5 bg-primary" />
-        {{ t("reports.burndownActual") }}
-      </span>
-      <span class="flex items-center gap-1.5">
-        <span class="inline-block w-3 h-0.5 border-t border-dashed border-muted-foreground" />
-        {{ t("reports.burndownIdeal") }}
-      </span>
-    </div>
   </div>
 </template>
 
@@ -58,37 +74,34 @@ import { useTaskboltTranslation } from "@/shared/composables/useShellServices";
 
 const { t } = useTaskboltTranslation();
 
-// Static placeholder burndown (remaining story points per sprint day) — see
-// TASKBOLT-6a5522a78afd1debb24aa01c. Hand-rolled SVG, no charting library
-// in the repo yet.
-const totalPoints = 45;
-const sprintDays = 10;
+// Static placeholder burndown (remaining story points per sprint week) —
+// see TASKBOLT-6a5522a78afd1debb24aa01c. Hand-rolled SVG, no charting
+// library in the repo yet.
+const totalPoints = 56;
 const actual = [
-  { day: 0, remaining: 45 },
-  { day: 1, remaining: 42 },
-  { day: 2, remaining: 40 },
-  { day: 3, remaining: 34 },
-  { day: 4, remaining: 30 },
-  { day: 5, remaining: 27 },
-  { day: 6, remaining: 21 },
-  { day: 7, remaining: 15 },
-  { day: 8, remaining: 9 },
-  { day: 9, remaining: 3 },
+  { week: "W1", remaining: 56 },
+  { week: "W1.5", remaining: 44 },
+  { week: "W2", remaining: 35 },
+  { week: "W2.5", remaining: 20 },
+  { week: "W3", remaining: 8 },
+  { week: "W3.5", remaining: 0 },
+  { week: "W4", remaining: 0 },
 ];
-const ideal = Array.from({ length: sprintDays }, (_, day) => ({
-  day,
-  remaining: totalPoints - (totalPoints / (sprintDays - 1)) * day,
+const ideal = actual.map((point, index) => ({
+  week: point.week,
+  remaining: totalPoints - (totalPoints / (actual.length - 1)) * index,
 }));
 
 const width = 300;
-const height = 120;
+const chartHeight = 110;
+const totalHeight = chartHeight + 22;
 
 function scaleX(index: number): number {
-  return (index / (sprintDays - 1)) * width;
+  return (index / (actual.length - 1)) * width;
 }
 
 function scaleY(value: number): number {
-  return height - (value / totalPoints) * height;
+  return chartHeight - (value / totalPoints) * chartHeight;
 }
 
 const yTicks = [0, totalPoints / 2, totalPoints];

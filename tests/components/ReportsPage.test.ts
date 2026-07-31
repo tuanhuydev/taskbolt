@@ -11,6 +11,7 @@ const router = createRouter({
   history: createMemoryHistory(),
   routes: [
     { path: "/:projectId?/reports", name: "reports", component: ReportsPage },
+    { path: "/:projectId?/active-sprint", name: "active-sprint", component: { template: "<div />" } },
   ],
 });
 
@@ -30,7 +31,7 @@ function mountComponent() {
 }
 
 describe("ReportsPage", () => {
-  it("renders the header, filter controls, and stat cards", async () => {
+  it("renders the header, sprint filter, KPI cards, charts, and task list", async () => {
     await router.push("/reports");
     const wrapper = mountComponent();
 
@@ -38,18 +39,23 @@ describe("ReportsPage", () => {
     expect(wrapper.text()).toContain("reports.filterSprint");
     expect(wrapper.text()).not.toContain("reports.filterProject");
     expect(wrapper.text()).not.toContain("reports.filterDateRange");
-    expect(wrapper.text()).toContain("Total Tasks");
-    expect(wrapper.text()).toContain("Completed");
-    expect(wrapper.text()).toContain("In Progress");
-    expect(wrapper.text()).toContain("Story Points");
-    expect(wrapper.text()).toContain("reports.velocityTitle");
+
+    expect(wrapper.text()).toContain("reports.kpiProgress");
+    expect(wrapper.text()).toContain("reports.kpiTasksDone");
+    expect(wrapper.text()).toContain("reports.kpiStoryPoints");
+    expect(wrapper.text()).toContain("reports.kpiTimeLeft");
+
     expect(wrapper.text()).toContain("reports.burndownTitle");
-    expect(wrapper.findAll("svg")).toHaveLength(2);
-    expect(wrapper.text()).toContain("reports.breakdownByStatus");
-    expect(wrapper.text()).toContain("reports.breakdownByType");
-    expect(wrapper.text()).toContain("reports.breakdownByPriority");
+    expect(wrapper.findAll("svg")).toHaveLength(1);
+
+    expect(wrapper.text()).toContain("reports.breakdownTitle");
     expect(wrapper.text()).toContain("taskStatus.TODO");
-    expect(wrapper.text()).toContain("taskType.BUG");
-    expect(wrapper.text()).toContain("taskPriority.HIGH");
+    expect(wrapper.text()).toContain("taskStatus.IN_PROGRESS");
+    expect(wrapper.text()).toContain("taskStatus.IN_REVIEW");
+    expect(wrapper.text()).toContain("taskStatus.DONE");
+
+    expect(wrapper.text()).toContain("reports.tasksTitle");
+    expect(wrapper.text()).toContain("reports.viewBoard");
+    expect(wrapper.text()).toContain("TB-142");
   });
 });
