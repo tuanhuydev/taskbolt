@@ -87,7 +87,7 @@
         <div
           v-for="card in comingSoonCards"
           :key="card.path"
-          class="soon-card flex cursor-default flex-col gap-3 rounded-2xl border bg-white p-5 shadow-sm transition-shadow"
+          class="soon-card flex cursor-default flex-col gap-3 rounded-2xl border bg-white p-5 transition-shadow"
         >
           <div class="flex items-center justify-between gap-2.5">
             <Badge variant="neutral">{{ t('configure.plannedBadge') }}</Badge>

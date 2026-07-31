@@ -61,7 +61,7 @@
     <!-- Sprint progress bar -->
     <div
       v-if="activeSprint && !isLoading"
-      class="flex-none flex items-center gap-6 bg-white border border-border rounded-lg shadow-sm px-4 py-3.5"
+      class="flex-none flex items-center gap-6 bg-white border border-border rounded-lg px-4 py-3.5"
     >
       <!-- Days left -->
       <div class="flex flex-col gap-0.5 flex-none">
@@ -223,7 +223,7 @@
             v-for="task in col.tasks"
             :key="task.id"
             draggable="true"
-            class="bg-white border border-border rounded-md shadow-sm px-3.5 py-3.5 flex flex-col gap-2.5 cursor-grab hover:shadow-md hover:-translate-y-0.5 active:cursor-grabbing transition-all select-none"
+            class="bg-white border border-border rounded-md px-3.5 py-3.5 flex flex-col gap-2.5 cursor-grab hover:-translate-y-0.5 active:cursor-grabbing transition-all select-none"
             :class="[
               draggingId === task.id ? 'opacity-40' : '',
               task.status === TaskStatus.CLOSED ? 'opacity-60' : '',

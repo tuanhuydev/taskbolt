@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white border border-border rounded-xl shadow-sm overflow-hidden">
+  <div class="bg-white border border-border rounded-xl overflow-hidden">
     <div class="px-5 py-4 border-b border-border">
       <span class="font-bold text-[14px] text-foreground">Team activity</span>
     </div>

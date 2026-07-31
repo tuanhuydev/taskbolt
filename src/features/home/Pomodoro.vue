@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white border border-border rounded-xl shadow-sm p-4 flex flex-col items-center gap-2.5">
+  <div class="bg-white border border-border rounded-xl p-4 flex flex-col items-center gap-2.5">
     <div class="w-full flex items-center justify-between">
       <span class="font-bold text-[12.5px] text-foreground">Pomodoro</span>
       <div class="flex gap-1.5">

@@ -12,15 +12,6 @@
     </div>
 
     <div class="flex flex-wrap items-center gap-2 sm:gap-4 w-full sm:w-auto">
-      <label
-        class="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer select-none whitespace-nowrap"
-      >
-        <Checkbox
-          :model-value="showClosedTasks"
-          @update:model-value="(v) => (showClosedTasks = !!v)"
-        />
-        {{ t("backlogs.showClosed") }}
-      </label>
       <BacklogFilters
         :statuses="selectedStatuses"
         :priorities="selectedPriorities"
@@ -94,7 +85,6 @@ import { type Sprint } from "@/shared/types/sprint";
 import { SPRINT_STATUS_ORDER } from "@/shared/lib/sprint-display";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
-import { Checkbox } from "@/shared/components/ui/checkbox";
 import { TaskForm, TaskDetail } from "@/shared/domain-ui/task";
 import BacklogSprintRow from "./BacklogSprintRow.vue";
 import BacklogFilters from "./BacklogFilters.vue";
@@ -137,22 +127,12 @@ watch(membersError, (message) => {
 watch(sprintsError, (message) => {
   if (message) getToastService()?.error(t("toast.sprintsLoadFailed"));
 });
-// Closed (obsoleted) tasks aren't actionable but shouldn't be deleted —
-// hide them from the backlog list by default, toggle to reveal.
-const showClosedTasks = ref(false);
-
-const visibleTasks = computed(() =>
-  showClosedTasks.value
-    ? taskList.value
-    : taskList.value.filter((task) => task.status !== TaskStatus.CLOSED),
-);
-
 const taskGroups = computed(() => {
   const parentTaskIds = new Set<string>();
   const childTaskMap = new Map<string, Task[]>();
   const parentTaskList: Task[] = [];
 
-  for (const task of visibleTasks.value) {
+  for (const task of taskList.value) {
     if (task.parentId == null) {
       parentTaskIds.add(task.id);
       parentTaskList.push(task);
