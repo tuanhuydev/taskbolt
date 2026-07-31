@@ -163,11 +163,12 @@
     </div>
 
     <!-- Kanban board -->
-    <div v-else class="flex-1 min-h-0 flex gap-4 pb-4">
+    <div v-else class="flex-1 min-h-0 flex gap-4 pb-4 overflow-x-auto">
       <div
         v-for="col in columns"
         :key="col.id"
-        class="flex-1 min-w-0 flex flex-col rounded-lg border transition-colors"
+        data-testid="kanban-column"
+        class="w-72 shrink-0 flex flex-col rounded-lg border transition-colors md:w-auto md:flex-1 md:min-w-0 md:shrink"
         :class="
           dragOverCol === col.id
             ? 'border-primary bg-primary/5'

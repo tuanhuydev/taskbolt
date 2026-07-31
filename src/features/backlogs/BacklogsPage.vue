@@ -11,7 +11,7 @@
       />
     </div>
 
-    <div class="flex items-center gap-4">
+    <div class="flex flex-wrap items-center gap-2 sm:gap-4 w-full sm:w-auto">
       <label
         class="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer select-none whitespace-nowrap"
       >

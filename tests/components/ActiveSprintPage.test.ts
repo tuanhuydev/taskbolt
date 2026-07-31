@@ -109,9 +109,8 @@ describe("ActiveSprintPage — CLOSED tasks fold into the Done column", () => {
     // Only the open task's 5 points should count toward the total.
     expect(wrapper.text()).toContain("of 5 points completed");
 
-    // Index 0 is the sprint progress stats block (matches the same class
-    // list incidentally); columns follow in TODO, In progress, Done order.
-    const doneColumn = wrapper.findAll(".flex-1.min-w-0.flex.flex-col")[3];
+    // Columns follow in TODO, In progress, Done order.
+    const doneColumn = wrapper.findAll('[data-testid="kanban-column"]')[2];
     expect(doneColumn.text()).toContain("Closed task");
   });
 
@@ -127,7 +126,7 @@ describe("ActiveSprintPage — CLOSED tasks fold into the Done column", () => {
 
     const card = wrapper.find('[draggable="true"]');
     await card.trigger("dragstart");
-    const doneColumn = wrapper.findAll(".flex-1.min-w-0.flex.flex-col")[3];
+    const doneColumn = wrapper.findAll('[data-testid="kanban-column"]')[2];
     await doneColumn.trigger("drop");
     await wrapper.vm.$nextTick();
 
@@ -153,7 +152,7 @@ describe("ActiveSprintPage — Done column has no add-task shortcut", () => {
     await new Promise((r) => setTimeout(r, 0));
     await wrapper.vm.$nextTick();
 
-    const columns = wrapper.findAll(".flex-1.min-w-0.flex.flex-col").slice(1);
+    const columns = wrapper.findAll('[data-testid="kanban-column"]');
     expect(columns).toHaveLength(3);
 
     const [todoCol, inProgressCol, doneCol] = columns;
@@ -251,7 +250,7 @@ describe("ActiveSprintPage — drag-and-drop task move", () => {
 
     const card = wrapper.find('[draggable="true"]');
     await card.trigger("dragstart");
-    const inProgressColumn = wrapper.findAll(".flex-1.min-w-0.flex.flex-col")[2];
+    const inProgressColumn = wrapper.findAll('[data-testid="kanban-column"]')[1];
     await inProgressColumn.trigger("drop");
     await wrapper.vm.$nextTick();
     await new Promise((r) => setTimeout(r, 0));
@@ -277,13 +276,13 @@ describe("ActiveSprintPage — drag-and-drop task move", () => {
 
     const card = wrapper.find('[draggable="true"]');
     await card.trigger("dragstart");
-    const inProgressColumn = wrapper.findAll(".flex-1.min-w-0.flex.flex-col")[2];
+    const inProgressColumn = wrapper.findAll('[data-testid="kanban-column"]')[1];
     await inProgressColumn.trigger("drop");
     await wrapper.vm.$nextTick();
     await new Promise((r) => setTimeout(r, 0));
     await wrapper.vm.$nextTick();
 
-    const todoColumn = wrapper.findAll(".flex-1.min-w-0.flex.flex-col")[1];
+    const todoColumn = wrapper.findAll('[data-testid="kanban-column"]')[0];
     expect(todoColumn.text()).toContain("Movable task");
     expect(inProgressColumn.text()).not.toContain("Movable task");
   });
