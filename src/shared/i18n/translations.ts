@@ -30,7 +30,6 @@ export const taskboltTranslations = {
     backlogs: {
       title: "Backlogs",
       empty: "No backlog items",
-      showClosed: "Show closed tasks",
       backlogBucket: "Backlog",
       filters: "Filters",
       filterStatus: "Status",
@@ -318,7 +317,6 @@ export const taskboltTranslations = {
     backlogs: {
       title: "Backlogs",
       empty: "Không có mục nào trong backlog",
-      showClosed: "Hiện công việc đã đóng",
       backlogBucket: "Backlog",
       filters: "Bộ lọc",
       filterStatus: "Trạng thái",

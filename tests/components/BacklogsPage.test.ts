@@ -84,23 +84,10 @@ function taskTitles(wrapper: ReturnType<typeof mountComponent>): string[] {
   return wrapper.findAll("h1").map((el) => el.text());
 }
 
-describe("BacklogsPage — closed tasks filter", () => {
-  it("hides closed tasks by default", async () => {
+describe("BacklogsPage — closed tasks", () => {
+  it("shows closed tasks alongside open ones by default (visibility is controlled by the Filters status selector, not a separate toggle)", async () => {
     const wrapper = mountComponent();
     await new Promise((r) => setTimeout(r, 0));
-    await wrapper.vm.$nextTick();
-
-    expect(taskTitles(wrapper)).toContain("Open task");
-    expect(taskTitles(wrapper)).not.toContain("Closed task");
-  });
-
-  it("reveals closed tasks once the show-closed checkbox is checked", async () => {
-    const wrapper = mountComponent();
-    await new Promise((r) => setTimeout(r, 0));
-    await wrapper.vm.$nextTick();
-
-    const checkbox = wrapper.findComponent({ name: "CheckboxRoot" });
-    await checkbox.vm.$emit("update:modelValue", true);
     await wrapper.vm.$nextTick();
 
     expect(taskTitles(wrapper)).toContain("Open task");
