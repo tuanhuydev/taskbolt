@@ -39,6 +39,9 @@ export const taskboltTranslations = {
     },
     reports: {
       title: "Reports",
+      subtitle: "Track sprint velocity, completion, and task breakdown.",
+      filterSprint: "Sprint",
+      filterSprintAll: "All sprints",
     },
     configure: {
       title: "Configure",
@@ -298,6 +301,9 @@ export const taskboltTranslations = {
     },
     reports: {
       title: "Báo cáo",
+      subtitle: "Theo dõi tốc độ, tỷ lệ hoàn thành và phân loại công việc theo sprint.",
+      filterSprint: "Sprint",
+      filterSprintAll: "Tất cả sprint",
     },
     configure: {
       title: "Cấu hình",
