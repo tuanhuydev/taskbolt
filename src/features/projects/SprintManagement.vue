@@ -50,6 +50,17 @@
           </span>
           <template v-if="props.isAdmin">
             <Button
+              v-if="canMarkAsDone(sprint)"
+              variant="ghost"
+              size="sm"
+              class="h-8 w-8 p-0 text-green-700 hover:text-green-700"
+              :disabled="completingSprintId === sprint.id"
+              :title="t('sprint.markAsDone')"
+              @click="markAsDone(sprint)"
+            >
+              <Check class="w-3.5 h-3.5" />
+            </Button>
+            <Button
               variant="ghost"
               size="sm"
               class="h-8 w-8 p-0"
@@ -94,7 +105,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import { Pencil, Trash2 } from "lucide-vue-next";
+import { Check, Pencil, Trash2 } from "lucide-vue-next";
 import {
   useShellServices,
   useTaskboltTranslation,
@@ -129,7 +140,19 @@ const loading = ref(true);
 const error = ref<string | null>(null);
 const showSprintForm = ref(false);
 const selectedSprint = ref<Sprint | null>(null);
+const completingSprintId = ref<string | null>(null);
 const isActiveSprint = (sprint: Sprint) => sprint.status === SprintStatus.ACTIVE;
+
+// endDate-only check here — unlike the Active Sprint page's own complete
+// button, this list has no access to a sprint's tasks (only fetches
+// sprints), so the "all tasks done" condition isn't available/relevant here.
+const isPastEndDate = (sprint: Sprint) => {
+  if (!sprint.endDate) return false;
+  return new Date(sprint.endDate).getTime() <= Date.now();
+};
+
+const canMarkAsDone = (sprint: Sprint) =>
+  isActiveSprint(sprint) && isPastEndDate(sprint);
 
 const statusClasses: Record<SprintStatus, string> = {
   [SprintStatus.PLANNED]: "bg-gray-100 text-gray-600",
@@ -204,6 +227,32 @@ async function handleSprintSubmit(
       isEdit ? t("toast.sprintUpdateFailed") : t("toast.sprintCreateFailed"),
     );
     console.error("Sprint submit error:", message);
+  }
+}
+
+async function markAsDone(sprint: Sprint) {
+  if (!window.confirm(t("sprint.markAsDoneConfirm"))) return;
+
+  const apiClient = getApiClient();
+  const toast = getToastService();
+
+  if (!apiClient) {
+    toast?.error(t("toast.apiClientUnavailable"));
+    return;
+  }
+
+  completingSprintId.value = sprint.id;
+  try {
+    await updateSprint(apiClient, sprint.id, { status: SprintStatus.COMPLETED });
+    toast?.success(t("toast.sprintCompleted"));
+    await fetchSprints();
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : t("toast.genericError");
+    toast?.error(t("toast.sprintCompleteFailed"));
+    console.error("Sprint complete error:", message);
+  } finally {
+    completingSprintId.value = null;
   }
 }
 
