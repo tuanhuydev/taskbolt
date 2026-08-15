@@ -36,26 +36,51 @@
           </template>
         </div>
       </div>
-      <button
-        v-if="activeSprint"
-        class="inline-flex items-center gap-2 h-9 px-3.5 rounded-md bg-foreground text-background text-sm font-semibold hover:opacity-80 transition-opacity flex-none"
-        @click="openCreateTask()"
-      >
-        <svg
-          width="15"
-          height="15"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2.2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
+      <div v-if="activeSprint" class="flex items-center gap-2 flex-none">
+        <button
+          v-if="canCompleteSprint"
+          :disabled="isCompletingSprint"
+          class="inline-flex items-center gap-2 h-9 px-3.5 rounded-md border border-border bg-white text-foreground text-sm font-semibold hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:pointer-events-none"
+          @click="handleCompleteSprint"
         >
-          <line x1="12" y1="5" x2="12" y2="19" />
-          <line x1="5" y1="12" x2="19" y2="12" />
-        </svg>
-        {{ t("activeSprint.addTask") }}
-      </button>
+          <svg
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M20 6 9 17l-5-5" />
+          </svg>
+          {{
+            isCompletingSprint
+              ? t("activeSprint.completingSprint")
+              : t("activeSprint.completeSprint")
+          }}
+        </button>
+        <button
+          class="inline-flex items-center gap-2 h-9 px-3.5 rounded-md bg-foreground text-background text-sm font-semibold hover:opacity-80 transition-opacity flex-none"
+          @click="openCreateTask()"
+        >
+          <svg
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+          {{ t("activeSprint.addTask") }}
+        </button>
+      </div>
     </div>
 
     <!-- Sprint progress bar -->
@@ -343,7 +368,8 @@ import {
 } from "@/shared/composables/useShellServices";
 import { useProjectContext } from "@/shared/composables/useProject";
 import { useProjectRouteSync } from "@/shared/composables/useProjectRouteSync";
-import { getSprints, getProjectMembers } from "@/shared/services";
+import { useProjectRole } from "@/shared/composables/useProjectRole";
+import { getSprints, getProjectMembers, updateSprint } from "@/shared/services";
 import { useProjectTasks } from "@/shared/composables/useProjectTasks";
 import { type Sprint, SprintStatus } from "@/shared/types/sprint";
 import {
@@ -369,11 +395,13 @@ const { t } = useTaskboltTranslation();
 const { getApiClient, getToastService } = useShellServices();
 const { selectedProjectId } = useProjectContext();
 useProjectRouteSync();
+const { isAdmin } = useProjectRole(selectedProjectId);
 
 // ── State ──────────────────────────────────────────────────────────────────
 const activeSprint = ref<Sprint | null>(null);
 const members = ref<ProjectMember[]>([]);
 const isLoading = ref(false);
+const isCompletingSprint = ref(false);
 const draggingId = ref<string | null>(null);
 const draggingFromCol = ref<TaskStatus | null>(null);
 const dragOverCol = ref<TaskStatus | null>(null);
@@ -446,6 +474,32 @@ const daysLeft = computed(() => {
   const now = new Date();
   return Math.max(0, Math.ceil((end.getTime() - now.getTime()) / 86_400_000));
 });
+
+// Manual-complete eligibility (backend auto-complete-on-endDate is tracked
+// separately as tech debt — see TASKBOLT tracker). Mirrors, doesn't replace,
+// the backend's own admin-only check on PATCH /sprints/:id.
+const isPastEndDate = computed(() => {
+  if (!activeSprint.value?.endDate) return false;
+  return new Date(activeSprint.value.endDate).getTime() <= Date.now();
+});
+
+// "All tasks done" means nothing left actively in progress — CLOSED
+// (obsoleted) tasks don't block completion, matching how they're already
+// excluded from the points total above.
+const allTasksDone = computed(() => {
+  if (tasks.value.length === 0) return false;
+  return tasks.value.every(
+    (task) =>
+      task.status === TaskStatus.DONE || task.status === TaskStatus.CLOSED,
+  );
+});
+
+const canCompleteSprint = computed(
+  () =>
+    isAdmin.value &&
+    !!activeSprint.value &&
+    (isPastEndDate.value || allTasksDone.value),
+);
 
 // ── Progress stats ─────────────────────────────────────────────────────────
 const donePoints = computed(() => boardStats.value.donePoints);
@@ -599,6 +653,34 @@ async function handleDrop(targetColId: TaskStatus) {
       };
     }
     toastService?.error(t("toast.taskUpdateFailed"));
+  }
+}
+
+// ── Sprint completion ──────────────────────────────────────────────────────
+async function handleCompleteSprint() {
+  if (!activeSprint.value) return;
+  if (!window.confirm(t("activeSprint.completeSprintConfirm"))) return;
+
+  const apiClient = getApiClient();
+  const toastService = getToastService();
+
+  if (!apiClient) {
+    toastService?.error(t("toast.apiClientUnavailable"));
+    return;
+  }
+
+  isCompletingSprint.value = true;
+  try {
+    await updateSprint(apiClient, activeSprint.value.id, {
+      status: SprintStatus.COMPLETED,
+    });
+    toastService?.success(t("toast.sprintCompleted"));
+    await loadData();
+  } catch (err) {
+    console.error("Failed to complete sprint:", err);
+    toastService?.error(t("toast.sprintCompleteFailed"));
+  } finally {
+    isCompletingSprint.value = false;
   }
 }
 
