@@ -9,6 +9,7 @@ import ConfigureHomePage from "@/features/configure/ConfigureHomePage.vue";
 import ConfigureProjectsPage from "@/features/configure/ConfigureProjectsPage.vue";
 import ProjectDetailPage from "@/features/projects/ProjectDetailPage.vue";
 import HomePage from "@/features/home/HomePage.vue";
+import PrimeVueSpikePage from "@/features/spike-primevue/PrimeVueSpikePage.vue";
 
 const routes = [
 	{
@@ -52,6 +53,12 @@ const routes = [
 		path: "/:projectId?/reports",
 		name: "reports",
 		component: ReportsPage,
+	},
+	// Not linked from any nav — spike/primevue-evaluation prototype only.
+	{
+		path: "/spike/primevue",
+		name: "spike-primevue",
+		component: PrimeVueSpikePage,
 	},
 	{
 		path: "/configure",
