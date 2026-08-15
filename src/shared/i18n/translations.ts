@@ -152,6 +152,8 @@ export const taskboltTranslations = {
       noSprints: "No sprints yet",
       addSprint: "Add Sprint",
       activeSprintLocked: "An active sprint can't be edited or deleted",
+      markAsDone: "Mark sprint as done",
+      markAsDoneConfirm: "Mark this sprint as done? It will be completed.",
     },
     sprintStatus: {
       planned: "Planning",
@@ -444,6 +446,8 @@ export const taskboltTranslations = {
       noSprints: "Chưa có sprint nào",
       addSprint: "Thêm Sprint",
       activeSprintLocked: "Không thể sửa hoặc xóa sprint đang hoạt động",
+      markAsDone: "Đánh dấu sprint đã hoàn thành",
+      markAsDoneConfirm: "Đánh dấu sprint này là đã hoàn thành?",
     },
     sprintStatus: {
       planned: "Lập kế hoạch",

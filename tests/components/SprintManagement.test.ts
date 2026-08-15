@@ -140,11 +140,64 @@ describe("SprintManagement", () => {
     await new Promise((r) => setTimeout(r, 0));
     await wrapper.vm.$nextTick();
 
-    const buttons = wrapper.find("li").findAll("button");
-    expect(buttons).toHaveLength(2);
-    buttons.forEach((button) => {
+    const lockedButtons = wrapper
+      .find("li")
+      .findAll('[title="taskbolt:sprint.activeSprintLocked"]');
+    expect(lockedButtons).toHaveLength(2);
+    lockedButtons.forEach((button) => {
       expect(button.attributes("disabled")).toBeDefined();
     });
+  });
+
+  it("shows an enabled 'mark as done' button for an active sprint past its endDate", async () => {
+    const activeSprint: Sprint = {
+      ...mockSprint,
+      status: SprintStatus.ACTIVE,
+      endDate: "2024-01-14", // fixed date in the past relative to any real clock
+    };
+    vi.mocked(mockApiClient.request).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ sprints: [activeSprint], total: 1 }),
+    } as Response);
+
+    const wrapper = mountComponent("proj-1", true);
+    await new Promise((r) => setTimeout(r, 0));
+    await wrapper.vm.$nextTick();
+
+    const markDoneButton = wrapper.find('[title="taskbolt:sprint.markAsDone"]');
+    expect(markDoneButton.exists()).toBe(true);
+    expect(markDoneButton.attributes("disabled")).toBeUndefined();
+  });
+
+  it("hides the 'mark as done' button for an active sprint before its endDate", async () => {
+    const activeSprint: Sprint = {
+      ...mockSprint,
+      status: SprintStatus.ACTIVE,
+      endDate: new Date(Date.now() + 7 * 86_400_000).toISOString(),
+    };
+    vi.mocked(mockApiClient.request).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ sprints: [activeSprint], total: 1 }),
+    } as Response);
+
+    const wrapper = mountComponent("proj-1", true);
+    await new Promise((r) => setTimeout(r, 0));
+    await wrapper.vm.$nextTick();
+
+    expect(wrapper.find('[title="taskbolt:sprint.markAsDone"]').exists()).toBe(false);
+  });
+
+  it("hides the 'mark as done' button for a non-active sprint even if its endDate has passed", async () => {
+    vi.mocked(mockApiClient.request).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ sprints: [mockSprint], total: 1 }), // PLANNED, endDate 2024-01-14
+    } as Response);
+
+    const wrapper = mountComponent("proj-1", true);
+    await new Promise((r) => setTimeout(r, 0));
+    await wrapper.vm.$nextTick();
+
+    expect(wrapper.find('[title="taskbolt:sprint.markAsDone"]').exists()).toBe(false);
   });
 
   it("leaves edit/delete controls enabled for a non-active sprint", async () => {
