@@ -4,17 +4,6 @@
            md:relative md:z-auto md:shadow md:translate-x-0 md:flex md:flex-none md:inset-y-auto md:h-auto md:rounded-lg"
     :class="[open ? 'translate-x-0' : '-translate-x-full', collapsed ? 'md:w-16' : 'md:w-56']"
   >
-    <!-- Mobile close button -->
-    <div class="flex items-center justify-between px-3 h-12 border-b border-border md:hidden">
-      <span class="font-semibold text-sm text-foreground">Menu</span>
-      <button
-        class="flex items-center justify-center w-8 h-8 rounded-md text-muted-foreground hover:bg-accent transition-colors"
-        @click="$emit('close')"
-      >
-        <X class="w-4 h-4" />
-      </button>
-    </div>
-
     <!-- Navigation -->
     <nav class="flex-1 px-2 py-2 flex flex-col gap-1 overflow-y-auto">
       <!-- Project selector + desktop collapse toggle, same row -->
@@ -98,7 +87,6 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
-  X,
 } from "lucide-vue-next";
 import {
   DropdownMenu,
@@ -124,7 +112,6 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   navigate: [routeName: string];
-  close: [];
 }>();
 
 const { t } = useTaskboltTranslation();
