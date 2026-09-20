@@ -22,7 +22,6 @@
       :current-route-name="currentRouteName"
       :open="sidebarOpen"
       @navigate="handleNavigate"
-      @close="sidebarOpen = false"
     />
 
     <div class="flex-1 flex flex-col min-w-0 overflow-auto min-h-0">
